@@ -1,0 +1,32 @@
+[
+    {
+        "name": "Somos Pueblo",
+        "source_type": "rss",
+        "url": "https://somospueblo.com/feed/"
+    },
+    {
+        "name": "El Pais - Tecnologia",
+        "source_type": "rss",
+        "url": "https://feeds.elpais.com/mrss-s/pages/ep/site/elpais.com/section/tecnologia/portada"
+    },
+    {
+        "name": "BBC Mundo",
+        "source_type": "rss",
+        "url": "https://feeds.bbci.co.uk/mundo/rss.xml"
+    },
+    {
+        "name": "Google News - Espanol",
+        "source_type": "rss",
+        "url": "https://news.google.com/rss?hl=es&gl=US&ceid=US:es"
+    },
+    {
+        "name": "Reuters - Top News",
+        "source_type": "rss",
+        "url": "https://feeds.reuters.com/reuters/topNews"
+    },
+    {
+        "name": "NewsAPI - Tecnologia ES",
+        "source_type": "newsapi",
+        "url": "{\"q\": \"tecnologia\", \"language\": \"es\", \"sortBy\": \"publishedAt\"}"
+    }
+]

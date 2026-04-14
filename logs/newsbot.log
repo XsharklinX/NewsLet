@@ -1,0 +1,863 @@
+2026-04-13 17:01:37 [INFO    ] app.main: NewsBot Pro starting up...
+2026-04-13 17:01:37 [INFO    ] app.main: Seeded 6 default news sources
+2026-04-13 17:01:37 [INFO    ] app.services.startup_validator: ==================================================
+2026-04-13 17:01:37 [INFO    ] app.services.startup_validator: NewsBot Pro — Startup Validation
+2026-04-13 17:01:37 [INFO    ] app.services.startup_validator: ==================================================
+2026-04-13 17:01:37 [INFO    ] app.services.startup_validator: [OK]   Database reachable
+2026-04-13 17:01:37 [INFO    ] app.services.startup_validator: [OK]   AI key present (groq / llama-3.3-70b-versatile)
+2026-04-13 17:01:38 [INFO    ] app.services.startup_validator: [OK]   Telegram bot @noticiasletbot connected
+2026-04-13 17:01:38 [INFO    ] app.services.startup_validator: [OK]   Telegram chat_id: 8549265540
+2026-04-13 17:01:38 [INFO    ] app.services.startup_validator: [INFO] NewsAPI key not configured (optional — RSS still works)
+2026-04-13 17:01:38 [INFO    ] app.services.startup_validator: ==================================================
+2026-04-13 17:01:38 [INFO    ] app.services.startup_validator: Startup: 4/5 checks passed
+2026-04-13 17:01:38 [INFO    ] app.services.startup_validator: ==================================================
+2026-04-13 17:01:38 [INFO    ] app.scheduler.jobs: Scheduler started: fetch every 30min, digest at 08:00
+2026-04-13 17:01:38 [INFO    ] app.main: Telegram bot polling started
+2026-04-13 17:01:38 [INFO    ] app.main: NewsBot Pro ready
+2026-04-13 17:01:38 [INFO    ] app.services.telegram_bot: Telegram bot polling active
+2026-04-13 17:01:56 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 17:02:12 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 17:02:19 [INFO    ] app.services.rss_fetcher: Fetching RSS: Somos Pueblo (https://somospueblo.com/feed/)
+2026-04-13 17:02:19 [INFO    ] app.services.rss_fetcher:   -> 10 new articles from Somos Pueblo
+2026-04-13 17:02:19 [INFO    ] app.services.rss_fetcher: Fetching RSS: El Pais - Tecnologia (https://feeds.elpais.com/mrss-s/pages/ep/site/elpais.com/section/tecnologia/portada)
+2026-04-13 17:02:20 [INFO    ] app.services.rss_fetcher:   -> 15 new articles from El Pais - Tecnologia
+2026-04-13 17:02:20 [INFO    ] app.services.rss_fetcher: Fetching RSS: Reuters - Top News (https://feeds.reuters.com/reuters/topNews)
+2026-04-13 17:02:20 [INFO    ] app.services.rss_fetcher:   -> 0 new articles from Reuters - Top News
+2026-04-13 17:02:20 [INFO    ] app.services.newsapi_fetcher: Fetching NewsAPI: NewsAPI - Tecnologia ES
+2026-04-13 17:02:21 [ERROR   ] app.services.newsapi_fetcher: Error fetching NewsAPI NewsAPI - Tecnologia ES: Client error '401 Unauthorized' for url 'https://newsapi.org/v2/everything?q=tecnologia&language=es&sortBy=publishedAt&apiKey=your-key-here&pageSize=20'
+For more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/401
+2026-04-13 17:02:28 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 17:02:44 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 17:03:00 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 17:03:17 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 17:03:33 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 17:03:49 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 17:04:05 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 17:04:21 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 17:04:37 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 17:04:53 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 17:05:09 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 17:05:25 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 17:05:41 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 17:05:58 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 17:06:14 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 17:06:30 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 17:06:46 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 17:07:02 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 17:07:18 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 17:07:34 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 17:07:50 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 17:08:06 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 17:08:23 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 17:08:39 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 17:08:55 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 17:09:11 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 17:09:27 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 17:09:43 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 17:09:59 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 17:10:16 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 17:10:32 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 17:10:48 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 17:11:04 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 17:11:20 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 17:11:36 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 17:11:52 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 17:12:09 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 17:12:25 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 17:12:41 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 17:12:57 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 17:13:13 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 17:13:29 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 17:13:45 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 17:14:02 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 17:14:18 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 17:14:34 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 17:14:50 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 17:15:06 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 17:15:22 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 17:15:38 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 17:15:54 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 17:16:11 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 17:16:27 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 17:16:30 [INFO    ] app.services.rss_fetcher: Fetching RSS: Somos Pueblo (https://somospueblo.com/feed/)
+2026-04-13 17:16:31 [INFO    ] app.services.rss_fetcher:   -> 1 new articles from Somos Pueblo
+2026-04-13 17:16:31 [INFO    ] app.services.rss_fetcher: Fetching RSS: El Pais - Tecnologia (https://feeds.elpais.com/mrss-s/pages/ep/site/elpais.com/section/tecnologia/portada)
+2026-04-13 17:16:31 [INFO    ] app.services.rss_fetcher:   -> 0 new articles from El Pais - Tecnologia
+2026-04-13 17:16:31 [INFO    ] app.services.rss_fetcher: Fetching RSS: Reuters - Top News (https://feeds.reuters.com/reuters/topNews)
+2026-04-13 17:16:31 [INFO    ] app.services.rss_fetcher:   -> 0 new articles from Reuters - Top News
+2026-04-13 17:16:31 [INFO    ] app.services.newsapi_fetcher: Fetching NewsAPI: NewsAPI - Tecnologia ES
+2026-04-13 17:16:32 [ERROR   ] app.services.newsapi_fetcher: Error fetching NewsAPI NewsAPI - Tecnologia ES: Client error '401 Unauthorized' for url 'https://newsapi.org/v2/everything?q=tecnologia&language=es&sortBy=publishedAt&apiKey=your-key-here&pageSize=20'
+For more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/401
+2026-04-13 17:16:47 [INFO    ] app.services.summarizer: Article 9 processed — category=Salud, score=8, text_len=2565
+2026-04-13 17:16:49 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 17:16:50 [INFO    ] app.services.telegram_notifier: Sent article 9 to Telegram
+2026-04-13 17:17:05 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 17:17:21 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 17:17:37 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 17:17:53 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 17:18:09 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 17:18:25 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 17:18:41 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 17:18:58 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 17:19:14 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 17:19:30 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 17:19:46 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 17:20:02 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 17:20:18 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 17:20:34 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 17:20:51 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 17:21:07 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 17:21:23 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 17:21:39 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 17:21:55 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 17:22:11 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 17:22:27 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 17:22:43 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 17:22:59 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 17:23:16 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 17:23:32 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 17:23:48 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 17:24:04 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 17:24:20 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 17:24:36 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 17:24:52 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 17:25:08 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 17:25:24 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 17:25:40 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 17:25:56 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 17:26:12 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 17:26:29 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 17:26:45 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 17:27:01 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 17:27:17 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 17:27:33 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 17:27:49 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 17:28:05 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 17:28:21 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 17:28:37 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 17:28:53 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 17:29:10 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 17:29:26 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 17:29:42 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 17:29:58 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 17:30:14 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 17:30:30 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 17:30:46 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 17:31:02 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 17:31:18 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 17:31:35 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 17:31:38 [INFO    ] app.scheduler.jobs: Scheduler: starting fetch cycle
+2026-04-13 17:31:38 [INFO    ] app.services.rss_fetcher: Fetching RSS: Somos Pueblo (https://somospueblo.com/feed/)
+2026-04-13 17:31:39 [INFO    ] app.services.rss_fetcher:   -> 2 new articles from Somos Pueblo
+2026-04-13 17:31:39 [INFO    ] app.services.rss_fetcher: Fetching RSS: El Pais - Tecnologia (https://feeds.elpais.com/mrss-s/pages/ep/site/elpais.com/section/tecnologia/portada)
+2026-04-13 17:31:39 [INFO    ] app.services.rss_fetcher:   -> 0 new articles from El Pais - Tecnologia
+2026-04-13 17:31:39 [INFO    ] app.services.rss_fetcher: Fetching RSS: Reuters - Top News (https://feeds.reuters.com/reuters/topNews)
+2026-04-13 17:31:39 [INFO    ] app.services.rss_fetcher:   -> 0 new articles from Reuters - Top News
+2026-04-13 17:31:39 [INFO    ] app.services.newsapi_fetcher: Fetching NewsAPI: NewsAPI - Tecnologia ES
+2026-04-13 17:31:40 [ERROR   ] app.services.newsapi_fetcher: Error fetching NewsAPI NewsAPI - Tecnologia ES: Client error '401 Unauthorized' for url 'https://newsapi.org/v2/everything?q=tecnologia&language=es&sortBy=publishedAt&apiKey=your-key-here&pageSize=20'
+For more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/401
+2026-04-13 17:31:40 [INFO    ] app.scheduler.jobs: Scheduler: fetched 2 new articles (rss=2, newsapi=0, scraper=0)
+2026-04-13 17:31:51 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 17:32:07 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 17:32:23 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 17:32:39 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 17:32:55 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 17:33:11 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 17:33:27 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 17:33:43 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 17:34:00 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 17:34:16 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 17:34:32 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 17:34:48 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 17:35:04 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 17:35:20 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 17:35:36 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 17:35:52 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 17:36:09 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 17:36:25 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 17:36:38 [INFO    ] app.scheduler.jobs: Scheduler: starting summarization
+2026-04-13 17:36:40 [INFO    ] app.services.summarizer: Article 28 processed — category=Salud, score=6, text_len=3165
+2026-04-13 17:36:41 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 17:36:42 [INFO    ] app.services.summarizer: Article 27 processed — category=Política, score=6, text_len=3085
+2026-04-13 17:36:44 [INFO    ] app.services.summarizer: Article 26 processed — category=Salud, score=8, text_len=3191
+2026-04-13 17:36:47 [INFO    ] app.services.summarizer: Article 25 processed — category=Tecnología, score=6, text_len=5356
+2026-04-13 17:36:49 [INFO    ] app.services.summarizer: Article 24 processed — category=Tecnología, score=8, text_len=7535
+2026-04-13 17:36:50 [INFO    ] app.services.summarizer: Article 23 processed — category=Tecnología, score=8, text_len=7954
+2026-04-13 17:36:53 [INFO    ] app.services.summarizer: Article 22 processed — category=Tecnología, score=8, text_len=6548
+2026-04-13 17:36:54 [INFO    ] app.services.summarizer: Article 21 processed — category=Tecnología, score=8, text_len=8000
+2026-04-13 17:36:56 [INFO    ] groq._base_client: Retrying request to /openai/v1/chat/completions in 7.000000 seconds
+2026-04-13 17:36:57 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 17:37:04 [INFO    ] app.services.summarizer: Article 20 processed — category=None, score=8, text_len=6439
+2026-04-13 17:37:05 [INFO    ] groq._base_client: Retrying request to /openai/v1/chat/completions in 6.000000 seconds
+2026-04-13 17:37:12 [WARNING ] app.services.enricher: enricher: JSON parse error: Expecting ',' delimiter: line 2 column 114 (char 115) | raw: {
+  "summary": "En Australia, a pesar de la ley que restringe el acceso a redes sociales a menores de 16 años, un "porcentaje significativo" de menores sigue utilizando estas plataformas. El regulador
+2026-04-13 17:37:12 [INFO    ] groq._base_client: Retrying request to /openai/v1/chat/completions in 5.000000 seconds
+2026-04-13 17:37:13 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 17:37:18 [INFO    ] app.services.summarizer: Article 19 processed — category=None, score=None, text_len=5240
+2026-04-13 17:37:20 [INFO    ] groq._base_client: Retrying request to /openai/v1/chat/completions in 6.000000 seconds
+2026-04-13 17:37:27 [INFO    ] app.services.summarizer: Article 18 processed — category=Tecnología, score=8, text_len=7358
+2026-04-13 17:37:28 [INFO    ] groq._base_client: Retrying request to /openai/v1/chat/completions in 7.000000 seconds
+2026-04-13 17:37:29 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 17:37:36 [INFO    ] app.services.summarizer: Article 17 processed — category=Tecnología, score=6, text_len=6884
+2026-04-13 17:37:38 [INFO    ] groq._base_client: Retrying request to /openai/v1/chat/completions in 5.000000 seconds
+2026-04-13 17:37:44 [INFO    ] app.services.summarizer: Article 16 processed — category=Tecnología, score=8, text_len=8000
+2026-04-13 17:37:45 [INFO    ] groq._base_client: Retrying request to /openai/v1/chat/completions in 7.000000 seconds
+2026-04-13 17:37:45 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 17:37:53 [INFO    ] app.services.summarizer: Article 15 processed — category=Tecnología, score=8, text_len=8000
+2026-04-13 17:37:54 [INFO    ] groq._base_client: Retrying request to /openai/v1/chat/completions in 5.000000 seconds
+2026-04-13 17:38:00 [INFO    ] app.services.summarizer: Article 14 processed — category=Tecnología, score=6, text_len=5670
+2026-04-13 17:38:01 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 17:38:02 [INFO    ] groq._base_client: Retrying request to /openai/v1/chat/completions in 7.000000 seconds
+2026-04-13 17:38:10 [INFO    ] app.services.summarizer: Article 13 processed — category=Tecnología, score=8, text_len=5455
+2026-04-13 17:38:12 [INFO    ] groq._base_client: Retrying request to /openai/v1/chat/completions in 5.000000 seconds
+2026-04-13 17:38:18 [INFO    ] app.services.summarizer: Article 12 processed — category=Salud, score=8, text_len=8000
+2026-04-13 17:38:18 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 17:38:19 [INFO    ] groq._base_client: Retrying request to /openai/v1/chat/completions in 6.000000 seconds
+2026-04-13 17:38:26 [INFO    ] app.services.summarizer: Article 11 processed — category=Tecnología, score=8, text_len=8000
+2026-04-13 17:38:32 [INFO    ] app.services.summarizer: Article 10 processed — category=Salud, score=8, text_len=2298
+2026-04-13 17:38:34 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 17:38:36 [INFO    ] groq._base_client: Retrying request to /openai/v1/chat/completions in 1.000000 seconds
+2026-04-13 17:38:38 [INFO    ] app.services.summarizer: Article 8 processed — category=Política, score=8, text_len=2909
+2026-04-13 17:38:38 [INFO    ] app.services.summarizer: Batch summarization: 20/20 processed
+2026-04-13 17:38:38 [INFO    ] app.scheduler.jobs: Scheduler: summarized 20 articles
+2026-04-13 17:38:50 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 17:38:53 [INFO    ] app.services.summarizer: Article 7 processed — category=Internacional, score=8, text_len=2799
+2026-04-13 17:38:58 [INFO    ] app.services.summarizer: Article 6 processed — category=Política, score=8, text_len=4991
+2026-04-13 17:39:03 [INFO    ] app.services.pdf_generator: PDF generated: 20 articles, 21615 bytes
+2026-04-13 17:39:03 [INFO    ] app.services.pdf_generator: PDF generated: 20 articles, 21615 bytes
+2026-04-13 17:39:05 [INFO    ] app.services.summarizer: Article 5 processed — category=None, score=8, text_len=2684
+2026-04-13 17:39:07 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 17:39:10 [INFO    ] app.services.summarizer: Article 4 processed — category=Salud, score=8, text_len=2618
+2026-04-13 17:39:12 [INFO    ] app.services.summarizer: Article 3 processed — category=Entretenimiento, score=8, text_len=2354
+2026-04-13 17:39:17 [INFO    ] app.services.summarizer: Article 2 processed — category=None, score=6, text_len=2642
+2026-04-13 17:39:18 [INFO    ] groq._base_client: Retrying request to /openai/v1/chat/completions in 4.000000 seconds
+2026-04-13 17:39:23 [INFO    ] app.services.summarizer: Article 1 processed — category=None, score=6, text_len=3153
+2026-04-13 17:39:23 [INFO    ] app.services.summarizer: Batch summarization: 7/7 processed
+2026-04-13 17:39:23 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 17:39:39 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 17:39:55 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 17:40:11 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 17:40:27 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 17:40:43 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 17:40:59 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 17:41:16 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 17:41:32 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 17:41:48 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 17:42:04 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 17:42:20 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 17:42:36 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 17:42:52 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 17:43:08 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 17:43:24 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 17:43:40 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 17:43:57 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 17:44:13 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 17:44:29 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 17:44:45 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 17:45:01 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 17:45:17 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 17:45:33 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 17:45:49 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 17:46:05 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 17:46:21 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 17:46:37 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 17:46:54 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 17:47:10 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 17:47:26 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 17:47:42 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 17:47:58 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 17:48:14 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 17:48:30 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 17:48:46 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 17:49:02 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 17:49:19 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 17:49:35 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 17:49:51 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 17:50:07 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 17:50:23 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 17:50:39 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 17:50:55 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 17:51:11 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 17:51:27 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 17:51:44 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 17:52:00 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 17:52:16 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 17:52:32 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 17:52:48 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 17:53:04 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 17:53:20 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 17:53:36 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 17:53:52 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 17:54:08 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 17:54:25 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 17:54:41 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 17:54:57 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 17:55:13 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 17:55:29 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 17:55:45 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 17:56:01 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 17:56:17 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 17:56:33 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 17:56:50 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 17:57:06 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 17:57:22 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 17:57:38 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 17:57:54 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 17:58:10 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 17:58:26 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 17:58:42 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 17:58:58 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 17:59:14 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 17:59:31 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 17:59:47 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:00:03 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:00:19 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:00:35 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:00:51 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:01:07 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:01:23 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:01:38 [INFO    ] app.scheduler.jobs: Scheduler: starting fetch cycle
+2026-04-13 18:01:38 [INFO    ] app.services.rss_fetcher: Fetching RSS: Somos Pueblo (https://somospueblo.com/feed/)
+2026-04-13 18:01:39 [INFO    ] app.services.rss_fetcher:   -> 2 new articles from Somos Pueblo
+2026-04-13 18:01:39 [INFO    ] app.services.rss_fetcher: Fetching RSS: El Pais - Tecnologia (https://feeds.elpais.com/mrss-s/pages/ep/site/elpais.com/section/tecnologia/portada)
+2026-04-13 18:01:39 [INFO    ] app.services.rss_fetcher:   -> 0 new articles from El Pais - Tecnologia
+2026-04-13 18:01:39 [INFO    ] app.services.rss_fetcher: Fetching RSS: Reuters - Top News (https://feeds.reuters.com/reuters/topNews)
+2026-04-13 18:01:39 [INFO    ] app.services.rss_fetcher:   -> 0 new articles from Reuters - Top News
+2026-04-13 18:01:39 [INFO    ] app.services.newsapi_fetcher: Fetching NewsAPI: NewsAPI - Tecnologia ES
+2026-04-13 18:01:39 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:01:40 [ERROR   ] app.services.newsapi_fetcher: Error fetching NewsAPI NewsAPI - Tecnologia ES: Client error '401 Unauthorized' for url 'https://newsapi.org/v2/everything?q=tecnologia&language=es&sortBy=publishedAt&apiKey=your-key-here&pageSize=20'
+For more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/401
+2026-04-13 18:01:40 [INFO    ] app.scheduler.jobs: Scheduler: fetched 2 new articles (rss=2, newsapi=0, scraper=0)
+2026-04-13 18:01:56 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:02:12 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:02:28 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:02:44 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:03:00 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:03:16 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:03:33 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:03:49 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:04:05 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:04:21 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:04:38 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:04:54 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:05:10 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:05:26 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:05:42 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:05:58 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:06:14 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:06:30 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:06:47 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:07:03 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:07:20 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:07:36 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:07:52 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:08:08 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:08:24 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:08:40 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:08:57 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:09:13 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:09:29 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:09:45 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:10:01 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:10:17 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:10:33 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:10:49 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:11:06 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:11:22 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:11:38 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:11:38 [INFO    ] app.scheduler.jobs: Scheduler: starting summarization
+2026-04-13 18:11:40 [INFO    ] app.services.summarizer: Article 30 processed — category=Salud, score=8, text_len=3264
+2026-04-13 18:11:42 [INFO    ] app.services.summarizer: Article 29 processed — category=Salud, score=6, text_len=3034
+2026-04-13 18:11:42 [INFO    ] app.services.summarizer: Batch summarization: 2/2 processed
+2026-04-13 18:11:42 [INFO    ] app.scheduler.jobs: Scheduler: summarized 2 articles
+2026-04-13 18:11:54 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:12:10 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:12:26 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:12:42 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:12:58 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:13:15 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:13:31 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:13:47 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:14:03 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:14:19 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:14:35 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:14:51 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:15:07 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:15:23 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:15:39 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:15:56 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:16:12 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:16:28 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:16:44 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:17:00 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:17:16 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:17:32 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:17:48 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:18:04 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:18:20 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:18:31 [INFO    ] app.services.rss_fetcher: Fetching RSS: Somos Pueblo (https://somospueblo.com/feed/)
+2026-04-13 18:18:32 [INFO    ] app.services.rss_fetcher:   -> 1 new articles from Somos Pueblo
+2026-04-13 18:18:32 [INFO    ] app.services.rss_fetcher: Fetching RSS: El Pais - Tecnologia (https://feeds.elpais.com/mrss-s/pages/ep/site/elpais.com/section/tecnologia/portada)
+2026-04-13 18:18:32 [INFO    ] app.services.rss_fetcher:   -> 0 new articles from El Pais - Tecnologia
+2026-04-13 18:18:32 [INFO    ] app.services.rss_fetcher: Fetching RSS: Reuters - Top News (https://feeds.reuters.com/reuters/topNews)
+2026-04-13 18:18:32 [INFO    ] app.services.rss_fetcher:   -> 0 new articles from Reuters - Top News
+2026-04-13 18:18:32 [INFO    ] app.services.newsapi_fetcher: Fetching NewsAPI: NewsAPI - Tecnologia ES
+2026-04-13 18:18:33 [ERROR   ] app.services.newsapi_fetcher: Error fetching NewsAPI NewsAPI - Tecnologia ES: Client error '401 Unauthorized' for url 'https://newsapi.org/v2/everything?q=tecnologia&language=es&sortBy=publishedAt&apiKey=your-key-here&pageSize=20'
+For more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/401
+2026-04-13 18:18:37 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:18:53 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:19:09 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:19:25 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:19:41 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:19:55 [INFO    ] app.services.summarizer: Article 31 processed — category=Salud, score=8, text_len=3056
+2026-04-13 18:19:57 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:20:01 [INFO    ] app.services.telegram_notifier: Sent article 31 to Telegram
+2026-04-13 18:20:13 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:20:29 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:20:45 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:21:01 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:21:03 [INFO    ] app.services.pdf_generator: PDF generated: 20 articles, 21648 bytes
+2026-04-13 18:21:17 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:21:18 [INFO    ] app.services.pdf_generator: PDF generated: 20 articles, 21648 bytes
+2026-04-13 18:21:34 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:21:50 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:22:06 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:22:22 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:22:38 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:22:54 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:23:10 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:23:26 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:23:42 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:23:59 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:24:15 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:24:31 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:24:47 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:25:03 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:25:19 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:25:35 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:25:51 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:26:07 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:26:23 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:26:40 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:26:56 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:27:12 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:27:28 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:27:44 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:28:00 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:28:16 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:28:39 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:28:55 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:29:11 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:29:28 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:29:44 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:30:00 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:30:16 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:30:32 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:30:48 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:31:04 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:31:20 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:31:36 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:31:38 [INFO    ] app.scheduler.jobs: Scheduler: starting fetch cycle
+2026-04-13 18:31:38 [INFO    ] app.services.rss_fetcher: Fetching RSS: Somos Pueblo (https://somospueblo.com/feed/)
+2026-04-13 18:31:39 [INFO    ] app.services.rss_fetcher:   -> 1 new articles from Somos Pueblo
+2026-04-13 18:31:39 [INFO    ] app.services.rss_fetcher: Fetching RSS: El Pais - Tecnologia (https://feeds.elpais.com/mrss-s/pages/ep/site/elpais.com/section/tecnologia/portada)
+2026-04-13 18:31:39 [INFO    ] app.services.rss_fetcher:   -> 0 new articles from El Pais - Tecnologia
+2026-04-13 18:31:39 [INFO    ] app.services.rss_fetcher: Fetching RSS: Reuters - Top News (https://feeds.reuters.com/reuters/topNews)
+2026-04-13 18:31:39 [INFO    ] app.services.rss_fetcher:   -> 0 new articles from Reuters - Top News
+2026-04-13 18:31:39 [INFO    ] app.services.newsapi_fetcher: Fetching NewsAPI: NewsAPI - Tecnologia ES
+2026-04-13 18:31:40 [ERROR   ] app.services.newsapi_fetcher: Error fetching NewsAPI NewsAPI - Tecnologia ES: Client error '401 Unauthorized' for url 'https://newsapi.org/v2/everything?q=tecnologia&language=es&sortBy=publishedAt&apiKey=your-key-here&pageSize=20'
+For more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/401
+2026-04-13 18:31:40 [INFO    ] app.scheduler.jobs: Scheduler: fetched 1 new articles (rss=1, newsapi=0, scraper=0)
+2026-04-13 18:31:53 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:32:09 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:32:25 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:32:41 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:32:57 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:33:13 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:33:29 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:33:45 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:34:01 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:34:17 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:34:33 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:34:49 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:35:06 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:35:22 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:35:38 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:35:54 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:36:10 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:36:26 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:36:42 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:36:58 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:37:14 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:37:30 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:37:47 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:38:03 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:38:19 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:38:35 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:38:51 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:39:07 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:39:23 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:39:39 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:39:55 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:40:11 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:40:28 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:40:44 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:41:00 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:41:16 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:41:32 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:41:48 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:42:04 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:42:20 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:42:36 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:42:53 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:43:09 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:43:25 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:43:41 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:43:57 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:44:13 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:44:29 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:44:45 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:45:01 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:45:18 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:45:34 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:45:50 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:46:06 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:46:22 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:46:38 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:46:38 [INFO    ] app.scheduler.jobs: Scheduler: starting summarization
+2026-04-13 18:46:40 [INFO    ] app.services.summarizer: Article 32 processed — category=None, score=6, text_len=3070
+2026-04-13 18:46:40 [INFO    ] app.services.summarizer: Batch summarization: 1/1 processed
+2026-04-13 18:46:40 [INFO    ] app.scheduler.jobs: Scheduler: summarized 1 articles
+2026-04-13 18:46:54 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:47:10 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:47:26 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:47:42 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:47:59 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:48:15 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:48:31 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:48:47 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:49:03 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:49:19 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:49:35 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:49:51 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:50:07 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:50:23 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:50:39 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:50:56 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:51:12 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:51:28 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:51:44 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:52:00 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:52:16 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:52:32 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:52:48 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:53:04 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:53:21 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:53:37 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:53:53 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:54:09 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:54:25 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:54:42 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:54:58 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:55:14 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:55:30 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:55:46 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:56:03 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:56:19 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:56:35 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:56:52 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:57:08 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:57:18 [INFO    ] app.main: NewsBot Pro shutting down...
+2026-04-13 18:57:18 [INFO    ] app.services.telegram_bot: Telegram polling stopped
+2026-04-13 18:57:18 [INFO    ] app.main: Shutdown complete
+2026-04-13 18:57:22 [INFO    ] app.main: NewsLet starting up...
+2026-04-13 18:57:22 [INFO    ] app.services.startup_validator: ==================================================
+2026-04-13 18:57:22 [INFO    ] app.services.startup_validator: NewsBot Pro — Startup Validation
+2026-04-13 18:57:22 [INFO    ] app.services.startup_validator: ==================================================
+2026-04-13 18:57:22 [INFO    ] app.services.startup_validator: [OK]   Database reachable
+2026-04-13 18:57:22 [INFO    ] app.services.startup_validator: [OK]   AI key present (groq / llama-3.3-70b-versatile)
+2026-04-13 18:57:23 [INFO    ] app.services.startup_validator: [OK]   Telegram bot @noticiasletbot connected
+2026-04-13 18:57:23 [INFO    ] app.services.startup_validator: [OK]   Telegram chat_id: 8549265540
+2026-04-13 18:57:23 [INFO    ] app.services.startup_validator: [INFO] NewsAPI key not configured (optional — RSS still works)
+2026-04-13 18:57:23 [INFO    ] app.services.startup_validator: ==================================================
+2026-04-13 18:57:23 [INFO    ] app.services.startup_validator: Startup: 4/5 checks passed
+2026-04-13 18:57:23 [INFO    ] app.services.startup_validator: ==================================================
+2026-04-13 18:57:23 [INFO    ] app.scheduler.jobs: Scheduler started: fetch every 30min, digest at 08:00
+2026-04-13 18:57:23 [INFO    ] app.main: Telegram bot polling started
+2026-04-13 18:57:23 [INFO    ] app.main: NewsBot Pro ready
+2026-04-13 18:57:23 [INFO    ] app.services.telegram_bot: Telegram bot polling active
+2026-04-13 18:57:23 [INFO    ] app.main: NewsBot Pro shutting down...
+2026-04-13 18:57:23 [INFO    ] app.services.telegram_bot: Telegram polling stopped
+2026-04-13 18:57:23 [INFO    ] app.main: Shutdown complete
+2026-04-13 18:57:25 [INFO    ] app.main: NewsLet starting up...
+2026-04-13 18:57:25 [INFO    ] app.services.startup_validator: ==================================================
+2026-04-13 18:57:25 [INFO    ] app.services.startup_validator: NewsBot Pro — Startup Validation
+2026-04-13 18:57:25 [INFO    ] app.services.startup_validator: ==================================================
+2026-04-13 18:57:25 [INFO    ] app.services.startup_validator: [OK]   Database reachable
+2026-04-13 18:57:25 [INFO    ] app.services.startup_validator: [OK]   AI key present (groq / llama-3.3-70b-versatile)
+2026-04-13 18:57:25 [INFO    ] app.services.startup_validator: [OK]   Telegram bot @noticiasletbot connected
+2026-04-13 18:57:25 [INFO    ] app.services.startup_validator: [OK]   Telegram chat_id: 8549265540
+2026-04-13 18:57:25 [INFO    ] app.services.startup_validator: [INFO] NewsAPI key not configured (optional — RSS still works)
+2026-04-13 18:57:25 [INFO    ] app.services.startup_validator: ==================================================
+2026-04-13 18:57:25 [INFO    ] app.services.startup_validator: Startup: 4/5 checks passed
+2026-04-13 18:57:25 [INFO    ] app.services.startup_validator: ==================================================
+2026-04-13 18:57:25 [INFO    ] app.scheduler.jobs: Scheduler started: fetch every 30min, digest at 08:00
+2026-04-13 18:57:25 [INFO    ] app.main: Telegram bot polling started
+2026-04-13 18:57:25 [INFO    ] app.main: NewsBot Pro ready
+2026-04-13 18:57:25 [INFO    ] app.services.telegram_bot: Telegram bot polling active
+2026-04-13 18:57:26 [INFO    ] app.main: NewsBot Pro shutting down...
+2026-04-13 18:57:26 [INFO    ] app.services.telegram_bot: Telegram polling stopped
+2026-04-13 18:57:26 [INFO    ] app.main: Shutdown complete
+2026-04-13 18:57:27 [INFO    ] app.main: NewsLet starting up...
+2026-04-13 18:57:28 [INFO    ] app.services.startup_validator: ==================================================
+2026-04-13 18:57:28 [INFO    ] app.services.startup_validator: NewsBot Pro — Startup Validation
+2026-04-13 18:57:28 [INFO    ] app.services.startup_validator: ==================================================
+2026-04-13 18:57:28 [INFO    ] app.services.startup_validator: [OK]   Database reachable
+2026-04-13 18:57:28 [INFO    ] app.services.startup_validator: [OK]   AI key present (groq / llama-3.3-70b-versatile)
+2026-04-13 18:57:28 [INFO    ] app.services.startup_validator: [OK]   Telegram bot @noticiasletbot connected
+2026-04-13 18:57:28 [INFO    ] app.services.startup_validator: [OK]   Telegram chat_id: 8549265540
+2026-04-13 18:57:28 [INFO    ] app.services.startup_validator: [INFO] NewsAPI key not configured (optional — RSS still works)
+2026-04-13 18:57:28 [INFO    ] app.services.startup_validator: ==================================================
+2026-04-13 18:57:28 [INFO    ] app.services.startup_validator: Startup: 4/5 checks passed
+2026-04-13 18:57:28 [INFO    ] app.services.startup_validator: ==================================================
+2026-04-13 18:57:28 [INFO    ] app.scheduler.jobs: Scheduler started: fetch every 30min, digest at 08:00
+2026-04-13 18:57:28 [INFO    ] app.main: Telegram bot polling started
+2026-04-13 18:57:28 [INFO    ] app.main: NewsBot Pro ready
+2026-04-13 18:57:28 [INFO    ] app.services.telegram_bot: Telegram bot polling active
+2026-04-13 18:57:29 [INFO    ] app.main: NewsBot Pro shutting down...
+2026-04-13 18:57:29 [INFO    ] app.services.telegram_bot: Telegram polling stopped
+2026-04-13 18:57:29 [INFO    ] app.main: Shutdown complete
+2026-04-13 18:57:31 [INFO    ] app.main: NewsLet starting up...
+2026-04-13 18:57:31 [INFO    ] app.services.startup_validator: ==================================================
+2026-04-13 18:57:31 [INFO    ] app.services.startup_validator: NewsBot Pro — Startup Validation
+2026-04-13 18:57:31 [INFO    ] app.services.startup_validator: ==================================================
+2026-04-13 18:57:31 [INFO    ] app.services.startup_validator: [OK]   Database reachable
+2026-04-13 18:57:31 [INFO    ] app.services.startup_validator: [OK]   AI key present (groq / llama-3.3-70b-versatile)
+2026-04-13 18:57:32 [INFO    ] app.services.startup_validator: [OK]   Telegram bot @noticiasletbot connected
+2026-04-13 18:57:32 [INFO    ] app.services.startup_validator: [OK]   Telegram chat_id: 8549265540
+2026-04-13 18:57:32 [INFO    ] app.services.startup_validator: [INFO] NewsAPI key not configured (optional — RSS still works)
+2026-04-13 18:57:32 [INFO    ] app.services.startup_validator: ==================================================
+2026-04-13 18:57:32 [INFO    ] app.services.startup_validator: Startup: 4/5 checks passed
+2026-04-13 18:57:32 [INFO    ] app.services.startup_validator: ==================================================
+2026-04-13 18:57:32 [INFO    ] app.scheduler.jobs: Scheduler started: fetch every 30min, digest at 08:00
+2026-04-13 18:57:32 [INFO    ] app.main: Telegram bot polling started
+2026-04-13 18:57:32 [INFO    ] app.main: NewsBot Pro ready
+2026-04-13 18:57:32 [INFO    ] app.services.telegram_bot: Telegram bot polling active
+2026-04-13 18:57:34 [INFO    ] app.main: NewsBot Pro shutting down...
+2026-04-13 18:57:34 [INFO    ] app.services.telegram_bot: Telegram polling stopped
+2026-04-13 18:57:34 [INFO    ] app.main: Shutdown complete
+2026-04-13 18:57:36 [INFO    ] app.main: NewsLet starting up...
+2026-04-13 18:57:36 [INFO    ] app.services.startup_validator: ==================================================
+2026-04-13 18:57:36 [INFO    ] app.services.startup_validator: NewsBot Pro — Startup Validation
+2026-04-13 18:57:36 [INFO    ] app.services.startup_validator: ==================================================
+2026-04-13 18:57:36 [INFO    ] app.services.startup_validator: [OK]   Database reachable
+2026-04-13 18:57:36 [INFO    ] app.services.startup_validator: [OK]   AI key present (groq / llama-3.3-70b-versatile)
+2026-04-13 18:57:36 [INFO    ] app.services.startup_validator: [OK]   Telegram bot @noticiasletbot connected
+2026-04-13 18:57:36 [INFO    ] app.services.startup_validator: [OK]   Telegram chat_id: 8549265540
+2026-04-13 18:57:36 [INFO    ] app.services.startup_validator: [INFO] NewsAPI key not configured (optional — RSS still works)
+2026-04-13 18:57:36 [INFO    ] app.services.startup_validator: ==================================================
+2026-04-13 18:57:36 [INFO    ] app.services.startup_validator: Startup: 4/5 checks passed
+2026-04-13 18:57:36 [INFO    ] app.services.startup_validator: ==================================================
+2026-04-13 18:57:36 [INFO    ] app.scheduler.jobs: Scheduler started: fetch every 30min, digest at 08:00
+2026-04-13 18:57:36 [INFO    ] app.main: Telegram bot polling started
+2026-04-13 18:57:36 [INFO    ] app.main: NewsBot Pro ready
+2026-04-13 18:57:36 [INFO    ] app.services.telegram_bot: Telegram bot polling active
+2026-04-13 18:57:41 [INFO    ] app.main: NewsBot Pro shutting down...
+2026-04-13 18:57:41 [INFO    ] app.services.telegram_bot: Telegram polling stopped
+2026-04-13 18:57:41 [INFO    ] app.main: Shutdown complete
+2026-04-13 18:57:43 [INFO    ] app.main: NewsLet starting up...
+2026-04-13 18:57:43 [INFO    ] app.services.startup_validator: ==================================================
+2026-04-13 18:57:43 [INFO    ] app.services.startup_validator: NewsBot Pro — Startup Validation
+2026-04-13 18:57:43 [INFO    ] app.services.startup_validator: ==================================================
+2026-04-13 18:57:43 [INFO    ] app.services.startup_validator: [OK]   Database reachable
+2026-04-13 18:57:43 [INFO    ] app.services.startup_validator: [OK]   AI key present (groq / llama-3.3-70b-versatile)
+2026-04-13 18:57:44 [INFO    ] app.services.startup_validator: [OK]   Telegram bot @noticiasletbot connected
+2026-04-13 18:57:44 [INFO    ] app.services.startup_validator: [OK]   Telegram chat_id: 8549265540
+2026-04-13 18:57:44 [INFO    ] app.services.startup_validator: [INFO] NewsAPI key not configured (optional — RSS still works)
+2026-04-13 18:57:44 [INFO    ] app.services.startup_validator: ==================================================
+2026-04-13 18:57:44 [INFO    ] app.services.startup_validator: Startup: 4/5 checks passed
+2026-04-13 18:57:44 [INFO    ] app.services.startup_validator: ==================================================
+2026-04-13 18:57:44 [INFO    ] app.scheduler.jobs: Scheduler started: fetch every 30min, digest at 08:00
+2026-04-13 18:57:44 [INFO    ] app.main: Telegram bot polling started
+2026-04-13 18:57:44 [INFO    ] app.main: NewsBot Pro ready
+2026-04-13 18:57:44 [INFO    ] app.services.telegram_bot: Telegram bot polling active
+2026-04-13 18:57:52 [INFO    ] app.main: NewsBot Pro shutting down...
+2026-04-13 18:57:52 [INFO    ] app.services.telegram_bot: Telegram polling stopped
+2026-04-13 18:57:52 [INFO    ] app.main: Shutdown complete
+2026-04-13 18:57:54 [INFO    ] app.main: NewsLet starting up...
+2026-04-13 18:57:54 [INFO    ] app.services.startup_validator: ==================================================
+2026-04-13 18:57:54 [INFO    ] app.services.startup_validator: NewsBot Pro — Startup Validation
+2026-04-13 18:57:54 [INFO    ] app.services.startup_validator: ==================================================
+2026-04-13 18:57:54 [INFO    ] app.services.startup_validator: [OK]   Database reachable
+2026-04-13 18:57:54 [INFO    ] app.services.startup_validator: [OK]   AI key present (groq / llama-3.3-70b-versatile)
+2026-04-13 18:57:54 [INFO    ] app.services.startup_validator: [OK]   Telegram bot @noticiasletbot connected
+2026-04-13 18:57:55 [INFO    ] app.services.startup_validator: [OK]   Telegram chat_id: 8549265540
+2026-04-13 18:57:55 [INFO    ] app.services.startup_validator: [INFO] NewsAPI key not configured (optional — RSS still works)
+2026-04-13 18:57:55 [INFO    ] app.services.startup_validator: ==================================================
+2026-04-13 18:57:55 [INFO    ] app.services.startup_validator: Startup: 4/5 checks passed
+2026-04-13 18:57:55 [INFO    ] app.services.startup_validator: ==================================================
+2026-04-13 18:57:55 [INFO    ] app.scheduler.jobs: Scheduler started: fetch every 30min, digest at 08:00
+2026-04-13 18:57:55 [INFO    ] app.main: Telegram bot polling started
+2026-04-13 18:57:55 [INFO    ] app.main: NewsBot Pro ready
+2026-04-13 18:57:55 [INFO    ] app.services.telegram_bot: Telegram bot polling active
+2026-04-13 18:58:03 [INFO    ] app.main: NewsBot Pro shutting down...
+2026-04-13 18:58:03 [INFO    ] app.services.telegram_bot: Telegram polling stopped
+2026-04-13 18:58:03 [INFO    ] app.main: Shutdown complete
+2026-04-13 18:58:04 [INFO    ] app.main: NewsLet starting up...
+2026-04-13 18:58:04 [INFO    ] app.services.startup_validator: ==================================================
+2026-04-13 18:58:04 [INFO    ] app.services.startup_validator: NewsBot Pro — Startup Validation
+2026-04-13 18:58:04 [INFO    ] app.services.startup_validator: ==================================================
+2026-04-13 18:58:04 [INFO    ] app.services.startup_validator: [OK]   Database reachable
+2026-04-13 18:58:04 [INFO    ] app.services.startup_validator: [OK]   AI key present (groq / llama-3.3-70b-versatile)
+2026-04-13 18:58:05 [INFO    ] app.services.startup_validator: [OK]   Telegram bot @noticiasletbot connected
+2026-04-13 18:58:05 [INFO    ] app.services.startup_validator: [OK]   Telegram chat_id: 8549265540
+2026-04-13 18:58:05 [INFO    ] app.services.startup_validator: [INFO] NewsAPI key not configured (optional — RSS still works)
+2026-04-13 18:58:05 [INFO    ] app.services.startup_validator: ==================================================
+2026-04-13 18:58:05 [INFO    ] app.services.startup_validator: Startup: 4/5 checks passed
+2026-04-13 18:58:05 [INFO    ] app.services.startup_validator: ==================================================
+2026-04-13 18:58:05 [INFO    ] app.scheduler.jobs: Scheduler started: fetch every 30min, digest at 08:00
+2026-04-13 18:58:05 [INFO    ] app.main: Telegram bot polling started
+2026-04-13 18:58:05 [INFO    ] app.main: NewsBot Pro ready
+2026-04-13 18:58:05 [INFO    ] app.services.telegram_bot: Telegram bot polling active
+2026-04-13 18:58:12 [INFO    ] app.main: NewsBot Pro shutting down...
+2026-04-13 18:58:12 [INFO    ] app.services.telegram_bot: Telegram polling stopped
+2026-04-13 18:58:12 [INFO    ] app.main: Shutdown complete
+2026-04-13 18:58:14 [INFO    ] app.main: NewsLet starting up...
+2026-04-13 18:58:14 [INFO    ] app.services.startup_validator: ==================================================
+2026-04-13 18:58:14 [INFO    ] app.services.startup_validator: NewsBot Pro — Startup Validation
+2026-04-13 18:58:14 [INFO    ] app.services.startup_validator: ==================================================
+2026-04-13 18:58:14 [INFO    ] app.services.startup_validator: [OK]   Database reachable
+2026-04-13 18:58:14 [INFO    ] app.services.startup_validator: [OK]   AI key present (groq / llama-3.3-70b-versatile)
+2026-04-13 18:58:15 [INFO    ] app.services.startup_validator: [OK]   Telegram bot @noticiasletbot connected
+2026-04-13 18:58:15 [INFO    ] app.services.startup_validator: [OK]   Telegram chat_id: 8549265540
+2026-04-13 18:58:15 [INFO    ] app.services.startup_validator: [INFO] NewsAPI key not configured (optional — RSS still works)
+2026-04-13 18:58:15 [INFO    ] app.services.startup_validator: ==================================================
+2026-04-13 18:58:15 [INFO    ] app.services.startup_validator: Startup: 4/5 checks passed
+2026-04-13 18:58:15 [INFO    ] app.services.startup_validator: ==================================================
+2026-04-13 18:58:15 [INFO    ] app.scheduler.jobs: Scheduler started: fetch every 30min, digest at 08:00
+2026-04-13 18:58:15 [INFO    ] app.main: Telegram bot polling started
+2026-04-13 18:58:15 [INFO    ] app.main: NewsBot Pro ready
+2026-04-13 18:58:15 [INFO    ] app.services.telegram_bot: Telegram bot polling active
+2026-04-13 18:58:17 [INFO    ] app.main: NewsBot Pro shutting down...
+2026-04-13 18:58:17 [INFO    ] app.services.telegram_bot: Telegram polling stopped
+2026-04-13 18:58:17 [INFO    ] app.main: Shutdown complete
+2026-04-13 18:58:19 [INFO    ] app.main: NewsLet starting up...
+2026-04-13 18:58:19 [INFO    ] app.services.startup_validator: ==================================================
+2026-04-13 18:58:19 [INFO    ] app.services.startup_validator: NewsBot Pro — Startup Validation
+2026-04-13 18:58:19 [INFO    ] app.services.startup_validator: ==================================================
+2026-04-13 18:58:19 [INFO    ] app.services.startup_validator: [OK]   Database reachable
+2026-04-13 18:58:19 [INFO    ] app.services.startup_validator: [OK]   AI key present (groq / llama-3.3-70b-versatile)
+2026-04-13 18:58:20 [INFO    ] app.services.startup_validator: [OK]   Telegram bot @noticiasletbot connected
+2026-04-13 18:58:20 [INFO    ] app.services.startup_validator: [OK]   Telegram chat_id: 8549265540
+2026-04-13 18:58:20 [INFO    ] app.services.startup_validator: [INFO] NewsAPI key not configured (optional — RSS still works)
+2026-04-13 18:58:20 [INFO    ] app.services.startup_validator: ==================================================
+2026-04-13 18:58:20 [INFO    ] app.services.startup_validator: Startup: 4/5 checks passed
+2026-04-13 18:58:20 [INFO    ] app.services.startup_validator: ==================================================
+2026-04-13 18:58:20 [INFO    ] app.scheduler.jobs: Scheduler started: fetch every 30min, digest at 08:00
+2026-04-13 18:58:20 [INFO    ] app.main: Telegram bot polling started
+2026-04-13 18:58:20 [INFO    ] app.main: NewsBot Pro ready
+2026-04-13 18:58:20 [INFO    ] app.services.telegram_bot: Telegram bot polling active
+2026-04-13 18:58:33 [INFO    ] app.main: NewsBot Pro shutting down...
+2026-04-13 18:58:33 [INFO    ] app.services.telegram_bot: Telegram polling stopped
+2026-04-13 18:58:33 [INFO    ] app.main: Shutdown complete
+2026-04-13 18:58:35 [INFO    ] app.main: NewsLet starting up...
+2026-04-13 18:58:35 [INFO    ] app.services.startup_validator: ==================================================
+2026-04-13 18:58:35 [INFO    ] app.services.startup_validator: NewsBot Pro — Startup Validation
+2026-04-13 18:58:35 [INFO    ] app.services.startup_validator: ==================================================
+2026-04-13 18:58:35 [INFO    ] app.services.startup_validator: [OK]   Database reachable
+2026-04-13 18:58:35 [INFO    ] app.services.startup_validator: [OK]   AI key present (groq / llama-3.3-70b-versatile)
+2026-04-13 18:58:35 [INFO    ] app.services.startup_validator: [OK]   Telegram bot @noticiasletbot connected
+2026-04-13 18:58:35 [INFO    ] app.services.startup_validator: [OK]   Telegram chat_id: 8549265540
+2026-04-13 18:58:35 [INFO    ] app.services.startup_validator: [INFO] NewsAPI key not configured (optional — RSS still works)
+2026-04-13 18:58:35 [INFO    ] app.services.startup_validator: ==================================================
+2026-04-13 18:58:35 [INFO    ] app.services.startup_validator: Startup: 4/5 checks passed
+2026-04-13 18:58:35 [INFO    ] app.services.startup_validator: ==================================================
+2026-04-13 18:58:35 [INFO    ] app.scheduler.jobs: Scheduler started: fetch every 30min, digest at 08:00
+2026-04-13 18:58:35 [INFO    ] app.main: Telegram bot polling started
+2026-04-13 18:58:35 [INFO    ] app.main: NewsBot Pro ready
+2026-04-13 18:58:35 [INFO    ] app.services.telegram_bot: Telegram bot polling active
+2026-04-13 18:58:40 [INFO    ] app.main: NewsBot Pro shutting down...
+2026-04-13 18:58:40 [INFO    ] app.services.telegram_bot: Telegram polling stopped
+2026-04-13 18:58:40 [INFO    ] app.main: Shutdown complete
+2026-04-13 18:58:42 [INFO    ] app.main: NewsLet starting up...
+2026-04-13 18:58:42 [INFO    ] app.services.startup_validator: ==================================================
+2026-04-13 18:58:42 [INFO    ] app.services.startup_validator: NewsBot Pro — Startup Validation
+2026-04-13 18:58:42 [INFO    ] app.services.startup_validator: ==================================================
+2026-04-13 18:58:42 [INFO    ] app.services.startup_validator: [OK]   Database reachable
+2026-04-13 18:58:42 [INFO    ] app.services.startup_validator: [OK]   AI key present (groq / llama-3.3-70b-versatile)
+2026-04-13 18:58:43 [INFO    ] app.services.startup_validator: [OK]   Telegram bot @noticiasletbot connected
+2026-04-13 18:58:43 [INFO    ] app.services.startup_validator: [OK]   Telegram chat_id: 8549265540
+2026-04-13 18:58:43 [INFO    ] app.services.startup_validator: [INFO] NewsAPI key not configured (optional — RSS still works)
+2026-04-13 18:58:43 [INFO    ] app.services.startup_validator: ==================================================
+2026-04-13 18:58:43 [INFO    ] app.services.startup_validator: Startup: 4/5 checks passed
+2026-04-13 18:58:43 [INFO    ] app.services.startup_validator: ==================================================
+2026-04-13 18:58:43 [INFO    ] app.scheduler.jobs: Scheduler started: fetch every 30min, digest at 08:00
+2026-04-13 18:58:43 [INFO    ] app.main: Telegram bot polling started
+2026-04-13 18:58:43 [INFO    ] app.main: NewsBot Pro ready
+2026-04-13 18:58:43 [INFO    ] app.services.telegram_bot: Telegram bot polling active
+2026-04-13 18:58:43 [INFO    ] app.main: NewsBot Pro shutting down...
+2026-04-13 18:58:43 [INFO    ] app.services.telegram_bot: Telegram polling stopped
+2026-04-13 18:58:43 [INFO    ] app.main: Shutdown complete
+2026-04-13 18:58:45 [INFO    ] app.main: NewsLet starting up...
+2026-04-13 18:58:45 [INFO    ] app.services.startup_validator: ==================================================
+2026-04-13 18:58:45 [INFO    ] app.services.startup_validator: NewsBot Pro — Startup Validation
+2026-04-13 18:58:45 [INFO    ] app.services.startup_validator: ==================================================
+2026-04-13 18:58:45 [INFO    ] app.services.startup_validator: [OK]   Database reachable
+2026-04-13 18:58:45 [INFO    ] app.services.startup_validator: [OK]   AI key present (groq / llama-3.3-70b-versatile)
+2026-04-13 18:58:45 [INFO    ] app.services.startup_validator: [OK]   Telegram bot @noticiasletbot connected
+2026-04-13 18:58:45 [INFO    ] app.services.startup_validator: [OK]   Telegram chat_id: 8549265540
+2026-04-13 18:58:45 [INFO    ] app.services.startup_validator: [INFO] NewsAPI key not configured (optional — RSS still works)
+2026-04-13 18:58:45 [INFO    ] app.services.startup_validator: ==================================================
+2026-04-13 18:58:45 [INFO    ] app.services.startup_validator: Startup: 4/5 checks passed
+2026-04-13 18:58:45 [INFO    ] app.services.startup_validator: ==================================================
+2026-04-13 18:58:45 [INFO    ] app.scheduler.jobs: Scheduler started: fetch every 30min, digest at 08:00
+2026-04-13 18:58:45 [INFO    ] app.main: Telegram bot polling started
+2026-04-13 18:58:45 [INFO    ] app.main: NewsBot Pro ready
+2026-04-13 18:58:45 [INFO    ] app.services.telegram_bot: Telegram bot polling active
+2026-04-13 18:58:46 [INFO    ] app.main: NewsBot Pro shutting down...
+2026-04-13 18:58:46 [INFO    ] app.services.telegram_bot: Telegram polling stopped
+2026-04-13 18:58:46 [INFO    ] app.main: Shutdown complete
+2026-04-13 18:58:48 [INFO    ] app.main: NewsLet starting up...
+2026-04-13 18:58:48 [INFO    ] app.services.startup_validator: ==================================================
+2026-04-13 18:58:48 [INFO    ] app.services.startup_validator: NewsBot Pro — Startup Validation
+2026-04-13 18:58:48 [INFO    ] app.services.startup_validator: ==================================================
+2026-04-13 18:58:48 [INFO    ] app.services.startup_validator: [OK]   Database reachable
+2026-04-13 18:58:48 [INFO    ] app.services.startup_validator: [OK]   AI key present (groq / llama-3.3-70b-versatile)
+2026-04-13 18:58:49 [INFO    ] app.services.startup_validator: [OK]   Telegram bot @noticiasletbot connected
+2026-04-13 18:58:49 [INFO    ] app.services.startup_validator: [OK]   Telegram chat_id: 8549265540
+2026-04-13 18:58:49 [INFO    ] app.services.startup_validator: [INFO] NewsAPI key not configured (optional — RSS still works)
+2026-04-13 18:58:49 [INFO    ] app.services.startup_validator: ==================================================
+2026-04-13 18:58:49 [INFO    ] app.services.startup_validator: Startup: 4/5 checks passed
+2026-04-13 18:58:49 [INFO    ] app.services.startup_validator: ==================================================
+2026-04-13 18:58:49 [INFO    ] app.scheduler.jobs: Scheduler started: fetch every 30min, digest at 08:00
+2026-04-13 18:58:49 [INFO    ] app.main: Telegram bot polling started
+2026-04-13 18:58:49 [INFO    ] app.main: NewsBot Pro ready
+2026-04-13 18:58:49 [INFO    ] app.services.telegram_bot: Telegram bot polling active
+2026-04-13 18:59:05 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:59:06 [INFO    ] app.main: NewsBot Pro shutting down...
+2026-04-13 18:59:06 [INFO    ] app.services.telegram_bot: Telegram polling stopped
+2026-04-13 18:59:06 [INFO    ] app.main: Shutdown complete
+2026-04-13 18:59:08 [INFO    ] app.main: NewsLet starting up...
+2026-04-13 18:59:08 [INFO    ] app.services.startup_validator: ==================================================
+2026-04-13 18:59:08 [INFO    ] app.services.startup_validator: NewsBot Pro — Startup Validation
+2026-04-13 18:59:08 [INFO    ] app.services.startup_validator: ==================================================
+2026-04-13 18:59:08 [INFO    ] app.services.startup_validator: [OK]   Database reachable
+2026-04-13 18:59:08 [INFO    ] app.services.startup_validator: [OK]   AI key present (groq / llama-3.3-70b-versatile)
+2026-04-13 18:59:09 [INFO    ] app.services.startup_validator: [OK]   Telegram bot @noticiasletbot connected
+2026-04-13 18:59:09 [INFO    ] app.services.startup_validator: [OK]   Telegram chat_id: 8549265540
+2026-04-13 18:59:09 [INFO    ] app.services.startup_validator: [INFO] NewsAPI key not configured (optional — RSS still works)
+2026-04-13 18:59:09 [INFO    ] app.services.startup_validator: ==================================================
+2026-04-13 18:59:09 [INFO    ] app.services.startup_validator: Startup: 4/5 checks passed
+2026-04-13 18:59:09 [INFO    ] app.services.startup_validator: ==================================================
+2026-04-13 18:59:09 [INFO    ] app.scheduler.jobs: Scheduler started: fetch every 30min, digest at 08:00
+2026-04-13 18:59:09 [INFO    ] app.main: Telegram bot polling started
+2026-04-13 18:59:09 [INFO    ] app.main: NewsBot Pro ready
+2026-04-13 18:59:09 [INFO    ] app.services.telegram_bot: Telegram bot polling active
+2026-04-13 18:59:24 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:59:40 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 18:59:56 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 19:00:13 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 19:00:29 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-13 19:00:39 [INFO    ] app.main: NewsBot Pro shutting down...
+2026-04-13 19:00:39 [INFO    ] app.services.telegram_bot: Telegram polling stopped
+2026-04-13 19:00:39 [INFO    ] app.main: Shutdown complete
