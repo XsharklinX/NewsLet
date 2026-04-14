@@ -164,49 +164,74 @@ async def job_daily_digest():
         db.close()
 
 
-async def job_backup_db():
-    """
-    Daily SQLite backup — copies the DB file to BACKUP_DIR with a timestamp.
-    Keeps only the last 7 backups to avoid filling the volume.
-    """
-    if not settings.backup_dir:
-        return
-
-    backup_dir = Path(settings.backup_dir)
-    backup_dir.mkdir(parents=True, exist_ok=True)
-
-    # Resolve source DB path from the SQLAlchemy URL
+def _resolve_db_path() -> Path | None:
+    """Resolve the SQLite file path from the configured DATABASE_URL."""
     db_url = settings.database_url
     if db_url.startswith("sqlite:////"):
-        db_path = Path(db_url[len("sqlite:////"):])
+        return Path(db_url[len("sqlite:////"):])
     elif db_url.startswith("sqlite:///"):
-        db_path = Path(db_url[len("sqlite:///"):])
-    else:
-        logger.warning("Backup: unsupported DB URL scheme, skipping")
-        return
+        p = db_url[len("sqlite:///"):]
+        return Path(p) if p else None
+    return None
 
-    if not db_path.exists():
-        logger.warning(f"Backup: DB file not found at {db_path}")
+
+async def job_backup_db():
+    """
+    Daily SQLite backup:
+    - If BACKUP_DIR is set → copy to that directory (keep 7 backups)
+    - Always → send the .db file to the admin Telegram chat as a document
+      so the DB survives even if the hosting filesystem is ephemeral (Render free tier)
+    """
+    db_path = _resolve_db_path()
+    if not db_path or not db_path.exists():
+        logger.warning("Backup: DB file not found, skipping")
         return
 
     timestamp = datetime.utcnow().strftime("%Y%m%d_%H%M%S")
-    dest = backup_dir / f"newslet_{timestamp}.db"
 
-    try:
-        shutil.copy2(db_path, dest)
-        logger.info(f"Backup: DB copied to {dest}")
-    except Exception as e:
-        logger.error(f"Backup: failed to copy DB — {e}")
+    # ── Local file backup (if BACKUP_DIR set) ────────────────────────────
+    if settings.backup_dir:
+        backup_dir = Path(settings.backup_dir)
+        backup_dir.mkdir(parents=True, exist_ok=True)
+        dest = backup_dir / f"newslet_{timestamp}.db"
+        try:
+            shutil.copy2(db_path, dest)
+            logger.info(f"Backup: DB copied to {dest}")
+        except Exception as e:
+            logger.error(f"Backup: local copy failed — {e}")
+        # Rotate — keep only 7 most recent
+        backups = sorted(backup_dir.glob("newslet_*.db"), key=lambda p: p.stat().st_mtime)
+        for old in backups[:-7]:
+            try:
+                old.unlink()
+            except Exception:
+                pass
+
+    # ── Telegram backup (always, works on ephemeral filesystems) ─────────
+    if not settings.telegram_bot_token or not settings.telegram_chat_id:
         return
 
-    # Rotate — keep only 7 most recent backups
-    backups = sorted(backup_dir.glob("newslet_*.db"), key=lambda p: p.stat().st_mtime)
-    for old in backups[:-7]:
-        try:
-            old.unlink()
-            logger.info(f"Backup: rotated old backup {old.name}")
-        except Exception:
-            pass
+    try:
+        import httpx
+        db_bytes = db_path.read_bytes()
+        filename = f"newslet_backup_{timestamp}.db"
+        url = f"https://api.telegram.org/bot{settings.telegram_bot_token}/sendDocument"
+        async with httpx.AsyncClient(timeout=60) as client:
+            resp = await client.post(
+                url,
+                data={
+                    "chat_id": settings.telegram_chat_id,
+                    "caption": f"🗄️ Backup automático de la DB\n{timestamp} UTC\n{len(db_bytes) // 1024} KB",
+                },
+                files={"document": (filename, db_bytes, "application/octet-stream")},
+            )
+        if resp.json().get("ok"):
+            logger.info(f"Backup: DB sent to Telegram ({len(db_bytes) // 1024} KB)")
+        else:
+            logger.warning(f"Backup: Telegram upload failed — {resp.json()}")
+    except Exception as e:
+        logger.error(f"Backup: Telegram send failed — {e}")
+
 
 
 async def job_cleanup():

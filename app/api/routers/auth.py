@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Request
 from pydantic import BaseModel as _BaseModel
 
 from app.config import settings
@@ -29,3 +29,46 @@ def auth_login(body: _LoginBody):
 def auth_status():
     from app.services.auth import is_auth_enabled
     return {"auth_enabled": is_auth_enabled()}
+
+
+@public_router.get("/auth/service-token")
+def service_token(key: str):
+    """
+    Generate a long-lived JWT for GitHub Actions / cron callers.
+    Protected by SERVICE_KEY env var instead of admin password.
+    """
+    from app.config import settings
+    from app.services.auth import create_token
+    svc_key = getattr(settings, "service_key", "")
+    if not svc_key or key != svc_key:
+        raise HTTPException(status_code=403, detail="Invalid service key")
+    # 365-day token for automation
+    from datetime import datetime, timedelta, timezone
+    try:
+        from jose import jwt
+    except ImportError:
+        raise HTTPException(500, "python-jose not installed")
+    payload = {
+        "sub": "service",
+        "iat": datetime.now(timezone.utc),
+        "exp": datetime.now(timezone.utc) + timedelta(days=365),
+    }
+    token = jwt.encode(payload, settings.jwt_secret, algorithm="HS256")
+    return {"token": token}
+
+
+# ─── Telegram Webhook ──────────────────────────────────────────────────────
+# Telegram calls this endpoint directly — must be public (no JWT)
+
+@public_router.post("/telegram/webhook")
+async def telegram_webhook(request: Request):
+    """Receive Telegram updates via webhook (used in production on Render)."""
+    try:
+        update = await request.json()
+        from app.services.telegram_bot import _process_update
+        await _process_update(update)
+    except Exception as e:
+        import logging
+        logging.getLogger(__name__).error(f"Webhook error: {e}")
+    # Always return 200 — Telegram retries on non-200
+    return {"ok": True}

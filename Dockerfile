@@ -7,6 +7,7 @@ LABEL description="NewsLet — Professional news aggregation & distribution syst
 # System deps
 RUN apt-get update && apt-get install -y --no-install-recommends \
     gcc \
+    libpq-dev \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app

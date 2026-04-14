@@ -85,6 +85,15 @@ class Settings(BaseSettings):
     # Backup — set to path of a writable directory to enable daily DB backups
     backup_dir: str = ""              # e.g. "/app/data/backups"
 
+    # Service key — used by GitHub Actions to call protected API endpoints
+    # Generate any random string: python -c "import secrets; print(secrets.token_hex(32))"
+    service_key: str = ""
+
+    # Telegram webhook mode (production) — set to your public HTTPS base URL
+    # e.g. https://newslet-pro.onrender.com
+    # Leave empty to use polling (local development)
+    webhook_base_url: str = ""
+
     model_config = {"env_file": ".env", "env_file_encoding": "utf-8"}
 
     def get_admin_ids(self) -> set[str]:

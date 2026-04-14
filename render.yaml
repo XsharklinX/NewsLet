@@ -1,0 +1,26 @@
+services:
+  - type: web
+    name: newslet-pro
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    plan: free
+    region: oregon
+    healthCheckPath: /api/v1/auth/status
+    # Auto-deploy on push to master (via GitHub integration)
+    autoDeploy: true
+    envVars:
+      - key: PORT
+        value: "8000"
+      - key: APP_TIMEZONE
+        value: America/Argentina/Buenos_Aires
+      # ── Set these in the Render dashboard (sensitive values) ──
+      # DATABASE_URL      → postgresql://... (from Supabase)
+      # TELEGRAM_BOT_TOKEN → from @BotFather
+      # TELEGRAM_CHAT_ID  → your Telegram chat ID
+      # TELEGRAM_ADMIN_IDS → comma-separated extra admin IDs (optional)
+      # GROQ_API_KEY       → from console.groq.com (free)
+      # ADMIN_PASSWORD     → any password for the web panel
+      # JWT_SECRET         → random 32-char string
+      # SERVICE_KEY        → random 32-char string (used by GitHub Actions)
+      # WEBHOOK_BASE_URL   → https://newslet-pro.onrender.com (your Render URL)
+      # NEWSAPI_KEY        → from newsapi.org (optional, free tier)

@@ -1,0 +1,62 @@
+name: Scheduled Jobs
+
+on:
+  schedule:
+    # Fetch news every 30 minutes
+    - cron: "*/30 * * * *"
+    # Daily digest at 08:00 UTC (adjust for your timezone)
+    - cron: "0 8 * * *"
+    # Keep Render alive — ping every 10 minutes (prevents sleep)
+    - cron: "*/10 * * * *"
+
+  # Allow manual trigger from GitHub Actions UI
+  workflow_dispatch:
+    inputs:
+      job:
+        description: "Job to run"
+        required: true
+        default: "fetch"
+        type: choice
+        options: [fetch, digest, ping]
+
+jobs:
+  scheduled:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Determine job from cron schedule
+        id: job
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "type=${{ github.event.inputs.job }}" >> $GITHUB_OUTPUT
+          else
+            MINUTE=$(date -u +%M)
+            HOUR=$(date -u +%H)
+            # 08:00 UTC = digest
+            if [ "$HOUR" = "08" ] && [ "$MINUTE" -lt "5" ]; then
+              echo "type=digest" >> $GITHUB_OUTPUT
+            else
+              # Every other trigger = fetch (and keep-alive ping)
+              echo "type=fetch" >> $GITHUB_OUTPUT
+            fi
+          fi
+
+      - name: Keep Render alive (ping)
+        if: steps.job.outputs.type == 'fetch' || steps.job.outputs.type == 'ping'
+        run: |
+          curl -sf "${{ secrets.APP_URL }}/api/v1/auth/status" || true
+
+      - name: Fetch news
+        if: steps.job.outputs.type == 'fetch'
+        run: |
+          curl -sf -X POST "${{ secrets.APP_URL }}/api/v1/fetch/now" \
+            -H "Authorization: Bearer ${{ secrets.APP_API_TOKEN }}" \
+            -H "Content-Type: application/json" \
+            --max-time 120 || echo "Fetch returned non-200 (may be normal)"
+
+      - name: Send daily digest
+        if: steps.job.outputs.type == 'digest'
+        run: |
+          curl -sf -X POST "${{ secrets.APP_URL }}/api/v1/digest/now" \
+            -H "Authorization: Bearer ${{ secrets.APP_API_TOKEN }}" \
+            -H "Content-Type: application/json" \
+            --max-time 60 || echo "Digest returned non-200"
