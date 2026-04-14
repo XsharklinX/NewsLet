@@ -24,51 +24,35 @@ _offset = 0
 
 # ── Command sets ──────────────────────────────────────────────────────────
 # Public users can use these commands (read-only, no moderation power)
-PUBLIC_COMMANDS = {"/start", "/help", "/noticias", "/ultimas", "/buscar",
-                   "/leer", "/suscribir", "/cancelar", "/misuscripcion"}
+PUBLIC_COMMANDS = {"/start", "/help", "/noticias", "/buscar",
+                   "/leer", "/suscribir", "/cancelar"}
 
-ADMIN_HELP = """<b>NewsLet Pro — Panel Admin</b>
+ADMIN_HELP = """<b>NewsLet Pro — Admin</b>
 
 <b>📰 Noticias</b>
-/noticias — Últimas 5 noticias
-/buscar &lt;term&gt; — Buscar artículos
+/noticias — Últimas noticias (con botones de acción)
+/buscar &lt;término&gt; — Buscar artículos
 /leer &lt;id&gt; — Leer artículo completo
-/score &lt;id&gt; — Score, categoría y sentimiento
-
-<b>✅ Moderación</b>
 /aprobar &lt;id&gt; — Aprobar artículo
 /rechazar &lt;id&gt; — Rechazar artículo
 
-<b>📊 Sistema</b>
-/stats — Estadísticas completas
-/salud — Estado de fuentes
-/suscriptores — Ver suscriptores activos
-
 <b>⚙️ Operaciones</b>
-/fetch — Buscar noticias ahora
-/resumir — Resumir artículos pendientes
+/fetch — Buscar y resumir noticias ahora
 /digest — Enviar digest ahora
-/pdf — Digest en PDF
+/stats — Estadísticas + salud de fuentes
 
 <b>🔧 Configuración</b>
-/fuentes — Gestionar fuentes
-/keywords — Gestionar keywords
-/config — Ver configuración del digest
-/config hora=8 cantidad=10 score=5 — Actualizar"""
+/fuentes — Activar/desactivar fuentes
+/config — Ver configuración
+/config hora=8 cantidad=10 score=5 — Cambiar"""
 
-PUBLIC_HELP = """<b>NewsLet Pro</b> — Tu canal de noticias curadas
+PUBLIC_HELP = """<b>NewsLet Pro</b> — Noticias curadas en español
 
-<b>📰 Comandos disponibles</b>
-/noticias — Últimas noticias enviadas
-/buscar &lt;término&gt; — Buscar por palabra clave
+/noticias — Últimas noticias
+/buscar &lt;término&gt; — Buscar por tema
 /leer &lt;id&gt; — Leer artículo completo
-
-<b>🔔 Suscripción al digest diario</b>
-/suscribir — Recibir el digest de noticias cada día
-/cancelar — Cancelar tu suscripción
-/misuscripcion — Ver el estado de tu suscripción
-
-Recibís noticias curadas y resumidas en español."""
+/suscribir — Recibir digest diario
+/cancelar — Cancelar suscripción"""
 
 
 # ── Permission helpers ─────────────────────────────────────────────────────
@@ -246,31 +230,30 @@ async def cmd_buscar_public(chat_id: str, term: str):
 async def cmd_stats(chat_id: str):
     db = SessionLocal()
     try:
+        from sqlalchemy import func
         total    = db.query(Article).count()
         pending  = db.query(Article).filter(Article.status == "pending").count()
         approved = db.query(Article).filter(Article.status == "approved").count()
         sent     = db.query(Article).filter(Article.status == "sent").count()
         no_sum   = db.query(Article).outerjoin(Summary).filter(Summary.id == None).count()
-        sources  = db.query(Source).filter(Source.is_active == True).count()
-        keywords = db.query(Keyword).filter(Keyword.is_active == True).count()
         subs     = db.query(Subscriber).filter(Subscriber.is_active == True).count()
-
-        from sqlalchemy import func
         avg_score = db.query(func.avg(Article.relevance_score)).filter(
             Article.relevance_score != None
         ).scalar()
 
+        # Source health summary
+        all_sources = db.query(Source).all()
+        ok_srcs  = sum(1 for s in all_sources if s.is_active and not (s.consecutive_failures or 0))
+        bad_srcs = sum(1 for s in all_sources if s.is_active and (s.consecutive_failures or 0) > 0)
+        off_srcs = sum(1 for s in all_sources if not s.is_active)
+
         text = (
-            "<b>Estadísticas del sistema</b>\n\n"
+            "<b>Estado del sistema</b>\n\n"
             f"📰 Total artículos: <b>{total}</b>\n"
-            f"⏳ Pendientes: <b>{pending}</b>\n"
-            f"✅ Aprobados: <b>{approved}</b>\n"
-            f"📤 Enviados: <b>{sent}</b>\n"
-            f"🤖 Sin resumen: <b>{no_sum}</b>\n\n"
-            f"📡 Fuentes activas: <b>{sources}</b>\n"
-            f"🔔 Keywords activas: <b>{keywords}</b>\n"
-            f"👥 Suscriptores activos: <b>{subs}</b>\n"
-            f"⭐ Score promedio: <b>{round(float(avg_score), 1) if avg_score else 'N/A'}/10</b>"
+            f"⏳ Pendientes: <b>{pending}</b>  ✅ Aprobados: <b>{approved}</b>  📤 Enviados: <b>{sent}</b>\n"
+            f"🤖 Sin resumen: <b>{no_sum}</b>  ⭐ Score prom: <b>{round(float(avg_score), 1) if avg_score else 'N/A'}</b>\n\n"
+            f"📡 Fuentes: 🟢 {ok_srcs} ok  ⚠️ {bad_srcs} con errores  🔴 {off_srcs} desactivadas\n"
+            f"👥 Suscriptores activos: <b>{subs}</b>"
         )
         await send_message(chat_id, text)
     finally:
@@ -520,7 +503,7 @@ async def cmd_rechazar(chat_id: str, article_id_str: str):
 
 
 async def cmd_fetch(chat_id: str):
-    await send_message(chat_id, "🔄 Buscando noticias en todas las fuentes...")
+    await send_message(chat_id, "🔄 Buscando y procesando noticias...")
     db = SessionLocal()
     try:
         from app.services.rss_fetcher import fetch_all_rss
@@ -533,23 +516,16 @@ async def cmd_fetch(chat_id: str):
         rss     = rss     if isinstance(rss,     int) else 0
         newsapi = newsapi if isinstance(newsapi, int) else 0
         scraped = scraped if isinstance(scraped, int) else 0
+        total_new = rss + newsapi + scraped
+
+        # Auto-summarize pending after fetch
+        from app.services.summarizer import summarize_pending
+        summarized = await summarize_pending(db, limit=15)
+
         await send_message(chat_id,
-            f"✅ <b>{rss + newsapi + scraped}</b> noticias nuevas\n"
+            f"✅ <b>{total_new}</b> noticias nuevas · <b>{summarized}</b> resumidas\n"
             f"RSS: {rss} · API: {newsapi} · Scraper: {scraped}"
         )
-    except Exception as e:
-        await send_message(chat_id, f"❌ Error: {_esc(str(e))}")
-    finally:
-        db.close()
-
-
-async def cmd_resumir(chat_id: str):
-    await send_message(chat_id, "🤖 Resumiendo artículos pendientes...")
-    db = SessionLocal()
-    try:
-        from app.services.summarizer import summarize_pending
-        count = await summarize_pending(db, limit=10)
-        await send_message(chat_id, f"✅ <b>{count}</b> artículos procesados")
     except Exception as e:
         await send_message(chat_id, f"❌ Error: {_esc(str(e))}")
     finally:
@@ -872,11 +848,11 @@ async def _process_update(update: dict):
         if not adm and cmd in PUBLIC_COMMANDS:
             _update_last_seen(chat_id)
 
-        if cmd in ("/start", "/help", "/ayuda"):
+        if cmd in ("/start", "/help"):
             await cmd_start(chat_id, adm)
 
-        # Public read-only commands (available to everyone)
-        elif cmd in ("/noticias", "/ultimas"):
+        # Public commands (available to everyone)
+        elif cmd == "/noticias":
             if adm:
                 await cmd_noticias_admin(chat_id)
             else:
@@ -897,45 +873,29 @@ async def _process_update(update: dict):
         elif cmd == "/cancelar":
             await cmd_cancelar(chat_id)
 
-        elif cmd == "/misuscripcion":
-            await cmd_misuscripcion(chat_id)
-
         # Admin-only commands
         elif not adm:
             await send_message(
                 chat_id,
-                "ℹ️ Comando no disponible.\nUsa /help para ver los comandos."
+                "ℹ️ Comando no disponible.\nUsa /help para ver los comandos disponibles."
             )
 
-        elif cmd == "/score":
-            await cmd_score(chat_id, rest)
         elif cmd == "/aprobar":
             await cmd_aprobar(chat_id, rest)
         elif cmd == "/rechazar":
             await cmd_rechazar(chat_id, rest)
         elif cmd == "/stats":
             await cmd_stats(chat_id)
-        elif cmd == "/suscriptores":
-            await cmd_suscriptores(chat_id)
-        elif cmd == "/salud":
-            await cmd_salud(chat_id)
         elif cmd == "/fetch":
             await cmd_fetch(chat_id)
-        elif cmd == "/resumir":
-            await cmd_resumir(chat_id)
         elif cmd == "/digest":
             await cmd_digest(chat_id)
-        elif cmd == "/pdf":
-            await cmd_pdf(chat_id)
         elif cmd == "/fuentes":
             await cmd_fuentes(chat_id)
-        elif cmd == "/keywords":
-            await cmd_keywords(chat_id)
         elif cmd == "/config":
             await cmd_config(chat_id, rest)
         else:
-            msg_reply = "Comando no reconocido. Usa /help"
-            await send_message(chat_id, msg_reply)
+            await send_message(chat_id, "Comando no reconocido. Usa /help")
 
     elif "callback_query" in update:
         await handle_callback(update["callback_query"])

@@ -21,7 +21,7 @@ async def register_webhook(base_url: str) -> bool:
         logger.warning("Webhook: no bot token configured, skipping")
         return False
 
-    webhook_url = f"{base_url.rstrip('/')}/telegram/webhook"
+    webhook_url = f"{base_url.rstrip('/')}/api/v1/telegram/webhook"
     api_url = f"https://api.telegram.org/bot{settings.telegram_bot_token}/setWebhook"
 
     try:
