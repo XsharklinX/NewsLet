@@ -359,3 +359,43 @@ def update_admin_settings(body: _SettingsUpdate):
             if needs_restart else "✅ Guardado."
         ),
     }
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# SUBSCRIBERS
+# ═══════════════════════════════════════════════════════════════════════════
+
+from app.models.article import Subscriber  # noqa
+
+
+@router.get("/subscribers")
+def list_subscribers(active_only: bool = True, db: Session = Depends(get_db)):
+    q = db.query(Subscriber)
+    if active_only:
+        q = q.filter(Subscriber.is_active == True)
+    subs = q.order_by(Subscriber.subscribed_at.desc()).all()
+    return {
+        "total": len(subs),
+        "subscribers": [
+            {
+                "id": s.id,
+                "chat_id": s.chat_id,
+                "username": s.username,
+                "first_name": s.first_name,
+                "is_active": s.is_active,
+                "subscribed_at": s.subscribed_at.isoformat(),
+                "last_seen_at": s.last_seen_at.isoformat() if s.last_seen_at else None,
+            }
+            for s in subs
+        ],
+    }
+
+
+@router.delete("/subscribers/{subscriber_id}")
+def remove_subscriber(subscriber_id: int, db: Session = Depends(get_db)):
+    sub = db.query(Subscriber).get(subscriber_id)
+    if not sub:
+        raise HTTPException(404, "Suscriptor no encontrado")
+    sub.is_active = False
+    db.commit()
+    return {"removed": subscriber_id}

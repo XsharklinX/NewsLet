@@ -11,7 +11,7 @@ from fastapi.staticfiles import StaticFiles
 from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 
-from app.api.routes import router, public_router
+from app.api.routes import protected_routers, public_routers
 from app.api.websocket import manager as ws_manager
 from app.config import settings
 from app.database import SessionLocal, create_tables, engine
@@ -227,10 +227,12 @@ app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 # PIN middleware (no-op if PANEL_PIN not set in .env)
 app.middleware("http")(pin_middleware)
 
-# Public routes (no auth) — must be registered BEFORE the protected router
-app.include_router(public_router)
+# Public routes (no auth) — registered BEFORE protected routes
+for _r in public_routers:
+    app.include_router(_r)
 # Protected routes (JWT required when ADMIN_PASSWORD is set)
-app.include_router(router)
+for _r in protected_routers:
+    app.include_router(_r)
 
 
 # ─── WebSocket endpoint ────────────────────────────────────────────────────
