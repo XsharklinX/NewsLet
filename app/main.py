@@ -83,12 +83,37 @@ def run_db_migrations():
     SQLAlchemy create_all handles NEW tables; this handles new columns on existing tables.
     """
     with engine.connect() as conn:
-        # Check & add `sentiment` column to articles
-        cols = [row[1] for row in conn.exec_driver_sql("PRAGMA table_info(articles)")]
-        if "sentiment" not in cols:
-            conn.exec_driver_sql("ALTER TABLE articles ADD COLUMN sentiment TEXT")
-            conn.commit()
-            logger.info("Migration: added articles.sentiment column")
+        # ── articles ─────────────────────────────────────────────────────────
+        art_cols = [row[1] for row in conn.exec_driver_sql("PRAGMA table_info(articles)")]
+
+        _article_migrations = [
+            ("sentiment",       "ALTER TABLE articles ADD COLUMN sentiment TEXT"),
+            ("enrich_attempts", "ALTER TABLE articles ADD COLUMN enrich_attempts INTEGER DEFAULT 0"),
+            ("thumbnail_url",   "ALTER TABLE articles ADD COLUMN thumbnail_url TEXT"),
+            ("cluster_id",      "ALTER TABLE articles ADD COLUMN cluster_id INTEGER"),
+            ("feedback",        "ALTER TABLE articles ADD COLUMN feedback INTEGER DEFAULT 0"),
+            ("is_recurring",    "ALTER TABLE articles ADD COLUMN is_recurring BOOLEAN DEFAULT 0"),
+        ]
+        for col, sql in _article_migrations:
+            if col not in art_cols:
+                conn.exec_driver_sql(sql)
+                logger.info(f"Migration: added articles.{col} column")
+
+        # ── sources ──────────────────────────────────────────────────────────
+        src_cols = [row[1] for row in conn.exec_driver_sql("PRAGMA table_info(sources)")]
+
+        _source_migrations = [
+            ("consecutive_failures", "ALTER TABLE sources ADD COLUMN consecutive_failures INTEGER DEFAULT 0"),
+            ("last_error",           "ALTER TABLE sources ADD COLUMN last_error TEXT"),
+            ("last_success_at",      "ALTER TABLE sources ADD COLUMN last_success_at DATETIME"),
+            ("disabled_at",          "ALTER TABLE sources ADD COLUMN disabled_at DATETIME"),
+        ]
+        for col, sql in _source_migrations:
+            if col not in src_cols:
+                conn.exec_driver_sql(sql)
+                logger.info(f"Migration: added sources.{col} column")
+
+        conn.commit()
 
 
 def seed_sources():

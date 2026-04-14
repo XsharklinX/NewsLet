@@ -11,6 +11,8 @@ from app.services.deduplicator import compute_hash, is_duplicate
 
 logger = logging.getLogger(__name__)
 
+MAX_CONSECUTIVE_FAILURES = 5
+
 
 def _parse_feed(url: str) -> list[dict]:
     """Parse an RSS feed and return entries as dicts. Runs synchronously."""
@@ -30,16 +32,41 @@ def _parse_feed(url: str) -> list[dict]:
     return entries
 
 
+def _record_success(source: Source, db: Session) -> None:
+    source.consecutive_failures = 0
+    source.last_error = None
+    source.last_success_at = datetime.utcnow()
+    db.commit()
+
+
+def _record_failure(source: Source, db: Session, error: str) -> None:
+    source.consecutive_failures = (source.consecutive_failures or 0) + 1
+    source.last_error = error[:500]
+    if source.consecutive_failures >= MAX_CONSECUTIVE_FAILURES and source.is_active:
+        source.is_active = False
+        source.disabled_at = datetime.utcnow()
+        logger.warning(
+            f"Source '{source.name}' auto-disabled after "
+            f"{source.consecutive_failures} consecutive failures"
+        )
+    db.commit()
+
+
 async def fetch_rss_source(source: Source, db: Session) -> int:
     """Fetch a single RSS source. Returns number of new articles inserted."""
     logger.info(f"Fetching RSS: {source.name} ({source.url})")
-    entries = await asyncio.to_thread(_parse_feed, source.url)
+    try:
+        entries = await asyncio.to_thread(_parse_feed, source.url)
+    except Exception as e:
+        _record_failure(source, db, str(e))
+        logger.error(f"Error fetching {source.name}: {e}")
+        return 0
 
     new_count = 0
     for entry in entries:
         if not entry["url"]:
             continue
-        if is_duplicate(entry["url"], db):
+        if is_duplicate(entry["url"], db, title=entry["title"]):
             continue
 
         article = Article(
@@ -57,6 +84,8 @@ async def fetch_rss_source(source: Source, db: Session) -> int:
 
     if new_count > 0:
         db.commit()
+
+    _record_success(source, db)
     logger.info(f"  -> {new_count} new articles from {source.name}")
     return new_count
 

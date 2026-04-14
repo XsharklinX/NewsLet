@@ -27,15 +27,19 @@ async def summarize_article(article: Article, db: Session) -> Summary | None:
     if article.summary:
         return article.summary
 
-    # Step 1: Scrape full article text
+    # Step 1: Scrape full article text + thumbnail
     if settings.scrape_full_text and not article.full_text:
         try:
-            from app.services.article_scraper import scrape_full_text
-            full = await scrape_full_text(article.url)
+            from app.services.article_scraper import scrape_article
+            full, thumbnail = await scrape_article(article.url)
             if full:
                 article.full_text = full
-                db.flush()
                 logger.debug(f"Scraped {len(full)} chars for article {article.id}")
+            if thumbnail and not article.thumbnail_url:
+                article.thumbnail_url = thumbnail
+                logger.debug(f"Thumbnail extracted for article {article.id}: {thumbnail[:60]}")
+            if full or thumbnail:
+                db.flush()
         except Exception as e:
             logger.warning(f"Full-text scrape failed for article {article.id}: {e}")
 

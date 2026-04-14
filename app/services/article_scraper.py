@@ -1,4 +1,4 @@
-"""Scrapes the full text of an article URL for better AI summarization."""
+"""Scrapes the full text and Open Graph thumbnail of an article URL."""
 import logging
 
 import httpx
@@ -22,10 +22,33 @@ _HEADERS = {
 }
 
 
-async def scrape_full_text(url: str) -> str | None:
+def _extract_thumbnail(soup: BeautifulSoup) -> str | None:
+    """Extract Open Graph or Twitter Card thumbnail URL from parsed HTML."""
+    # og:image (standard)
+    og = soup.find("meta", property="og:image")
+    if og and og.get("content"):
+        return og["content"].strip()
+
+    # twitter:image (fallback)
+    tw = soup.find("meta", attrs={"name": "twitter:image"})
+    if tw and tw.get("content"):
+        return tw["content"].strip()
+
+    # twitter:image:src (another variant)
+    tw2 = soup.find("meta", attrs={"name": "twitter:image:src"})
+    if tw2 and tw2.get("content"):
+        return tw2["content"].strip()
+
+    return None
+
+
+async def scrape_article(url: str) -> tuple[str | None, str | None]:
     """
-    Fetch a URL and extract article body text.
-    Returns cleaned text (max 8000 chars) or None on failure.
+    Fetch a URL and extract:
+    - full article text (max 8000 chars)
+    - thumbnail URL from Open Graph / Twitter Card meta tags
+
+    Returns (text, thumbnail_url). Either can be None on failure.
     """
     try:
         async with httpx.AsyncClient(timeout=20, follow_redirects=True) as client:
@@ -33,14 +56,17 @@ async def scrape_full_text(url: str) -> str | None:
             resp.raise_for_status()
     except Exception as e:
         logger.debug(f"article_scraper: failed to fetch {url}: {e}")
-        return None
+        return None, None
 
     try:
         soup = BeautifulSoup(resp.text, "lxml")
     except Exception:
-        return None
+        return None, None
 
-    # Remove noise elements
+    # Extract thumbnail BEFORE removing noise tags
+    thumbnail = _extract_thumbnail(soup)
+
+    # Remove noise elements for text extraction
     for tag in soup(_NOISE_TAGS):
         tag.decompose()
 
@@ -51,16 +77,19 @@ async def scrape_full_text(url: str) -> str | None:
         or soup.find("main")
         or soup.body
     )
-    if not container:
-        return None
 
-    text = container.get_text(separator="\n", strip=True)
-    # Collapse blank lines
-    lines = [line for line in text.splitlines() if line.strip()]
-    cleaned = "\n".join(lines)
+    text = None
+    if container:
+        raw_text = container.get_text(separator="\n", strip=True)
+        lines = [line for line in raw_text.splitlines() if line.strip()]
+        cleaned = "\n".join(lines)
+        if len(cleaned) >= 100:
+            text = cleaned[:8000]
 
-    # Minimum useful length
-    if len(cleaned) < 100:
-        return None
+    return text, thumbnail
 
-    return cleaned[:8000]
+
+async def scrape_full_text(url: str) -> str | None:
+    """Backward-compatible wrapper — returns only full text."""
+    text, _ = await scrape_article(url)
+    return text

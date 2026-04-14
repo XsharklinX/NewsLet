@@ -43,6 +43,23 @@ class Settings(BaseSettings):
     # Panel security (optional PIN gate)
     panel_pin: str = ""
 
+    # JWT Auth (set admin_password to enable login page)
+    jwt_secret: str = "change-me-in-production-please"
+    jwt_expire_minutes: int = 1440   # 24 h
+    admin_password: str = ""          # empty = JWT auth disabled
+
+    # Email digest via SMTP
+    smtp_enabled: bool = False
+    smtp_host: str = "smtp.gmail.com"
+    smtp_port: int = 587
+    smtp_user: str = ""
+    smtp_password: str = ""
+    smtp_from: str = ""
+    smtp_to: str = ""                 # comma-separated recipients
+
+    # Source health
+    source_max_failures: int = 5     # auto-disable after N consecutive failures
+
     model_config = {"env_file": ".env", "env_file_encoding": "utf-8"}
 
 

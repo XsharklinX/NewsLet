@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NewsLet — Panel Editorial</title>
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#818cf8">
     <link rel="stylesheet" href="style.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 </head>
@@ -70,6 +72,10 @@
         <svg class="ni" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z" clip-rule="evenodd"/></svg>
         Configuración
       </button>
+      <button class="nav-item" onclick="go('admin')" data-v="admin">
+        <svg class="ni" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M18 8a6 6 0 01-7.743 5.743L10 14l-1 1-1 1H6v2H2v-4l4.257-4.257A6 6 0 1118 8zm-6-4a1 1 0 100 2 2 2 0 012 2 1 1 0 102 0 4 4 0 00-4-4z" clip-rule="evenodd"/></svg>
+        Administración
+      </button>
     </nav>
 
     <nav class="nav-section">
@@ -94,6 +100,7 @@
           <span class="ai-dot"></span>Groq · Llama 3.3
         </span>
         <button class="theme-btn" onclick="toggleTheme()" title="Cambiar tema" id="theme-btn">☀</button>
+        <button id="logout-btn" class="theme-btn" onclick="logout()" title="Cerrar sesión" style="display:none;font-size:14px;">⏻</button>
       </div>
       <!-- Notification bell -->
       <button class="notif-btn" onclick="openNotifications()" id="notif-btn" title="Notificaciones">
@@ -224,6 +231,13 @@
           <button class="pill" onclick="fil('approved',this)">Aprobados</button>
           <button class="pill" onclick="fil('rejected',this)">Rechazados</button>
           <button class="pill" onclick="fil('sent',this)">Enviados</button>
+        </div>
+        <div class="pills" style="margin-left:auto">
+          <span style="font-size:11px;color:var(--text-muted);align-self:center">🕐</span>
+          <button class="pill pill-time" onclick="filRecent('1h',this)">1h</button>
+          <button class="pill pill-time" onclick="filRecent('6h',this)">6h</button>
+          <button class="pill pill-time" onclick="filRecent('24h',this)">24h</button>
+          <button class="pill pill-time" onclick="filRecent('7d',this)">7 días</button>
         </div>
         <!-- Saved searches -->
         <div class="saved-searches" id="saved-searches-bar"></div>
@@ -451,6 +465,195 @@
       </div>
     </div>
 
+    <!-- ══════════════════════ ADMINISTRACIÓN ══════════════════════ -->
+    <div class="view" id="v-admin">
+      <div class="topbar">
+        <div class="topbar-left">
+          <h2 class="page-title">⚙️ Administración del sistema</h2>
+        </div>
+      </div>
+      <div class="content" style="max-width:860px">
+
+        <!-- Aviso reinicio -->
+        <div id="admin-restart-notice" style="display:none;background:rgba(245,158,11,0.12);border:1px solid rgba(245,158,11,0.3);border-radius:12px;padding:14px 18px;margin-bottom:20px;color:#fbbf24;font-size:13px;">
+          ⚠️ <strong>Algunos cambios requieren reiniciar el servidor</strong> para aplicarse.
+          Después de guardar, detén uvicorn con <kbd>Ctrl+C</kbd> y vuélvelo a iniciar.
+        </div>
+
+        <!-- ── IA ─────────────────────────────────────────── -->
+        <div class="settings-section">
+          <h3 class="settings-title">🤖 Inteligencia Artificial</h3>
+          <div class="settings-grid">
+            <div class="settings-field">
+              <label>Proveedor IA</label>
+              <select id="sf-AI_PROVIDER" class="form-input">
+                <option value="groq">Groq (gratis)</option>
+                <option value="openai">OpenAI</option>
+              </select>
+              <span class="settings-hint restart-tag">🔄 Requiere reinicio</span>
+            </div>
+            <div class="settings-field">
+              <label>Groq API Key</label>
+              <input type="password" id="sf-GROQ_API_KEY" class="form-input" placeholder="gsk_...">
+              <span class="settings-hint restart-tag">🔄 Requiere reinicio</span>
+            </div>
+            <div class="settings-field">
+              <label>Groq Model</label>
+              <input type="text" id="sf-GROQ_MODEL" class="form-input" placeholder="llama-3.3-70b-versatile">
+              <span class="settings-hint restart-tag">🔄 Requiere reinicio</span>
+            </div>
+            <div class="settings-field">
+              <label>OpenAI API Key (opcional)</label>
+              <input type="password" id="sf-OPENAI_API_KEY" class="form-input" placeholder="sk-...">
+              <span class="settings-hint restart-tag">🔄 Requiere reinicio</span>
+            </div>
+            <div class="settings-field">
+              <label>Score mínimo auto-aprobar (1-10)</label>
+              <input type="number" id="sf-RELEVANCE_THRESHOLD" class="form-input" min="1" max="10">
+              <span class="settings-hint">Sin reinicio</span>
+            </div>
+            <div class="settings-field">
+              <label>Enriquecer artículos con IA</label>
+              <select id="sf-ENRICH_ARTICLES" class="form-input">
+                <option value="true">Sí</option>
+                <option value="false">No</option>
+              </select>
+            </div>
+            <div class="settings-field">
+              <label>Scraping texto completo</label>
+              <select id="sf-SCRAPE_FULL_TEXT" class="form-input">
+                <option value="true">Sí</option>
+                <option value="false">No</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── Telegram ──────────────────────────────────── -->
+        <div class="settings-section">
+          <h3 class="settings-title">📱 Telegram</h3>
+          <div class="settings-grid">
+            <div class="settings-field">
+              <label>Bot Token</label>
+              <input type="password" id="sf-TELEGRAM_BOT_TOKEN" class="form-input" placeholder="123456:ABC...">
+              <span class="settings-hint restart-tag">🔄 Requiere reinicio</span>
+            </div>
+            <div class="settings-field">
+              <label>Chat ID (tu ID de usuario)</label>
+              <input type="text" id="sf-TELEGRAM_CHAT_ID" class="form-input" placeholder="123456789">
+              <span class="settings-hint restart-tag">🔄 Requiere reinicio</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── Seguridad ─────────────────────────────────── -->
+        <div class="settings-section">
+          <h3 class="settings-title">🔒 Seguridad del panel</h3>
+          <div class="settings-grid">
+            <div class="settings-field">
+              <label>Contraseña del panel (JWT)</label>
+              <input type="password" id="sf-ADMIN_PASSWORD" class="form-input" placeholder="Nueva contraseña...">
+              <span class="settings-hint restart-tag">🔄 Requiere reinicio</span>
+            </div>
+            <div class="settings-field">
+              <label>JWT Secret (clave de firma)</label>
+              <input type="password" id="sf-JWT_SECRET" class="form-input" placeholder="Clave larga aleatoria">
+              <span class="settings-hint restart-tag">🔄 Requiere reinicio</span>
+            </div>
+            <div class="settings-field">
+              <label>Expiración sesión (minutos)</label>
+              <input type="number" id="sf-JWT_EXPIRE_MINUTES" class="form-input" min="60" max="43200">
+              <span class="settings-hint">1440 = 24h · Sin reinicio</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── Email ─────────────────────────────────────── -->
+        <div class="settings-section">
+          <h3 class="settings-title">📧 Email (digest por correo)</h3>
+          <div class="settings-info-box">
+            Para Gmail necesitas una <strong>App Password</strong> (no tu contraseña normal).
+            Ve a <a href="https://myaccount.google.com/apppasswords" target="_blank" rel="noopener" style="color:var(--primary-hover)">myaccount.google.com/apppasswords</a>
+            → genera una contraseña para "NewsLet" → pégala abajo.
+          </div>
+          <div class="settings-grid">
+            <div class="settings-field">
+              <label>Email habilitado</label>
+              <select id="sf-SMTP_ENABLED" class="form-input">
+                <option value="false">No (desactivado)</option>
+                <option value="true">Sí</option>
+              </select>
+            </div>
+            <div class="settings-field">
+              <label>SMTP Host</label>
+              <input type="text" id="sf-SMTP_HOST" class="form-input" placeholder="smtp.gmail.com">
+            </div>
+            <div class="settings-field">
+              <label>SMTP Puerto</label>
+              <input type="number" id="sf-SMTP_PORT" class="form-input" placeholder="587">
+            </div>
+            <div class="settings-field">
+              <label>Tu email Gmail (usuario)</label>
+              <input type="email" id="sf-SMTP_USER" class="form-input" placeholder="tu@gmail.com">
+            </div>
+            <div class="settings-field">
+              <label>App Password de Gmail</label>
+              <input type="password" id="sf-SMTP_PASSWORD" class="form-input" placeholder="xxxx xxxx xxxx xxxx">
+            </div>
+            <div class="settings-field">
+              <label>Email remitente (From)</label>
+              <input type="email" id="sf-SMTP_FROM" class="form-input" placeholder="tu@gmail.com">
+            </div>
+            <div class="settings-field settings-field--full">
+              <label>Destinatarios (separados por coma)</label>
+              <input type="text" id="sf-SMTP_TO" class="form-input" placeholder="uno@email.com, dos@email.com">
+            </div>
+          </div>
+          <button class="btn btn-g btn-sm" onclick="testEmail()" style="margin-top:12px">📧 Enviar email de prueba</button>
+        </div>
+
+        <!-- ── Scheduler ─────────────────────────────────── -->
+        <div class="settings-section">
+          <h3 class="settings-title">⏰ Scheduler automático</h3>
+          <div class="settings-grid">
+            <div class="settings-field">
+              <label>Frecuencia de fetch (minutos)</label>
+              <input type="number" id="sf-FETCH_INTERVAL_MINUTES" class="form-input" min="5" max="1440">
+              <span class="settings-hint">Mínimo 5 min · Sin reinicio</span>
+            </div>
+            <div class="settings-field">
+              <label>Hora del digest diario (0-23)</label>
+              <input type="number" id="sf-DIGEST_HOUR" class="form-input" min="0" max="23">
+              <span class="settings-hint">Sin reinicio</span>
+            </div>
+            <div class="settings-field">
+              <label>Fallos antes de desactivar fuente</label>
+              <input type="number" id="sf-SOURCE_MAX_FAILURES" class="form-input" min="1" max="20">
+            </div>
+          </div>
+        </div>
+
+        <!-- ── NewsAPI ───────────────────────────────────── -->
+        <div class="settings-section">
+          <h3 class="settings-title">📰 NewsAPI</h3>
+          <div class="settings-grid">
+            <div class="settings-field settings-field--full">
+              <label>NewsAPI Key (<a href="https://newsapi.org/register" target="_blank" style="color:var(--primary-hover)">registro gratis en newsapi.org</a>)</label>
+              <input type="password" id="sf-NEWSAPI_KEY" class="form-input" placeholder="tu_api_key_aqui">
+              <span class="settings-hint restart-tag">🔄 Requiere reinicio</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Botones -->
+        <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:8px;padding-bottom:40px">
+          <button class="btn btn-primary" onclick="saveAdminSettings()">💾 Guardar todo</button>
+          <button class="btn btn-g" onclick="loadAdminSettings()">↺ Recargar desde archivo</button>
+        </div>
+
+      </div>
+    </div>
+
   </main>
 </div>
 
@@ -521,6 +724,7 @@
       </div>
       <button class="btn btn-g btn-sm" onclick="closeReader()">✕</button>
     </div>
+    <img id="r-thumb" class="reader-thumb" src="" alt="" style="display:none">
     <div class="reader-summary" id="r-summary"></div>
     <div class="reader-body" id="r-body"></div>
     <div class="reader-foot">
@@ -566,10 +770,35 @@
       <div><kbd>Esc</kbd><span>Cerrar modal</span></div>
     </div>
   </div>
+
 </div>
 
-<button class="mob-toggle" onclick="document.getElementById('sidebar').classList.toggle('open')">☰</button>
+</div>
+
+<div class="sidebar-backdrop" id="sidebar-backdrop" onclick="closeSidebar()"></div>
+<button class="mob-toggle" id="mob-toggle" onclick="toggleSidebar()">☰</button>
 <div id="toast" class="toast"></div>
 <script src="app.js"></script>
+<script>
+  // Service Worker registration (PWA)
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/sw.js').catch(() => {});
+  }
+  // JWT Auth check + show logout button
+  (async () => {
+    try {
+      const res = await fetch('/api/v1/auth/status');
+      const { auth_enabled } = await res.json();
+      if (auth_enabled) {
+        if (!localStorage.getItem('nl_token')) {
+          window.location.replace('/login.html');
+        } else {
+          const btn = document.getElementById('logout-btn');
+          if (btn) btn.style.display = '';
+        }
+      }
+    } catch {}
+  })();
+</script>
 </body>
 </html>

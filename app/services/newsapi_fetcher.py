@@ -12,6 +12,27 @@ from app.services.deduplicator import compute_hash, is_duplicate
 logger = logging.getLogger(__name__)
 
 NEWSAPI_BASE = "https://newsapi.org/v2/everything"
+MAX_CONSECUTIVE_FAILURES = 5
+
+
+def _record_success(source: Source, db: Session) -> None:
+    source.consecutive_failures = 0
+    source.last_error = None
+    source.last_success_at = datetime.utcnow()
+    db.commit()
+
+
+def _record_failure(source: Source, db: Session, error: str) -> None:
+    source.consecutive_failures = (source.consecutive_failures or 0) + 1
+    source.last_error = error[:500]
+    if source.consecutive_failures >= MAX_CONSECUTIVE_FAILURES and source.is_active:
+        source.is_active = False
+        source.disabled_at = datetime.utcnow()
+        logger.warning(
+            f"Source '{source.name}' auto-disabled after "
+            f"{source.consecutive_failures} consecutive failures"
+        )
+    db.commit()
 
 
 async def fetch_newsapi_source(source: Source, db: Session) -> int:
@@ -22,24 +43,32 @@ async def fetch_newsapi_source(source: Source, db: Session) -> int:
     try:
         params = json.loads(source.url)
     except json.JSONDecodeError:
-        logger.error(f"Invalid JSON in source URL for {source.name}: {source.url}")
+        error_msg = f"Invalid JSON in source URL for {source.name}: {source.url}"
+        logger.error(error_msg)
+        _record_failure(source, db, error_msg)
         return 0
 
     params["apiKey"] = settings.newsapi_key
     if not params.get("pageSize"):
         params["pageSize"] = 20
 
-    new_count = 0
-    async with httpx.AsyncClient(timeout=30) as client:
-        resp = await client.get(NEWSAPI_BASE, params=params)
-        resp.raise_for_status()
-        data = resp.json()
+    try:
+        async with httpx.AsyncClient(timeout=30) as client:
+            resp = await client.get(NEWSAPI_BASE, params=params)
+            resp.raise_for_status()
+            data = resp.json()
+    except Exception as e:
+        _record_failure(source, db, str(e))
+        logger.error(f"Error fetching NewsAPI {source.name}: {e}")
+        return 0
 
+    new_count = 0
     for item in data.get("articles", []):
         url = item.get("url", "")
+        title = item.get("title", "Sin titulo")
         if not url:
             continue
-        if is_duplicate(url, db):
+        if is_duplicate(url, db, title=title):
             continue
 
         published = None
@@ -55,7 +84,7 @@ async def fetch_newsapi_source(source: Source, db: Session) -> int:
 
         article = Article(
             source_id=source.id,
-            title=item.get("title", "Sin titulo"),
+            title=title,
             url=url,
             url_hash=compute_hash(url),
             original_text=text,
@@ -68,6 +97,8 @@ async def fetch_newsapi_source(source: Source, db: Session) -> int:
 
     if new_count > 0:
         db.commit()
+
+    _record_success(source, db)
     logger.info(f"  -> {new_count} new articles from {source.name}")
     return new_count
 

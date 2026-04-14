@@ -21,6 +21,12 @@ class Source(Base):
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
 
+    # Health monitoring
+    consecutive_failures: Mapped[int] = mapped_column(Integer, default=0)
+    last_error: Mapped[str | None] = mapped_column(Text, nullable=True)
+    last_success_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    disabled_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+
     articles: Mapped[list["Article"]] = relationship(back_populates="source", cascade="all, delete-orphan")
 
 
@@ -41,6 +47,21 @@ class Article(Base):
     published_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
     fetched_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
     status: Mapped[str] = mapped_column(String(20), default="pending")  # pending/approved/rejected/sent
+
+    # Enrichment tracking
+    enrich_attempts: Mapped[int] = mapped_column(Integer, default=0)
+
+    # Thumbnail
+    thumbnail_url: Mapped[str | None] = mapped_column(String(1000), nullable=True)
+
+    # Topic clustering
+    cluster_id: Mapped[int | None] = mapped_column(Integer, nullable=True)
+
+    # User feedback (-1 = dislike, 0 = none, 1 = like)
+    feedback: Mapped[int] = mapped_column(Integer, default=0)
+
+    # Recurring topic flag
+    is_recurring: Mapped[bool] = mapped_column(Boolean, default=False)
 
     source: Mapped["Source"] = relationship(back_populates="articles")
     summary: Mapped["Summary | None"] = relationship(back_populates="article", uselist=False, cascade="all, delete-orphan")

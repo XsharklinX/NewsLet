@@ -10,6 +10,7 @@ from fastapi.responses import Response, StreamingResponse
 from sqlalchemy import cast, Date, func, extract
 from sqlalchemy.orm import Session, joinedload
 
+from app.config import settings
 from app.database import get_db
 from app.limiter import limiter
 from app.models import Article, DigestConfig, Keyword, Source, Summary
@@ -55,6 +56,7 @@ def list_articles(
     sentiment: str | None = None,
     min_score: int | None = Query(None, ge=1, le=10),
     search: str | None = Query(None, max_length=200),
+    date_from: str | None = Query(None, description="ISO datetime — only articles fetched after this"),
     page: int = Query(1, ge=1),
     page_size: int = Query(20, ge=1, le=100),
     db: Session = Depends(get_db),
@@ -76,6 +78,13 @@ def list_articles(
             Article.original_text.ilike(f"%{search}%") |
             Article.full_text.ilike(f"%{search}%")
         )
+    if date_from:
+        try:
+            from datetime import datetime as _dt
+            cutoff = _dt.fromisoformat(date_from.replace("Z", "+00:00")).replace(tzinfo=None)
+            query = query.filter(Article.fetched_at >= cutoff)
+        except ValueError:
+            pass
 
     total = query.count()
     articles = (
@@ -734,3 +743,294 @@ def rss_feed(
 @router.get("/categories")
 def get_categories():
     return {"categories": VALID_CATEGORIES}
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# AUTH (JWT — enabled only when ADMIN_PASSWORD is set)
+# ═══════════════════════════════════════════════════════════════════════════
+
+from pydantic import BaseModel as _BaseModel
+
+
+class _LoginBody(_BaseModel):
+    password: str
+
+
+@router.post("/auth/login")
+def auth_login(body: _LoginBody):
+    from app.services.auth import check_password, create_token, is_auth_enabled
+    if not is_auth_enabled():
+        return {"token": None, "message": "Auth disabled — set ADMIN_PASSWORD in .env to enable"}
+    if not check_password(body.password):
+        raise HTTPException(status_code=401, detail="Contraseña incorrecta")
+    token = create_token()
+    return {"token": token, "expires_in": f"{settings.jwt_expire_minutes}m"}
+
+
+@router.get("/auth/status")
+def auth_status():
+    from app.services.auth import is_auth_enabled
+    return {"auth_enabled": is_auth_enabled()}
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# ARTICLE FEEDBACK
+# ═══════════════════════════════════════════════════════════════════════════
+
+class _FeedbackBody(_BaseModel):
+    value: int  # -1 = dislike, 0 = reset, 1 = like
+
+
+@router.post("/articles/{article_id}/feedback")
+def set_article_feedback(
+    article_id: int,
+    body: _FeedbackBody,
+    db: Session = Depends(get_db),
+):
+    if body.value not in (-1, 0, 1):
+        raise HTTPException(400, "value must be -1, 0, or 1")
+    article = db.query(Article).filter(Article.id == article_id).first()
+    if not article:
+        raise HTTPException(404, "Artículo no encontrado")
+    article.feedback = body.value
+    db.commit()
+    return {"id": article_id, "feedback": article.feedback}
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# CLUSTERS
+# ═══════════════════════════════════════════════════════════════════════════
+
+@router.get("/clusters")
+def get_clusters(db: Session = Depends(get_db)):
+    """Return articles grouped by cluster_id."""
+    from sqlalchemy import func as _func
+    rows = (
+        db.query(Article.cluster_id, _func.count(Article.id).label("count"))
+        .filter(Article.cluster_id != None)
+        .group_by(Article.cluster_id)
+        .order_by(_func.count(Article.id).desc())
+        .all()
+    )
+    clusters = []
+    for cluster_id, count in rows:
+        sample = (
+            db.query(Article.title)
+            .filter(Article.cluster_id == cluster_id)
+            .order_by(Article.relevance_score.desc())
+            .limit(3)
+            .all()
+        )
+        clusters.append({
+            "cluster_id": cluster_id,
+            "count": count,
+            "top_titles": [t for (t,) in sample],
+        })
+    return {"clusters": clusters}
+
+
+@router.post("/clusters/run")
+async def run_clustering(db: Session = Depends(get_db)):
+    """Trigger topic clustering manually."""
+    from app.services.topic_clusterer import cluster_articles
+    count = await cluster_articles(db)
+    return {"clustered": count}
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# EMAIL DIGEST
+# ═══════════════════════════════════════════════════════════════════════════
+
+@router.post("/digest/email")
+async def send_email_digest(db: Session = Depends(get_db)):
+    """Send today's digest via email (requires SMTP settings in .env)."""
+    from app.services.email_notifier import send_email_digest as _send
+    from app.models import DigestConfig
+    cfg = db.query(DigestConfig).first()
+    count = cfg.count if cfg else 10
+    articles = (
+        db.query(Article)
+        .options(joinedload(Article.summary), joinedload(Article.source))
+        .filter(Article.status.in_(["approved", "sent", "pending"]))
+        .order_by(Article.relevance_score.desc(), Article.fetched_at.desc())
+        .limit(count)
+        .all()
+    )
+    try:
+        result = await _send(articles)
+        return result
+    except Exception as e:
+        raise HTTPException(500, str(e))
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# SOURCE HEALTH
+# ═══════════════════════════════════════════════════════════════════════════
+
+@router.get("/sources/health")
+def sources_health(db: Session = Depends(get_db)):
+    """Return health status of all sources."""
+    sources = db.query(Source).order_by(Source.consecutive_failures.desc()).all()
+    return {
+        "sources": [
+            {
+                "id": s.id,
+                "name": s.name,
+                "is_active": s.is_active,
+                "consecutive_failures": s.consecutive_failures or 0,
+                "last_error": s.last_error,
+                "last_success_at": s.last_success_at.isoformat() if s.last_success_at else None,
+                "disabled_at": s.disabled_at.isoformat() if s.disabled_at else None,
+            }
+            for s in sources
+        ]
+    }
+
+
+@router.post("/sources/{source_id}/reenable")
+def reenable_source(source_id: int, db: Session = Depends(get_db)):
+    """Re-enable a source that was auto-disabled."""
+    source = db.query(Source).filter(Source.id == source_id).first()
+    if not source:
+        raise HTTPException(404, "Fuente no encontrada")
+    source.is_active = True
+    source.consecutive_failures = 0
+    source.last_error = None
+    source.disabled_at = None
+    db.commit()
+    return {"id": source_id, "is_active": True}
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# ADMIN SETTINGS — read/write .env from the panel
+# ═══════════════════════════════════════════════════════════════════════════
+
+from pathlib import Path as _Path
+import re as _re
+
+_ENV_PATH = _Path(".env")
+
+# Fields that are shown/editable from the panel (value is masked in GET if True)
+_EDITABLE_FIELDS = {
+    # key                     (label,                         masked, restart_needed)
+    "AI_PROVIDER":            ("Proveedor IA",                False,  True),
+    "GROQ_API_KEY":           ("Groq API Key",                True,   True),
+    "GROQ_MODEL":             ("Groq Model",                  False,  True),
+    "OPENAI_API_KEY":         ("OpenAI API Key",              True,   True),
+    "OPENAI_MODEL":           ("OpenAI Model",                False,  True),
+    "NEWSAPI_KEY":            ("NewsAPI Key",                 True,   True),
+    "TELEGRAM_BOT_TOKEN":     ("Telegram Bot Token",          True,   True),
+    "TELEGRAM_CHAT_ID":       ("Telegram Chat ID",            False,  True),
+    "ADMIN_PASSWORD":         ("Contraseña del panel",        True,   True),
+    "JWT_SECRET":             ("JWT Secret",                  True,   True),
+    "JWT_EXPIRE_MINUTES":     ("Expiración JWT (minutos)",    False,  False),
+    "SMTP_ENABLED":           ("Email habilitado",            False,  False),
+    "SMTP_HOST":              ("SMTP Host",                   False,  True),
+    "SMTP_PORT":              ("SMTP Puerto",                 False,  True),
+    "SMTP_USER":              ("SMTP Usuario",                False,  True),
+    "SMTP_PASSWORD":          ("SMTP Contraseña",             True,   True),
+    "SMTP_FROM":              ("Email remitente",             False,  True),
+    "SMTP_TO":                ("Email destinatario(s)",       False,  True),
+    "FETCH_INTERVAL_MINUTES": ("Frecuencia fetch (minutos)",  False,  False),
+    "DIGEST_HOUR":            ("Hora del digest (0-23)",      False,  False),
+    "RELEVANCE_THRESHOLD":    ("Score mínimo auto-aprobar",   False,  False),
+    "ENRICH_ARTICLES":        ("Enriquecer con IA",           False,  False),
+    "SCRAPE_FULL_TEXT":       ("Scraping texto completo",     False,  False),
+    "SOURCE_MAX_FAILURES":    ("Fallos antes de desactivar",  False,  False),
+    "RATE_LIMIT_PER_MINUTE":  ("Rate limit (req/min)",        False,  False),
+    "PANEL_PIN":              ("PIN del panel (alternativo)", True,   True),
+}
+
+
+def _read_env() -> dict[str, str]:
+    """Parse .env into a dict of key→value."""
+    result = {}
+    if not _ENV_PATH.exists():
+        return result
+    for line in _ENV_PATH.read_text(encoding="utf-8").splitlines():
+        line = line.strip()
+        if not line or line.startswith("#"):
+            continue
+        if "=" in line:
+            k, _, v = line.partition("=")
+            result[k.strip()] = v.strip()
+    return result
+
+
+def _write_env(updates: dict[str, str]) -> None:
+    """Write key=value pairs into .env, preserving comments and ordering."""
+    if not _ENV_PATH.exists():
+        content = ""
+    else:
+        content = _ENV_PATH.read_text(encoding="utf-8")
+
+    lines = content.splitlines(keepends=True)
+    updated_keys = set()
+
+    new_lines = []
+    for line in lines:
+        stripped = line.strip()
+        if stripped and not stripped.startswith("#") and "=" in stripped:
+            k = stripped.split("=", 1)[0].strip()
+            if k in updates:
+                new_lines.append(f"{k}={updates[k]}\n")
+                updated_keys.add(k)
+                continue
+        new_lines.append(line)
+
+    # Append any keys that weren't already in the file
+    for k, v in updates.items():
+        if k not in updated_keys:
+            new_lines.append(f"\n{k}={v}\n")
+
+    _ENV_PATH.write_text("".join(new_lines), encoding="utf-8")
+
+
+@router.get("/admin/settings")
+def get_admin_settings():
+    """Read current .env settings (secrets are masked)."""
+    env = _read_env()
+    result = {}
+    for key, (label, masked, restart) in _EDITABLE_FIELDS.items():
+        raw_val = env.get(key, "")
+        result[key] = {
+            "label": label,
+            "value": "••••••••" if (masked and raw_val) else raw_val,
+            "masked": masked,
+            "restart_needed": restart,
+        }
+    return {"settings": result}
+
+
+class _SettingsUpdate(_BaseModel):
+    updates: dict[str, str]
+
+
+@router.post("/admin/settings")
+def update_admin_settings(body: _SettingsUpdate):
+    """Write settings to .env. Only whitelisted keys are accepted."""
+    allowed = set(_EDITABLE_FIELDS.keys())
+    rejected = [k for k in body.updates if k not in allowed]
+    if rejected:
+        raise HTTPException(400, f"Claves no permitidas: {rejected}")
+
+    # Validate a few values
+    for k, v in body.updates.items():
+        if k in ("FETCH_INTERVAL_MINUTES", "DIGEST_HOUR", "RELEVANCE_THRESHOLD",
+                 "SOURCE_MAX_FAILURES", "JWT_EXPIRE_MINUTES", "RATE_LIMIT_PER_MINUTE",
+                 "SMTP_PORT"):
+            if v and not v.lstrip("-").isdigit():
+                raise HTTPException(400, f"{k} debe ser un número")
+
+    _write_env(body.updates)
+    needs_restart = any(
+        _EDITABLE_FIELDS[k][2] for k in body.updates if k in _EDITABLE_FIELDS
+    )
+    return {
+        "saved": list(body.updates.keys()),
+        "restart_needed": needs_restart,
+        "message": (
+            "✅ Guardado. Reinicia el servidor para aplicar cambios marcados como 'requiere reinicio'."
+            if needs_restart else "✅ Guardado."
+        ),
+    }

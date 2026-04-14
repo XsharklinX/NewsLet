@@ -164,6 +164,20 @@ async def job_cleanup():
         db.close()
 
 
+async def _job_cluster():
+    """Periodic topic clustering."""
+    db = SessionLocal()
+    try:
+        from app.services.topic_clusterer import cluster_articles
+        updated = await cluster_articles(db)
+        if updated:
+            logger.info(f"Scheduler: topic clustering updated {updated} articles")
+    except Exception as e:
+        logger.error(f"Clustering job error: {e}")
+    finally:
+        db.close()
+
+
 def reschedule_digest(hour: int):
     scheduler.reschedule_job("daily_digest", trigger=CronTrigger(hour=hour, minute=0))
     logger.info(f"Daily digest rescheduled to {hour:02d}:00")
@@ -191,6 +205,13 @@ def start_scheduler():
         CronTrigger(hour=digest_hour, minute=0),
         id="daily_digest", replace_existing=True,
         misfire_grace_time=300,
+    )
+
+    # Topic clustering — every 2 hours
+    scheduler.add_job(
+        _job_cluster,
+        IntervalTrigger(hours=2),
+        id="topic_cluster", replace_existing=True,
     )
 
     # Weekly cleanup — every Sunday at 03:00

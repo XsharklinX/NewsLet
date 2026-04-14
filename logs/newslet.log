@@ -6950,3 +6950,172 @@ For more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/St
 2026-04-14 00:33:09 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates error: {'ok': False, 'error_code': 409, 'description': 'Conflict: terminated by other getUpdates request; make sure that only one bot instance is running'}
 2026-04-14 00:33:14 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates error: {'ok': False, 'error_code': 409, 'description': 'Conflict: terminated by other getUpdates request; make sure that only one bot instance is running'}
 2026-04-14 00:33:15 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates error: {'ok': False, 'error_code': 409, 'description': 'Conflict: terminated by other getUpdates request; make sure that only one bot instance is running'}
+2026-04-14 00:42:35 [INFO    ] app.main: NewsLet v3.0 starting up...
+2026-04-14 00:42:35 [INFO    ] app.services.startup_validator: ==================================================
+2026-04-14 00:42:35 [INFO    ] app.services.startup_validator: NewsBot Pro — Startup Validation
+2026-04-14 00:42:35 [INFO    ] app.services.startup_validator: ==================================================
+2026-04-14 00:42:35 [INFO    ] app.services.startup_validator: [OK]   Database reachable
+2026-04-14 00:42:35 [INFO    ] app.services.startup_validator: [OK]   AI key present (groq / llama-3.3-70b-versatile)
+2026-04-14 00:42:36 [INFO    ] app.services.startup_validator: [OK]   Telegram bot @noticiasletbot connected
+2026-04-14 00:42:36 [INFO    ] app.services.startup_validator: [OK]   Telegram chat_id: 8549265540
+2026-04-14 00:42:36 [INFO    ] app.services.startup_validator: [INFO] NewsAPI key not configured (optional — RSS still works)
+2026-04-14 00:42:36 [INFO    ] app.services.startup_validator: ==================================================
+2026-04-14 00:42:36 [INFO    ] app.services.startup_validator: Startup: 4/5 checks passed
+2026-04-14 00:42:36 [INFO    ] app.services.startup_validator: ==================================================
+2026-04-14 00:42:36 [INFO    ] app.scheduler.jobs: Scheduler started: fetch every 30min, digest at 08:00, cleanup Sundays 03:00
+2026-04-14 00:42:36 [INFO    ] app.main: Telegram bot auto-restart runner started
+2026-04-14 00:42:36 [INFO    ] app.main: NewsLet ready ✓
+2026-04-14 00:42:36 [INFO    ] app.services.telegram_bot: Telegram bot polling active
+2026-04-14 00:42:52 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-14 00:43:08 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-14 00:43:24 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-14 00:43:34 [INFO    ] app.services.rss_fetcher: Fetching RSS: Somos Pueblo (https://somospueblo.com/feed/)
+2026-04-14 00:43:35 [INFO    ] app.services.rss_fetcher:   -> 0 new articles from Somos Pueblo
+2026-04-14 00:43:35 [INFO    ] app.services.rss_fetcher: Fetching RSS: El Pais - Tecnologia (https://feeds.elpais.com/mrss-s/pages/ep/site/elpais.com/section/tecnologia/portada)
+2026-04-14 00:43:35 [INFO    ] app.services.rss_fetcher:   -> 0 new articles from El Pais - Tecnologia
+2026-04-14 00:43:35 [INFO    ] app.services.rss_fetcher: Fetching RSS: Reuters - Top News (https://feeds.reuters.com/reuters/topNews)
+2026-04-14 00:43:35 [INFO    ] app.services.rss_fetcher:   -> 0 new articles from Reuters - Top News
+2026-04-14 00:43:35 [INFO    ] app.services.newsapi_fetcher: Fetching NewsAPI: NewsAPI - Tecnologia ES
+2026-04-14 00:43:36 [ERROR   ] app.services.newsapi_fetcher: Error fetching NewsAPI NewsAPI - Tecnologia ES: Client error '401 Unauthorized' for url 'https://newsapi.org/v2/everything?q=tecnologia&language=es&sortBy=publishedAt&apiKey=your-key-here&pageSize=20'
+For more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/401
+2026-04-14 00:43:40 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-14 00:43:56 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-14 00:44:00 [INFO    ] app.services.telegram_notifier: Sent article 45 to Telegram
+2026-04-14 00:44:12 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-14 00:44:28 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-14 00:44:44 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-14 00:45:00 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-14 00:45:16 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-14 00:45:42 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-14 00:45:59 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-14 07:51:55 [INFO    ] app.main: NewsLet v3.0 starting up...
+2026-04-14 07:51:55 [INFO    ] app.main: Migration: added articles.enrich_attempts column
+2026-04-14 07:51:55 [INFO    ] app.main: Migration: added articles.thumbnail_url column
+2026-04-14 07:51:55 [INFO    ] app.main: Migration: added articles.cluster_id column
+2026-04-14 07:51:55 [INFO    ] app.main: Migration: added articles.feedback column
+2026-04-14 07:51:55 [INFO    ] app.main: Migration: added articles.is_recurring column
+2026-04-14 07:51:55 [INFO    ] app.main: Migration: added sources.consecutive_failures column
+2026-04-14 07:51:55 [INFO    ] app.main: Migration: added sources.last_error column
+2026-04-14 07:51:55 [INFO    ] app.main: Migration: added sources.last_success_at column
+2026-04-14 07:51:55 [INFO    ] app.main: Migration: added sources.disabled_at column
+2026-04-14 07:51:55 [INFO    ] app.services.startup_validator: ==================================================
+2026-04-14 07:51:55 [INFO    ] app.services.startup_validator: NewsBot Pro — Startup Validation
+2026-04-14 07:51:55 [INFO    ] app.services.startup_validator: ==================================================
+2026-04-14 07:51:55 [INFO    ] app.services.startup_validator: [OK]   Database reachable
+2026-04-14 07:51:55 [INFO    ] app.services.startup_validator: [OK]   AI key present (groq / llama-3.3-70b-versatile)
+2026-04-14 07:51:56 [INFO    ] app.services.startup_validator: [OK]   Telegram bot @noticiasletbot connected
+2026-04-14 07:51:56 [INFO    ] app.services.startup_validator: [OK]   Telegram chat_id: 8549265540
+2026-04-14 07:51:56 [INFO    ] app.services.startup_validator: [INFO] NewsAPI key not configured (optional — RSS still works)
+2026-04-14 07:51:56 [INFO    ] app.services.startup_validator: ==================================================
+2026-04-14 07:51:56 [INFO    ] app.services.startup_validator: Startup: 4/5 checks passed
+2026-04-14 07:51:56 [INFO    ] app.services.startup_validator: ==================================================
+2026-04-14 07:51:57 [INFO    ] app.scheduler.jobs: Scheduler started: fetch every 30min, digest at 08:00, cleanup Sundays 03:00
+2026-04-14 07:51:57 [INFO    ] app.main: Telegram bot auto-restart runner started
+2026-04-14 07:51:57 [INFO    ] app.main: NewsLet ready ✓
+2026-04-14 07:51:57 [INFO    ] app.services.telegram_bot: Telegram bot polling active
+2026-04-14 07:52:12 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-14 07:52:28 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-14 07:52:44 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-14 07:52:48 [INFO    ] app.services.rss_fetcher: Fetching RSS: Somos Pueblo (https://somospueblo.com/feed/)
+2026-04-14 07:52:49 [INFO    ] app.services.rss_fetcher:   -> 0 new articles from Somos Pueblo
+2026-04-14 07:52:49 [INFO    ] app.services.rss_fetcher: Fetching RSS: El Pais - Tecnologia (https://feeds.elpais.com/mrss-s/pages/ep/site/elpais.com/section/tecnologia/portada)
+2026-04-14 07:52:49 [INFO    ] app.services.rss_fetcher:   -> 0 new articles from El Pais - Tecnologia
+2026-04-14 07:52:49 [INFO    ] app.services.rss_fetcher: Fetching RSS: Reuters - Top News (https://feeds.reuters.com/reuters/topNews)
+2026-04-14 07:52:49 [INFO    ] app.services.rss_fetcher:   -> 0 new articles from Reuters - Top News
+2026-04-14 07:52:49 [INFO    ] app.services.newsapi_fetcher: Fetching NewsAPI: NewsAPI - Tecnologia ES
+2026-04-14 07:52:50 [ERROR   ] app.services.newsapi_fetcher: Error fetching NewsAPI NewsAPI - Tecnologia ES: Client error '401 Unauthorized' for url 'https://newsapi.org/v2/everything?q=tecnologia&language=es&sortBy=publishedAt&apiKey=your-key-here&pageSize=20'
+For more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/401
+2026-04-14 07:53:00 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-14 07:53:17 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-14 07:53:33 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-14 07:53:49 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-14 07:54:05 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-14 07:54:21 [INFO    ] app.services.rss_fetcher: Fetching RSS: Somos Pueblo (https://somospueblo.com/feed/)
+2026-04-14 07:54:21 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-14 07:54:21 [INFO    ] app.services.rss_fetcher:   -> 0 new articles from Somos Pueblo
+2026-04-14 07:54:21 [INFO    ] app.services.rss_fetcher: Fetching RSS: El Pais - Tecnologia (https://feeds.elpais.com/mrss-s/pages/ep/site/elpais.com/section/tecnologia/portada)
+2026-04-14 07:54:21 [INFO    ] app.services.rss_fetcher:   -> 0 new articles from El Pais - Tecnologia
+2026-04-14 07:54:21 [INFO    ] app.services.rss_fetcher: Fetching RSS: Reuters - Top News (https://feeds.reuters.com/reuters/topNews)
+2026-04-14 07:54:21 [INFO    ] app.services.rss_fetcher:   -> 0 new articles from Reuters - Top News
+2026-04-14 07:54:21 [INFO    ] app.services.newsapi_fetcher: Fetching NewsAPI: NewsAPI - Tecnologia ES
+2026-04-14 07:54:22 [ERROR   ] app.services.newsapi_fetcher: Error fetching NewsAPI NewsAPI - Tecnologia ES: Client error '401 Unauthorized' for url 'https://newsapi.org/v2/everything?q=tecnologia&language=es&sortBy=publishedAt&apiKey=your-key-here&pageSize=20'
+For more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/401
+2026-04-14 07:54:37 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-14 07:54:53 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-14 07:55:09 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-14 07:55:25 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-14 07:55:42 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-14 07:55:58 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-14 07:56:14 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-14 07:56:45 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-14 07:57:01 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-14 07:57:18 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-14 07:57:34 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-14 07:57:50 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-14 07:58:06 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-14 07:58:22 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-14 07:58:38 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-14 07:58:54 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-14 07:59:11 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-14 07:59:27 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-14 07:59:43 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-14 07:59:59 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-14 08:00:00 [INFO    ] app.scheduler.jobs: Scheduler: sending daily digest
+2026-04-14 08:00:00 [INFO    ] app.scheduler.jobs: Scheduler: digest sent with 10 articles
+2026-04-14 08:00:15 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-14 08:00:31 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-14 08:00:47 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-14 08:01:03 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-14 08:01:19 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-14 08:01:36 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-14 08:01:52 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-14 08:02:08 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-14 08:02:24 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-14 08:02:40 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-14 08:02:56 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-14 08:03:12 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-14 08:03:28 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-14 08:03:44 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-14 08:04:00 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-14 08:04:16 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-14 08:04:33 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-14 08:04:49 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-14 08:05:05 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-14 08:05:21 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-14 08:05:37 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-14 08:05:53 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-14 08:06:09 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-14 08:06:25 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-14 08:06:41 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-14 08:06:57 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-14 08:07:13 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-14 08:07:30 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-14 08:07:46 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-14 08:08:02 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-14 08:08:18 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-14 08:08:34 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-14 08:08:50 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-14 08:09:06 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-14 08:09:22 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-14 08:09:38 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-14 08:09:54 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-14 08:10:11 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-14 08:10:27 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-14 08:10:43 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-14 08:10:59 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-14 08:11:15 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates exception: 
+2026-04-14 08:11:27 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates error: {'ok': False, 'error_code': 409, 'description': 'Conflict: terminated by other getUpdates request; make sure that only one bot instance is running'}
+2026-04-14 08:11:32 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates error: {'ok': False, 'error_code': 409, 'description': 'Conflict: terminated by other getUpdates request; make sure that only one bot instance is running'}
+2026-04-14 08:11:37 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates error: {'ok': False, 'error_code': 409, 'description': 'Conflict: terminated by other getUpdates request; make sure that only one bot instance is running'}
+2026-04-14 08:11:42 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates error: {'ok': False, 'error_code': 409, 'description': 'Conflict: terminated by other getUpdates request; make sure that only one bot instance is running'}
+2026-04-14 08:11:47 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates error: {'ok': False, 'error_code': 409, 'description': 'Conflict: terminated by other getUpdates request; make sure that only one bot instance is running'}
+2026-04-14 08:11:52 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates error: {'ok': False, 'error_code': 409, 'description': 'Conflict: terminated by other getUpdates request; make sure that only one bot instance is running'}
+2026-04-14 08:11:57 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates error: {'ok': False, 'error_code': 409, 'description': 'Conflict: terminated by other getUpdates request; make sure that only one bot instance is running'}
+2026-04-14 08:12:02 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates error: {'ok': False, 'error_code': 409, 'description': 'Conflict: terminated by other getUpdates request; make sure that only one bot instance is running'}
+2026-04-14 08:12:07 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates error: {'ok': False, 'error_code': 409, 'description': 'Conflict: terminated by other getUpdates request; make sure that only one bot instance is running'}
+2026-04-14 08:12:12 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates error: {'ok': False, 'error_code': 409, 'description': 'Conflict: terminated by other getUpdates request; make sure that only one bot instance is running'}
+2026-04-14 08:12:17 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates error: {'ok': False, 'error_code': 409, 'description': 'Conflict: terminated by other getUpdates request; make sure that only one bot instance is running'}
+2026-04-14 08:12:22 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates error: {'ok': False, 'error_code': 409, 'description': 'Conflict: terminated by other getUpdates request; make sure that only one bot instance is running'}
+2026-04-14 08:12:27 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates error: {'ok': False, 'error_code': 409, 'description': 'Conflict: terminated by other getUpdates request; make sure that only one bot instance is running'}
+2026-04-14 08:12:32 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates error: {'ok': False, 'error_code': 409, 'description': 'Conflict: terminated by other getUpdates request; make sure that only one bot instance is running'}
+2026-04-14 08:12:37 [ERROR   ] app.services.telegram_notifier: Telegram getUpdates error: {'ok': False, 'error_code': 409, 'description': 'Conflict: terminated by other getUpdates request; make sure that only one bot instance is running'}

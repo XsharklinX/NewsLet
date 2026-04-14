@@ -7,6 +7,7 @@ const API = "/api/v1";
 // ── State ─────────────────────────────────────────────
 let pg = 1;
 let filterStatus = "", filterSrc = "", filterCat = "", filterScore = "", filterSentiment = "";
+let filterRecent = "";  // "1h", "6h", "24h", "7d" — vacío = todos
 let searchQ = "", searchTmr = null;
 let artView = localStorage.getItem("artView") || "list";
 let dashView = localStorage.getItem("dashView") || "list";
@@ -24,12 +25,23 @@ const NOTIF_ICON = { fetch: "🔄", keyword: "🔑", digest: "📬", error: "⚠
    API
 ══════════════════════════════════════════════════════ */
 async function api(path, opt = {}) {
-  const r = await fetch(API + path, {
-    headers: { "Content-Type": "application/json" },
-    ...opt,
-  });
+  const token = localStorage.getItem("nl_token");
+  const headers = { "Content-Type": "application/json" };
+  if (token) headers["Authorization"] = "Bearer " + token;
+  const r = await fetch(API + path, { headers, ...opt });
+  if (r.status === 401) {
+    // Token expired or invalid — redirect to login
+    localStorage.removeItem("nl_token");
+    window.location.replace("/login.html");
+    return;
+  }
   if (!r.ok) throw Object.assign(new Error(`${r.status}`), { status: r.status });
   return r.json();
+}
+
+function logout() {
+  localStorage.removeItem("nl_token");
+  window.location.replace("/login.html");
 }
 
 /* ══════════════════════════════════════════════════════
@@ -46,6 +58,24 @@ function toast(msg, type) {
 }
 
 /* ══════════════════════════════════════════════════════
+   SIDEBAR (mobile)
+══════════════════════════════════════════════════════ */
+function toggleSidebar() {
+  const sb = document.getElementById("sidebar");
+  const bd = document.getElementById("sidebar-backdrop");
+  const open = sb.classList.toggle("mobile-open");
+  bd.classList.toggle("on", open);
+  document.body.style.overflow = open ? "hidden" : "";
+}
+function closeSidebar() {
+  const sb = document.getElementById("sidebar");
+  const bd = document.getElementById("sidebar-backdrop");
+  sb.classList.remove("mobile-open");
+  bd.classList.remove("on");
+  document.body.style.overflow = "";
+}
+
+/* ══════════════════════════════════════════════════════
    NAVIGATION
 ══════════════════════════════════════════════════════ */
 function go(v) {
@@ -54,7 +84,13 @@ function go(v) {
   document.querySelectorAll(".nav-item[data-v]").forEach(n => n.classList.remove("active"));
   const b = document.querySelector(`.nav-item[data-v="${v}"]`);
   if (b) b.classList.add("active");
-  document.getElementById("sidebar").classList.remove("open");
+  closeSidebar(); // close mobile sidebar on navigation
+
+  // Bug fix: reset time filter when leaving articles view
+  if (v !== "arts") {
+    filterRecent = "";
+    document.querySelectorAll(".pill-time").forEach(p => p.classList.remove("on"));
+  }
 
   if (v === "dash")     { loadStats(); loadDash(); }
   if (v === "arts")     { loadArts(); loadSrcFilter(); }
@@ -66,6 +102,7 @@ function go(v) {
   if (v === "kw")       loadKeywords();
   if (v === "webhooks") loadWebhooks();
   if (v === "cfg")      { loadDigestConfig(); loadSystemStatus(); }
+  if (v === "admin")   loadAdminSettings();
 }
 
 /* ══════════════════════════════════════════════════════
@@ -78,8 +115,27 @@ function esc(s) {
 }
 function fmtDate(s) {
   if (!s) return "";
-  return new Date(s).toLocaleDateString("es-ES", {
-    day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit",
+  const d = new Date(s);
+  const now = new Date();
+  const diffMs = now - d;
+  const diffMin = Math.floor(diffMs / 60000);
+  const diffH   = Math.floor(diffMs / 3600000);
+  const diffD   = Math.floor(diffMs / 86400000);
+
+  // Relative time for recent articles
+  if (diffMin < 1)  return "ahora mismo";
+  if (diffMin < 60) return `hace ${diffMin} min`;
+  if (diffH   < 24) return `hace ${diffH}h`;
+  if (diffD   < 2)  return `ayer ${d.toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit" })}`;
+  if (diffD   < 7)  return d.toLocaleDateString("es-ES", { weekday: "short", hour: "2-digit", minute: "2-digit" });
+  return d.toLocaleDateString("es-ES", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" });
+}
+
+function fmtDateFull(s) {
+  if (!s) return "";
+  return new Date(s).toLocaleString("es-ES", {
+    day: "2-digit", month: "short", year: "numeric",
+    hour: "2-digit", minute: "2-digit"
   });
 }
 function cleanTxt(t) {
@@ -276,30 +332,52 @@ function scoreRing(score) {
    ARTICLE CARD — multi-view
 ══════════════════════════════════════════════════════ */
 function card(a, compact = false) {
-  const sumText  = a.summary ? esc(a.summary.summary_text) : "";
-  const preview  = sumText || esc(cleanTxt(a.original_text)).slice(0, 200) || "Sin contenido";
-  const src      = a.source ? esc(a.source.name) : "?";
-  const model    = a.summary ? a.summary.model_used : "";
-  const rt       = readTime(a.full_text || a.original_text);
-  const catHtml  = a.category ? `<span class="a-cat">${esc(a.category)}</span>` : "";
-  const sentHtml = sentimentTag(a.sentiment);
+  const sumText   = a.summary ? esc(a.summary.summary_text) : "";
+  const preview   = sumText || esc(cleanTxt(a.original_text)).slice(0, 200) || "Sin contenido";
+  const src       = a.source ? esc(a.source.name) : "?";
+  const model     = a.summary ? a.summary.model_used : "";
+  const rt        = readTime(a.full_text || a.original_text);
+  const catHtml   = a.category ? `<span class="a-cat">${esc(a.category)}</span>` : "";
+  const sentHtml  = sentimentTag(a.sentiment);
   const statusCls = `s-${a.status}`;
 
+  const thumbHtml = (!compact && a.thumbnail_url)
+    ? `<img class="a-thumb" src="${esc(a.thumbnail_url)}" alt="" loading="lazy" onerror="this.style.display='none'">`
+    : "";
+
+  const clusterHtml = a.cluster_id
+    ? `<span title="Cluster #${a.cluster_id}" style="font-size:10px;color:var(--text-muted);background:var(--surface);padding:1px 6px;border-radius:4px;border:1px solid var(--border)">🔗 C${a.cluster_id}</span>`
+    : "";
+
+  const fb = a.feedback || 0;
+  const fbHtml = !compact ? `<span class="a-feedback">
+    <button onclick="doFeedback(${a.id},${fb===1?0:1},this)" title="Me gusta" style="background:none;border:none;cursor:pointer;font-size:14px;opacity:${fb===1?1:0.4}">👍</button>
+    <button onclick="doFeedback(${a.id},${fb===-1?0:-1},this)" title="No me gusta" style="background:none;border:none;cursor:pointer;font-size:14px;opacity:${fb===-1?1:0.4}">👎</button>
+  </span>` : "";
+
+  const recurringBadge = a.is_recurring
+    ? `<span title="Tema recurrente" style="font-size:10px;color:var(--warning)">🔁</span>`
+    : "";
+
   return `<div class="a-card ${statusCls}" data-id="${a.id}">
+    ${thumbHtml}
     <div class="a-body">
       <div class="a-title" onclick="openReader(${a.id})">
         <a href="${esc(a.url)}" target="_blank" rel="noopener" onclick="event.stopPropagation()">${esc(a.title)}</a>
+        ${recurringBadge}
       </div>
       ${!compact ? `<div class="a-summary">${a.summary ? preview : `<em>${preview}</em>`}</div>` : ""}
       ${!compact ? `<div class="a-meta">
         <span class="a-source">${src}</span>
         ${catHtml}
         ${sentHtml}
+        ${clusterHtml}
         ${rt ? `<span class="a-read-time">${rt}</span>` : ""}
         <span class="a-dot">·</span>
-        <span>${fmtDate(a.published_at || a.fetched_at)}</span>
+        <span title="${fmtDateFull(a.published_at || a.fetched_at)}" style="cursor:default">${fmtDate(a.published_at || a.fetched_at)}</span>
         ${model ? `<span class="a-dot">·</span><span style="font-style:italic;font-size:0.62rem;color:var(--text-muted)">${esc(model)}</span>` : ""}
       </div>` : ""}
+      ${fbHtml}
     </div>
     <div class="a-right">
       <div style="display:flex;flex-direction:column;align-items:center;gap:6px">
@@ -314,6 +392,24 @@ function card(a, compact = false) {
       </div>
     </div>
   </div>`;
+}
+
+async function doFeedback(articleId, value, btn) {
+  try {
+    await api(`/articles/${articleId}/feedback`, {
+      method: "POST",
+      body: JSON.stringify({ value }),
+    });
+    // Update both buttons' opacity in the same .a-feedback container
+    const container = btn.closest(".a-feedback");
+    if (container) {
+      const [likeBtn, dislikeBtn] = container.querySelectorAll("button");
+      likeBtn.style.opacity    = value === 1  ? 1 : 0.4;
+      dislikeBtn.style.opacity = value === -1 ? 1 : 0.4;
+    }
+  } catch (e) {
+    toast("Error al guardar feedback", "err");
+  }
 }
 
 function setViewClass(container, view) {
@@ -406,6 +502,14 @@ async function loadArts(p) {
   if (c) { c.innerHTML = skeletonCards(8); setViewClass(c, artView); }
   if (filterSentiment) params.set("sentiment", filterSentiment);
   if (searchQ)         params.set("search",    searchQ);
+  if (filterRecent) {
+    const map = { "1h": 1, "6h": 6, "24h": 24, "7d": 168 };
+    const hours = map[filterRecent];
+    if (hours) {
+      const from = new Date(Date.now() - hours * 3600000).toISOString();
+      params.set("date_from", from);
+    }
+  }
 
   try {
     const d = await api("/articles?" + params);
@@ -435,6 +539,13 @@ function onSearch() {
     searchQ = document.getElementById("q").value.trim();
     loadArts(1);
   }, 350);
+}
+
+function filRecent(v, el) {
+  filterRecent = filterRecent === v ? "" : v;  // toggle
+  document.querySelectorAll(".pill-time").forEach(p => p.classList.remove("on"));
+  if (filterRecent && el) el.classList.add("on");
+  loadArts(1);
 }
 
 function fil(s, el) {
@@ -512,11 +623,24 @@ async function openReader(id) {
     document.getElementById("r-cat").textContent   = a.category || "";
     document.getElementById("r-title").textContent = a.title;
     document.getElementById("r-link").href         = a.url;
-    document.getElementById("r-meta").textContent  =
-      `${a.source?.name || ""} · ${fmtDate(a.published_at || a.fetched_at)}` +
-      (a.relevance_score ? ` · Score ${a.relevance_score}/10` : "") +
+    document.getElementById("r-meta").innerHTML =
+      `<span title="${fmtDateFull(a.published_at || a.fetched_at)}">${fmtDate(a.published_at || a.fetched_at)}</span>` +
+      (a.source?.name ? ` · ${esc(a.source.name)}` : "") +
+      (a.relevance_score ? ` · ⭐ ${a.relevance_score}/10` : "") +
       (a.sentiment ? ` · ${SENT_EMOJI[a.sentiment] || ""} ${a.sentiment}` : "") +
-      (readTime(a.full_text || a.original_text) ? ` · ${readTime(a.full_text || a.original_text)}` : "");
+      (readTime(a.full_text || a.original_text) ? ` · ${readTime(a.full_text || a.original_text)} lectura` : "");
+
+    // Bug fix: show thumbnail in reader
+    const thumbEl = document.getElementById("r-thumb");
+    if (thumbEl) {
+      if (a.thumbnail_url) {
+        thumbEl.src = a.thumbnail_url;
+        thumbEl.style.display = "block";
+        thumbEl.onerror = () => { thumbEl.style.display = "none"; };
+      } else {
+        thumbEl.style.display = "none";
+      }
+    }
 
     const sumEl = document.getElementById("r-summary");
     sumEl.textContent = a.summary?.summary_text || "";
@@ -529,8 +653,6 @@ async function openReader(id) {
     sendBtn.style.display = a.summary && a.status !== "sent" ? "inline-flex" : "none";
 
     document.getElementById("overlay-reader").classList.add("on");
-
-    // Load related in background
     loadRelated(id);
   } catch(e) { toast("Error al cargar artículo", "err"); }
 }
@@ -1220,4 +1342,134 @@ document.addEventListener("click", e => {
 
   // Poll notification badge every 60s
   setInterval(loadNotifBadge, 60000);
+})();
+
+/* ══════════════════════════════════════════════════════
+   ADMIN SETTINGS
+══════════════════════════════════════════════════════ */
+
+// Fields that are masked (password inputs — we never pre-fill them from API)
+const _MASKED_FIELDS = new Set([
+  "GROQ_API_KEY","OPENAI_API_KEY","TELEGRAM_BOT_TOKEN",
+  "ADMIN_PASSWORD","JWT_SECRET","SMTP_PASSWORD","NEWSAPI_KEY","PANEL_PIN",
+]);
+
+async function loadAdminSettings() {
+  // Hide restart notice whenever we (re)load the settings page
+  const notice = document.getElementById("admin-restart-notice");
+  if (notice) notice.style.display = "none";
+  try {
+    const { settings } = await api("/admin/settings");
+    for (const [key, info] of Object.entries(settings)) {
+      const el = document.getElementById("sf-" + key);
+      if (!el) continue;
+      // Never pre-fill masked/password fields
+      if (_MASKED_FIELDS.has(key)) {
+        el.placeholder = info.value === "••••••••" ? "••••••• (configurado)" : "Vacío";
+        el.value = "";
+      } else {
+        if (el.tagName === "SELECT") {
+          el.value = info.value;
+        } else {
+          el.value = info.value;
+        }
+      }
+    }
+  } catch (e) {
+    toast("Error cargando configuración: " + e.message, "err");
+  }
+}
+
+async function saveAdminSettings() {
+  const updates = {};
+  // Collect all sf-* fields
+  document.querySelectorAll("[id^='sf-']").forEach(el => {
+    const key = el.id.replace("sf-", "");
+    const val = el.value.trim();
+    // For masked fields: only include if user typed something new
+    if (_MASKED_FIELDS.has(key)) {
+      if (val && val !== "•••••••") updates[key] = val;
+    } else {
+      updates[key] = val;
+    }
+  });
+
+  if (Object.keys(updates).length === 0) {
+    toast("No hay cambios para guardar", "info");
+    return;
+  }
+
+  try {
+    const result = await api("/admin/settings", {
+      method: "POST",
+      body: JSON.stringify({ updates }),
+    });
+    toast(result.message, "ok");
+    if (result.restart_needed) {
+      document.getElementById("admin-restart-notice").style.display = "block";
+    }
+    // Clear password fields after save
+    _MASKED_FIELDS.forEach(key => {
+      const el = document.getElementById("sf-" + key);
+      if (el) { el.value = ""; el.placeholder = "••••••• (guardado)"; }
+    });
+  } catch (e) {
+    toast("Error guardando: " + e.message, "err");
+  }
+}
+
+async function testEmail() {
+  toast("Enviando email de prueba...", "info");
+  try {
+    const r = await api("/digest/email", { method: "POST" });
+    if (r.sent > 0) {
+      toast(`✅ Email enviado a ${r.recipients.join(", ")}`, "ok");
+    } else {
+      toast("❌ " + (r.error || JSON.stringify(r.errors)), "err");
+    }
+  } catch (e) {
+    toast("Error: " + e.message, "err");
+  }
+}
+
+/* ══════════════════════════════════════════════════════
+   MOBILE — Swipe gestures
+══════════════════════════════════════════════════════ */
+(function initMobileGestures() {
+  let touchStartX = 0, touchStartY = 0;
+  const SWIPE_THRESHOLD = 60;
+  const EDGE_ZONE = 30; // px from left edge to start open gesture
+
+  document.addEventListener("touchstart", e => {
+    touchStartX = e.touches[0].clientX;
+    touchStartY = e.touches[0].clientY;
+  }, { passive: true });
+
+  document.addEventListener("touchend", e => {
+    const dx = e.changedTouches[0].clientX - touchStartX;
+    const dy = e.changedTouches[0].clientY - touchStartY;
+    // Only treat as horizontal swipe if mostly horizontal
+    if (Math.abs(dy) > Math.abs(dx) * 0.8) return;
+
+    const sb = document.getElementById("sidebar");
+    const isMobile = window.innerWidth <= 700;
+    if (!isMobile) return;
+
+    // Swipe right from left edge → open sidebar
+    if (dx > SWIPE_THRESHOLD && touchStartX < EDGE_ZONE && !sb.classList.contains("mobile-open")) {
+      toggleSidebar();
+    }
+    // Swipe left while sidebar open → close sidebar
+    if (dx < -SWIPE_THRESHOLD && sb.classList.contains("mobile-open")) {
+      closeSidebar();
+    }
+  }, { passive: true });
+
+  // Close sidebar on Escape key
+  document.addEventListener("keydown", e => {
+    if (e.key === "Escape") {
+      const sb = document.getElementById("sidebar");
+      if (sb && sb.classList.contains("mobile-open")) closeSidebar();
+    }
+  });
 })();

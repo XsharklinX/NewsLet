@@ -19,24 +19,31 @@ logger = logging.getLogger(__name__)
 OWNER_ID = settings.telegram_chat_id
 _offset = 0
 
-HELP_TEXT = """<b>NewsBot Pro</b> — Comandos disponibles:
+HELP_TEXT = """<b>NewsLet Pro</b> — Comandos disponibles:
 
 <b>📰 Noticias</b>
-/noticias — Ultimas 5 noticias con resumenes
-/buscar &lt;termino&gt; — Buscar por palabra clave
-/leer &lt;id&gt; — Leer articulo completo
+/noticias — Últimas 5 noticias con resúmenes
+/ultimas — Alias de /noticias
+/buscar &lt;término&gt; — Buscar por palabra clave
+/leer &lt;id&gt; — Leer artículo completo
+/score &lt;id&gt; — Ver score, categoría y sentimiento
+
+<b>✅ Moderación rápida</b>
+/aprobar &lt;id&gt; — Aprobar artículo por ID
+/rechazar &lt;id&gt; — Rechazar artículo por ID
 
 <b>📊 Sistema</b>
-/stats — Estadisticas completas
+/stats — Estadísticas completas
+/salud — Estado de las fuentes (salud)
 /fetch — Buscar noticias ahora
-/resumir — Resumir articulos pendientes
+/resumir — Resumir artículos pendientes
 /digest — Enviar digest ahora
 /pdf — Recibir digest en PDF
 
-<b>⚙️ Configuracion</b>
+<b>⚙️ Configuración</b>
 /fuentes — Ver y gestionar fuentes
 /keywords — Ver y gestionar keywords
-/config — Ver configuracion del digest
+/config — Ver configuración del digest
 /config hora=8 cantidad=10 score=5 — Actualizar digest"""
 
 
@@ -392,6 +399,162 @@ async def cmd_config(chat_id: str, args: str):
         db.close()
 
 
+async def cmd_score(chat_id: str, article_id_str: str):
+    """Show score, category, sentiment and summary for a specific article."""
+    try:
+        article_id = int(article_id_str.strip())
+    except ValueError:
+        await send_message(chat_id, "Uso: <code>/score {id}</code>\nEjemplo: <code>/score 42</code>")
+        return
+
+    db = SessionLocal()
+    try:
+        article = db.query(Article).options(joinedload(Article.summary), joinedload(Article.source)).get(article_id)
+        if not article:
+            await send_message(chat_id, f"Artículo #{article_id} no encontrado.")
+            return
+
+        score_bar = ""
+        if article.relevance_score:
+            filled = round(article.relevance_score / 10 * 10)
+            score_bar = "█" * filled + "░" * (10 - filled)
+
+        sentiment_icon = {"positive": "😊", "negative": "😟", "neutral": "😐"}.get(
+            article.sentiment or "neutral", "😐"
+        )
+        status_icon = {"pending": "⏳", "approved": "✅", "rejected": "❌", "sent": "📤"}.get(
+            article.status, "❓"
+        )
+        cat = article.category or "Sin categoría"
+        src = article.source.name if article.source else "?"
+        summary_preview = ""
+        if article.summary:
+            summary_preview = f"\n\n<i>{_esc(article.summary.summary_text[:300])}</i>"
+
+        text = (
+            f"<b>#{article_id} · {_esc(article.title[:80])}</b>\n\n"
+            f"⭐ Score: <b>{article.relevance_score}/10</b>  {score_bar}\n"
+            f"🏷 Categoría: <b>{_esc(cat)}</b>\n"
+            f"{sentiment_icon} Sentimiento: <b>{article.sentiment or 'N/A'}</b>\n"
+            f"{status_icon} Estado: <b>{article.status}</b>\n"
+            f"📡 Fuente: <b>{_esc(src)}</b>"
+            f"{summary_preview}\n\n"
+            f'<a href="{article.url}">Leer original</a>'
+        )
+
+        buttons = []
+        if article.status == "pending":
+            buttons.append([
+                {"text": "✅ Aprobar", "callback_data": json.dumps({"a": "approve", "id": article.id})},
+                {"text": "❌ Rechazar", "callback_data": json.dumps({"a": "reject", "id": article.id})},
+            ])
+        if not article.summary:
+            buttons.append([{"text": "🤖 Resumir", "callback_data": json.dumps({"a": "summarize", "id": article.id})}])
+
+        await send_message(chat_id, text, reply_markup={"inline_keyboard": buttons} if buttons else None)
+    finally:
+        db.close()
+
+
+async def cmd_aprobar(chat_id: str, article_id_str: str):
+    """Approve an article by ID via text command."""
+    try:
+        article_id = int(article_id_str.strip())
+    except ValueError:
+        await send_message(chat_id, "Uso: <code>/aprobar {id}</code>\nEjemplo: <code>/aprobar 42</code>")
+        return
+
+    db = SessionLocal()
+    try:
+        article = db.query(Article).get(article_id)
+        if not article:
+            await send_message(chat_id, f"Artículo #{article_id} no encontrado.")
+            return
+        if article.status == "approved":
+            await send_message(chat_id, f"ℹ️ El artículo #{article_id} ya está aprobado.")
+            return
+        article.status = "approved"
+        db.commit()
+        await send_message(
+            chat_id,
+            f"✅ Artículo #{article_id} aprobado: <b>{_esc(article.title[:80])}</b>"
+        )
+    finally:
+        db.close()
+
+
+async def cmd_rechazar(chat_id: str, article_id_str: str):
+    """Reject an article by ID via text command."""
+    try:
+        article_id = int(article_id_str.strip())
+    except ValueError:
+        await send_message(chat_id, "Uso: <code>/rechazar {id}</code>\nEjemplo: <code>/rechazar 42</code>")
+        return
+
+    db = SessionLocal()
+    try:
+        article = db.query(Article).get(article_id)
+        if not article:
+            await send_message(chat_id, f"Artículo #{article_id} no encontrado.")
+            return
+        if article.status == "rejected":
+            await send_message(chat_id, f"ℹ️ El artículo #{article_id} ya está rechazado.")
+            return
+        article.status = "rejected"
+        db.commit()
+        await send_message(
+            chat_id,
+            f"❌ Artículo #{article_id} rechazado: <b>{_esc(article.title[:80])}</b>"
+        )
+    finally:
+        db.close()
+
+
+async def cmd_salud(chat_id: str):
+    """Show source health status — consecutive failures, last error, disabled sources."""
+    db = SessionLocal()
+    try:
+        sources = db.query(Source).order_by(Source.consecutive_failures.desc()).all()
+        if not sources:
+            await send_message(chat_id, "No hay fuentes configuradas.")
+            return
+
+        lines = ["<b>Salud de las Fuentes</b>\n"]
+        disabled = [s for s in sources if not s.is_active]
+        healthy = [s for s in sources if s.is_active and (s.consecutive_failures or 0) == 0]
+        warning = [s for s in sources if s.is_active and (s.consecutive_failures or 0) > 0]
+
+        if disabled:
+            lines.append("🔴 <b>Desactivadas:</b>")
+            for s in disabled:
+                err = (s.last_error or "")[:60]
+                lines.append(f"  • {_esc(s.name)} — {_esc(err)}")
+
+        if warning:
+            lines.append("\n⚠️ <b>Con errores:</b>")
+            for s in warning:
+                lines.append(f"  • {_esc(s.name)} — {s.consecutive_failures} fallos consecutivos")
+
+        if healthy:
+            lines.append(f"\n🟢 <b>OK:</b> {len(healthy)} fuentes sin errores")
+
+        # Offer re-enable buttons for disabled sources
+        buttons = []
+        for s in disabled:
+            buttons.append([{
+                "text": f"🔄 Reactivar: {s.name}",
+                "callback_data": json.dumps({"a": "reenable_src", "id": s.id}),
+            }])
+
+        await send_message(
+            chat_id,
+            "\n".join(lines),
+            reply_markup={"inline_keyboard": buttons} if buttons else None,
+        )
+    finally:
+        db.close()
+
+
 # ═══════════════════════════════════════════════════════════════════════════
 # CALLBACK HANDLER (inline buttons)
 # ═══════════════════════════════════════════════════════════════════════════
@@ -477,6 +640,17 @@ async def handle_callback(cb: dict):
             await _tg("answerCallbackQuery", callback_query_id=cb_id, text="🔄 Actualizado")
             await cmd_fuentes(chat_id)
 
+        elif action == "reenable_src":
+            source = db.query(Source).get(item_id)
+            if source:
+                source.is_active = True
+                source.consecutive_failures = 0
+                source.last_error = None
+                source.disabled_at = None
+                db.commit()
+                await _tg("answerCallbackQuery", callback_query_id=cb_id, text=f"🟢 {source.name} reactivada")
+                await cmd_salud(chat_id)
+
     except Exception as e:
         logger.error(f"Callback error [{action}]: {e}")
         await _tg("answerCallbackQuery", callback_query_id=cb_id, text="❌ Error")
@@ -504,12 +678,20 @@ async def _process_update(update: dict):
             await cmd_start(chat_id)
         elif cmd == "/stats":
             await cmd_stats(chat_id)
-        elif cmd == "/noticias":
+        elif cmd in ("/noticias", "/ultimas"):
             await cmd_noticias(chat_id)
         elif cmd == "/buscar":
             await cmd_buscar(chat_id, rest)
         elif cmd == "/leer":
             await cmd_leer(chat_id, rest)
+        elif cmd == "/score":
+            await cmd_score(chat_id, rest)
+        elif cmd == "/aprobar":
+            await cmd_aprobar(chat_id, rest)
+        elif cmd == "/rechazar":
+            await cmd_rechazar(chat_id, rest)
+        elif cmd == "/salud":
+            await cmd_salud(chat_id)
         elif cmd == "/fetch":
             await cmd_fetch(chat_id)
         elif cmd == "/resumir":
