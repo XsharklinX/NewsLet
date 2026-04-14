@@ -39,8 +39,12 @@ class Settings(BaseSettings):
     database_url: str = ""
 
     def model_post_init(self, __context) -> None:
-        # Set DB URL after init if not provided via env
-        if not self.database_url:
+        # Override DB URL when running on Fly.io (/app/data volume exists)
+        # This takes priority over the DATABASE_URL env var/secret so a stale
+        # secret pointing outside the volume doesn't cause data loss.
+        if os.path.isdir("/app/data"):
+            object.__setattr__(self, "database_url", "sqlite:////app/data/newslet.db")
+        elif not self.database_url:
             object.__setattr__(self, "database_url", _default_db_url())
 
     # Scheduler
