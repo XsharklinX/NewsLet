@@ -52,11 +52,22 @@ def _record_failure(source: Source, db: Session, error: str) -> None:
     db.commit()
 
 
+_SOURCE_TIMEOUT = 30  # seconds per source
+
+
 async def fetch_rss_source(source: Source, db: Session) -> int:
-    """Fetch a single RSS source. Returns number of new articles inserted."""
+    """Fetch a single RSS source with a per-source timeout. Returns new article count."""
     logger.info(f"Fetching RSS: {source.name} ({source.url})")
     try:
-        entries = await asyncio.to_thread(_parse_feed, source.url)
+        entries = await asyncio.wait_for(
+            asyncio.to_thread(_parse_feed, source.url),
+            timeout=_SOURCE_TIMEOUT,
+        )
+    except asyncio.TimeoutError:
+        err = f"Timeout after {_SOURCE_TIMEOUT}s"
+        _record_failure(source, db, err)
+        logger.warning(f"RSS timeout: {source.name}")
+        return 0
     except Exception as e:
         _record_failure(source, db, str(e))
         logger.error(f"Error fetching {source.name}: {e}")
@@ -90,14 +101,24 @@ async def fetch_rss_source(source: Source, db: Session) -> int:
     return new_count
 
 
+_MAX_CONCURRENT = 5  # max parallel RSS fetches to avoid hammering
+
+
 async def fetch_all_rss(db: Session) -> int:
-    """Fetch all active RSS sources. Returns total new articles."""
-    sources = db.query(Source).filter(Source.source_type == "rss", Source.is_active == True).all()
-    total = 0
-    for source in sources:
-        try:
-            count = await fetch_rss_source(source, db)
-            total += count
-        except Exception as e:
-            logger.error(f"Error fetching {source.name}: {e}")
-    return total
+    """Fetch all active RSS sources with bounded concurrency. Returns total new articles."""
+    sources = db.query(Source).filter(
+        Source.source_type == "rss", Source.is_active == True
+    ).all()
+
+    semaphore = asyncio.Semaphore(_MAX_CONCURRENT)
+
+    async def _bounded(source: Source) -> int:
+        async with semaphore:
+            try:
+                return await fetch_rss_source(source, db)
+            except Exception as e:
+                logger.error(f"fetch_all_rss unexpected error for {source.name}: {e}")
+                return 0
+
+    results = await asyncio.gather(*(_bounded(s) for s in sources), return_exceptions=True)
+    return sum(r for r in results if isinstance(r, int))

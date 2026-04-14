@@ -1,6 +1,8 @@
 import asyncio
 import logging
+import shutil
 from datetime import datetime, timedelta
+from pathlib import Path
 
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.triggers.cron import CronTrigger
@@ -15,16 +17,26 @@ logger = logging.getLogger(__name__)
 scheduler = AsyncIOScheduler()
 
 
+_FETCH_TIMEOUT = 5 * 60  # 5 minutes max per full fetch cycle
+
+
 async def job_fetch_all():
     """
-    Full fetch pipeline:
-    1. Parallel fetch from all sources
+    Full fetch pipeline with a 5-minute hard timeout to avoid hanging forever.
+    1. Parallel fetch from all sources (each source has its own httpx timeout)
     2. Keyword alerts on new articles
     3. Auto-summarize new articles immediately
     4. Broadcast live update via WebSocket
     5. Push in-app notification
     """
     logger.info("Scheduler: starting fetch cycle")
+    try:
+        await asyncio.wait_for(_fetch_all_impl(), timeout=_FETCH_TIMEOUT)
+    except asyncio.TimeoutError:
+        logger.error(f"Scheduler: fetch cycle timed out after {_FETCH_TIMEOUT}s")
+
+
+async def _fetch_all_impl():
     db = SessionLocal()
     try:
         cutoff = datetime.utcnow() - timedelta(minutes=settings.fetch_interval_minutes + 2)
@@ -33,7 +45,7 @@ async def job_fetch_all():
         from app.services.newsapi_fetcher import fetch_all_newsapi
         from app.services.web_scraper import fetch_all_scrapers
 
-        # Run all fetchers in parallel
+        # Run all fetchers in parallel (each uses its own httpx client with timeouts)
         rss, newsapi, scraped = await asyncio.gather(
             fetch_all_rss(db),
             fetch_all_newsapi(db),
@@ -88,13 +100,13 @@ async def job_fetch_all():
 
 
 async def job_daily_digest():
-    """Send daily digest respecting DigestConfig settings."""
+    """Send daily digest to owner + all active subscribers."""
     logger.info("Scheduler: sending daily digest")
     db = SessionLocal()
     try:
         cfg = db.query(DigestConfig).first()
-        count      = cfg.count     if cfg else 10
-        min_score  = cfg.min_score if cfg else 0
+        count       = cfg.count     if cfg else 10
+        min_score   = cfg.min_score if cfg else 0
         cats_filter = (
             [c.strip() for c in cfg.categories.split(",")]
             if cfg and cfg.categories else None
@@ -114,8 +126,32 @@ async def job_daily_digest():
 
         articles = query.order_by(Article.fetched_at.desc()).limit(count).all()
 
+        # Send to owner channel
         from app.services.telegram_notifier import send_digest
         await send_digest(articles)
+
+        # Broadcast digest summary to public subscribers
+        if articles:
+            try:
+                from app.services.telegram_bot import broadcast_to_subscribers
+                from app.services.telegram_notifier import _esc
+                lines = [f"📰 <b>Digest diario — {len(articles)} noticias</b>\n"]
+                for i, a in enumerate(articles[:5], 1):
+                    summary = ""
+                    if a.summary:
+                        summary = a.summary.summary_text[:120] + "…"
+                    cat = f" · {a.category}" if a.category else ""
+                    lines.append(f"<b>{i}. {_esc(a.title)}</b>{cat}")
+                    if summary:
+                        lines.append(f"   {_esc(summary)}")
+                    lines.append(f'   <a href="{a.url}">Leer más</a>\n')
+                if len(articles) > 5:
+                    lines.append(f"<i>… y {len(articles) - 5} noticias más</i>")
+                lines.append("\n💬 /noticias para ver todas · /cancelar para darte de baja")
+                await broadcast_to_subscribers("\n".join(lines))
+                logger.info("Scheduler: digest broadcast to subscribers")
+            except Exception as e:
+                logger.warning(f"Subscriber broadcast error: {e}")
 
         from app.services.notification_service import push
         push(db, "digest", "Digest diario enviado",
@@ -126,6 +162,51 @@ async def job_daily_digest():
         logger.exception(f"Scheduler digest error: {e}")
     finally:
         db.close()
+
+
+async def job_backup_db():
+    """
+    Daily SQLite backup — copies the DB file to BACKUP_DIR with a timestamp.
+    Keeps only the last 7 backups to avoid filling the volume.
+    """
+    if not settings.backup_dir:
+        return
+
+    backup_dir = Path(settings.backup_dir)
+    backup_dir.mkdir(parents=True, exist_ok=True)
+
+    # Resolve source DB path from the SQLAlchemy URL
+    db_url = settings.database_url
+    if db_url.startswith("sqlite:////"):
+        db_path = Path(db_url[len("sqlite:////"):])
+    elif db_url.startswith("sqlite:///"):
+        db_path = Path(db_url[len("sqlite:///"):])
+    else:
+        logger.warning("Backup: unsupported DB URL scheme, skipping")
+        return
+
+    if not db_path.exists():
+        logger.warning(f"Backup: DB file not found at {db_path}")
+        return
+
+    timestamp = datetime.utcnow().strftime("%Y%m%d_%H%M%S")
+    dest = backup_dir / f"newslet_{timestamp}.db"
+
+    try:
+        shutil.copy2(db_path, dest)
+        logger.info(f"Backup: DB copied to {dest}")
+    except Exception as e:
+        logger.error(f"Backup: failed to copy DB — {e}")
+        return
+
+    # Rotate — keep only 7 most recent backups
+    backups = sorted(backup_dir.glob("newslet_*.db"), key=lambda p: p.stat().st_mtime)
+    for old in backups[:-7]:
+        try:
+            old.unlink()
+            logger.info(f"Backup: rotated old backup {old.name}")
+        except Exception:
+            pass
 
 
 async def job_cleanup():
@@ -184,6 +265,8 @@ def reschedule_digest(hour: int):
 
 
 def start_scheduler():
+    import os
+
     # Parallel fetch + auto-summarize every N minutes
     scheduler.add_job(
         job_fetch_all,
@@ -192,7 +275,7 @@ def start_scheduler():
         misfire_grace_time=60,
     )
 
-    # Daily digest
+    # Daily digest — read hour from DB config
     db = SessionLocal()
     try:
         cfg = db.query(DigestConfig).first()
@@ -213,6 +296,20 @@ def start_scheduler():
         IntervalTrigger(hours=2),
         id="topic_cluster", replace_existing=True,
     )
+
+    # Daily DB backup at 02:00 UTC — auto-enabled on Fly.io if volume exists
+    effective_backup_dir = settings.backup_dir or (
+        "/app/data/backups" if os.path.isdir("/app/data") else ""
+    )
+    if effective_backup_dir:
+        # Patch settings so job_backup_db picks it up
+        object.__setattr__(settings, "backup_dir", effective_backup_dir)
+        scheduler.add_job(
+            job_backup_db,
+            CronTrigger(hour=2, minute=0),
+            id="db_backup", replace_existing=True,
+        )
+        logger.info(f"DB backup scheduled → {effective_backup_dir}")
 
     # Weekly cleanup — every Sunday at 03:00
     scheduler.add_job(

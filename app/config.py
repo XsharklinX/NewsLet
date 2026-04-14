@@ -1,4 +1,15 @@
+import os
 from pydantic_settings import BaseSettings
+
+
+def _default_db_url() -> str:
+    """
+    In production (Fly.io) the persistent volume is mounted at /app/data.
+    Use that path if it exists; otherwise fall back to the local dev path.
+    """
+    if os.path.isdir("/app/data"):
+        return "sqlite:////app/data/newslet.db"
+    return "sqlite:///./newslet.db"
 
 
 class Settings(BaseSettings):
@@ -18,14 +29,26 @@ class Settings(BaseSettings):
 
     # Telegram
     telegram_bot_token: str = ""
-    telegram_chat_id: str = ""
+    telegram_chat_id: str = ""          # owner / primary admin chat ID
 
-    # Database
-    database_url: str = "sqlite:///./newsbot.db"
+    # Telegram admin IDs — comma-separated list of chat IDs that can use
+    # admin commands. TELEGRAM_CHAT_ID is always included automatically.
+    telegram_admin_ids: str = ""
+
+    # Database — auto-resolves to /app/data/newslet.db on Fly.io
+    database_url: str = ""
+
+    def model_post_init(self, __context) -> None:
+        # Set DB URL after init if not provided via env
+        if not self.database_url:
+            object.__setattr__(self, "database_url", _default_db_url())
 
     # Scheduler
     fetch_interval_minutes: int = 30
     digest_hour: int = 8
+
+    # Timezone for display / digest scheduling (pytz name, e.g. "America/Argentina/Buenos_Aires")
+    app_timezone: str = "America/Argentina/Buenos_Aires"
 
     # AI Enrichment
     relevance_threshold: int = 5       # min score (1-10) to auto-send to Telegram
@@ -60,7 +83,21 @@ class Settings(BaseSettings):
     # Source health
     source_max_failures: int = 5     # auto-disable after N consecutive failures
 
+    # Backup — set to path of a writable directory to enable daily DB backups
+    backup_dir: str = ""              # e.g. "/app/data/backups"
+
     model_config = {"env_file": ".env", "env_file_encoding": "utf-8"}
+
+    def get_admin_ids(self) -> set[str]:
+        """Return the full set of Telegram admin chat IDs."""
+        ids: set[str] = set()
+        if self.telegram_chat_id:
+            ids.add(str(self.telegram_chat_id).strip())
+        for raw in self.telegram_admin_ids.split(","):
+            stripped = raw.strip()
+            if stripped:
+                ids.add(stripped)
+        return ids
 
 
 settings = Settings()

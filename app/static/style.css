@@ -1757,23 +1757,6 @@ kbd {
   .kanban-board { grid-template-columns: repeat(2, 1fr); }
   .dashboard-grid { grid-template-columns: 1fr; }
 }
-@media (max-width: 900px) {
-  :root { --sidebar-w: 220px; }
-}
-@media (max-width: 700px) {
-  .app { grid-template-columns: 1fr; }
-  .sidebar {
-    transform: translateX(-100%);
-    box-shadow: 4px 0 20px rgba(0,0,0,0.5);
-  }
-  .sidebar.mobile-open { transform: translateX(0); }
-  .main { margin-left: 0; }
-  .topbar { padding: 0 16px; }
-  .content { padding: 16px; }
-  .kanban-board { grid-template-columns: 1fr; }
-  .charts-grid { grid-template-columns: 1fr; }
-  .stats-grid { grid-template-columns: repeat(2, 1fr); }
-}
 
 /* ═══════════════════════════════════════════════
    COMPATIBILITY — JS-generated class names
@@ -3440,7 +3423,7 @@ kbd {
   transition: all var(--transition);
 }
 .mob-toggle:hover { transform: scale(1.05); }
-@media (max-width: 700px) { .mob-toggle { display: flex; align-items: center; justify-content: center; } }
+/* .mob-toggle show/hide handled in the main @media (max-width: 700px) block */
 
 /* Toast (updated) */
 .toast {
@@ -3477,23 +3460,7 @@ kbd {
   border-top: 1px solid var(--border);
 }
 
-/* Responsive adjustments */
-@media (max-width: 900px) {
-  .kanban-board { grid-template-columns: repeat(2, 1fr); }
-  .stats-row { grid-template-columns: repeat(2, 1fr); padding: 16px; }
-  .toolbar { padding: 10px 16px; }
-  .content, .article-list, .kw-list, .src-grid,
-  .charts-grid, .heatmap-section, .cfg-grid, .wh-list,
-  .trending-cloud, .pills-row, .kw-add-row, .wh-info-bar,
-  .sec-head, .paging { padding-left: 16px; padding-right: 16px; }
-  .topbar { padding: 0 16px; }
-}
-@media (max-width: 600px) {
-  .kanban-board { grid-template-columns: 1fr; }
-  .charts-grid { grid-template-columns: 1fr; }
-  .cfg-grid { grid-template-columns: 1fr; }
-  .stats-row { grid-template-columns: repeat(2, 1fr); }
-}
+/* Responsive adjustments (tablet — merged into tablet tweaks block below) */
 
 /* ═══════════════════════════════════════════════
    ADMIN SETTINGS PAGE
@@ -3754,7 +3721,14 @@ kbd {
 /* Tablet tweaks (701px – 900px) */
 @media (min-width: 701px) and (max-width: 900px) {
   :root { --sidebar-w: 200px; }
-  .stats-row { grid-template-columns: repeat(3, 1fr); }
+  .kanban-board { grid-template-columns: repeat(2, 1fr); }
+  .stats-row { grid-template-columns: repeat(3, 1fr); padding: 16px; }
+  .toolbar { padding: 10px 16px; }
+  .content, .article-list, .kw-list, .src-grid,
+  .charts-grid, .heatmap-section, .cfg-grid, .wh-list,
+  .trending-cloud, .pills-row, .kw-add-row, .wh-info-bar,
+  .sec-head, .paging { padding-left: 16px; padding-right: 16px; }
+  .topbar { padding: 0 16px; }
   #art-list.view-grid, #dash-list.view-grid {
     grid-template-columns: repeat(2, 1fr);
   }

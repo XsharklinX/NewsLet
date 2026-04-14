@@ -11,7 +11,7 @@ from fastapi.staticfiles import StaticFiles
 from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 
-from app.api.routes import router
+from app.api.routes import router, public_router
 from app.api.websocket import manager as ws_manager
 from app.config import settings
 from app.database import SessionLocal, create_tables, engine
@@ -114,6 +114,11 @@ def run_db_migrations():
                 logger.info(f"Migration: added sources.{col} column")
 
         conn.commit()
+
+    # create_all handles the subscribers table if it doesn't exist
+    from app.models.article import Subscriber  # noqa — ensure model is imported
+    from app.database import Base
+    Base.metadata.create_all(bind=engine)
 
 
 def seed_sources():
@@ -222,7 +227,9 @@ app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 # PIN middleware (no-op if PANEL_PIN not set in .env)
 app.middleware("http")(pin_middleware)
 
-# API routes
+# Public routes (no auth) — must be registered BEFORE the protected router
+app.include_router(public_router)
+# Protected routes (JWT required when ADMIN_PASSWORD is set)
 app.include_router(router)
 
 

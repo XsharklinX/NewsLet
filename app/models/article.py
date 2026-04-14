@@ -78,3 +78,16 @@ class Summary(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
 
     article: Mapped["Article"] = relationship(back_populates="summary")
+
+
+class Subscriber(Base):
+    """Public Telegram subscribers who opted in via /suscribir."""
+    __tablename__ = "subscribers"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    chat_id: Mapped[str] = mapped_column(String(50), unique=True, nullable=False)
+    username: Mapped[str | None] = mapped_column(String(200), nullable=True)
+    first_name: Mapped[str | None] = mapped_column(String(200), nullable=True)
+    is_active: Mapped[bool] = mapped_column(Boolean, default=True)
+    subscribed_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    last_seen_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
