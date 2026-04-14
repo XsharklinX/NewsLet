@@ -4,11 +4,10 @@ from pydantic_settings import BaseSettings
 
 def _default_db_url() -> str:
     """
-    In production (Fly.io) the persistent volume is mounted at /app/data.
-    Use that path if it exists; otherwise fall back to the local dev path.
+    Resolve the best DB path for the current environment:
+    - Railway: uses DATABASE_URL env var pointing to a volume mount
+    - Local dev: ./newslet.db
     """
-    if os.path.isdir("/app/data"):
-        return "sqlite:////app/data/newslet.db"
     return "sqlite:///./newslet.db"
 
 
@@ -39,12 +38,8 @@ class Settings(BaseSettings):
     database_url: str = ""
 
     def model_post_init(self, __context) -> None:
-        # Override DB URL when running on Fly.io (/app/data volume exists)
-        # This takes priority over the DATABASE_URL env var/secret so a stale
-        # secret pointing outside the volume doesn't cause data loss.
-        if os.path.isdir("/app/data"):
-            object.__setattr__(self, "database_url", "sqlite:////app/data/newslet.db")
-        elif not self.database_url:
+        # If DATABASE_URL wasn't set via env, use the default
+        if not self.database_url:
             object.__setattr__(self, "database_url", _default_db_url())
 
     # Scheduler
