@@ -63,6 +63,14 @@
     </nav>
 
     <nav class="nav-section">
+      <div class="nav-label">Sistema</div>
+      <button class="nav-item" onclick="go('logs')" data-v="logs">
+        <svg class="ni" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3 4a1 1 0 000 2h14a1 1 0 100-2H3zm0 4a1 1 0 000 2h14a1 1 0 100-2H3zm0 4a1 1 0 000 2h7a1 1 0 100-2H3z" clip-rule="evenodd"/></svg>
+        Logs <span id="health-dot-nav" style="width:7px;height:7px;border-radius:50%;background:#6b7280;display:inline-block;margin-left:4px"></span>
+      </button>
+    </nav>
+
+    <nav class="nav-section">
       <div class="nav-label">Distribución</div>
       <button class="nav-item" onclick="go('webhooks')" data-v="webhooks">
         <svg class="ni" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M12.586 4.586a2 2 0 112.828 2.828l-3 3a2 2 0 01-2.828 0 1 1 0 00-1.414 1.414 4 4 0 005.656 0l3-3a4 4 0 00-5.656-5.656l-1.5 1.5a1 1 0 101.414 1.414l1.5-1.5zm-5 5a2 2 0 012.828 0 1 1 0 101.414-1.414 4 4 0 00-5.656 0l-3 3a4 4 0 105.656 5.656l1.5-1.5a1 1 0 10-1.414-1.414l-1.5 1.5a2 2 0 11-2.828-2.828l3-3z" clip-rule="evenodd"/></svg>
@@ -102,11 +110,21 @@
         <button class="theme-btn" onclick="toggleTheme()" title="Cambiar tema" id="theme-btn">☀</button>
         <button id="logout-btn" class="theme-btn" onclick="logout()" title="Cerrar sesión" style="display:none;font-size:14px;">⏻</button>
       </div>
-      <!-- Notification bell -->
-      <button class="notif-btn" onclick="openNotifications()" id="notif-btn" title="Notificaciones">
-        <svg viewBox="0 0 20 20" fill="currentColor" style="width:18px;height:18px"><path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z"/></svg>
-        <span class="notif-badge" id="notif-badge" style="display:none">0</span>
+      <!-- PWA Install button (shown only when available) -->
+      <button id="pwa-install-btn" onclick="installPWA()" style="display:none;width:100%;margin-bottom:6px;background:rgba(99,102,241,0.15);border:1px solid rgba(99,102,241,0.3);color:#818cf8;border-radius:8px;padding:6px 12px;font-size:12px;cursor:pointer;font-weight:600">
+        📱 Instalar app
       </button>
+      <!-- Health + Notification row -->
+      <div style="display:flex;align-items:center;gap:8px;margin-top:6px">
+        <div id="health-indicator" onclick="go('logs')" title="Estado del sistema" style="cursor:pointer;display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text-muted)">
+          <span id="health-dot" style="width:8px;height:8px;border-radius:50%;background:#6b7280;display:inline-block;flex-shrink:0"></span>
+          <span id="health-label">Verificando...</span>
+        </div>
+        <button class="notif-btn" onclick="openNotifications()" id="notif-btn" title="Notificaciones" style="margin-left:auto">
+          <svg viewBox="0 0 20 20" fill="currentColor" style="width:18px;height:18px"><path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z"/></svg>
+          <span class="notif-badge" id="notif-badge" style="display:none">0</span>
+        </button>
+      </div>
     </div>
   </aside>
 
@@ -170,6 +188,34 @@
         </div>
       </div>
 
+      <!-- Dashboard mini-widgets row -->
+      <div class="dash-widgets-row">
+        <!-- Trending topics mini widget -->
+        <div class="dash-widget">
+          <div class="dash-widget-head">
+            <span>🔥 Trending (24h)</span>
+            <button class="btn btn-g btn-xs" onclick="go('trending')">Ver →</button>
+          </div>
+          <div id="dash-trending-mini" class="dash-trending-mini">Cargando...</div>
+        </div>
+        <!-- Activity mini heatmap (by hour today) -->
+        <div class="dash-widget">
+          <div class="dash-widget-head">
+            <span>📊 Actividad por hora</span>
+            <button class="btn btn-g btn-xs" onclick="go('heatmap')">Ver →</button>
+          </div>
+          <div id="dash-heatmap-mini" class="dash-hm-mini">Cargando...</div>
+        </div>
+        <!-- Top articles by score -->
+        <div class="dash-widget">
+          <div class="dash-widget-head">
+            <span>⭐ Más relevantes hoy</span>
+            <button class="btn btn-g btn-xs" onclick="go('arts')">Ver →</button>
+          </div>
+          <div id="dash-top-mini" class="dash-top-mini">Cargando...</div>
+        </div>
+      </div>
+
       <div class="sec-head">
         <h3>Últimos artículos</h3>
         <div style="display:flex;gap:8px;align-items:center">
@@ -218,6 +264,8 @@
           <option value="neutral">Neutral 😐</option>
           <option value="negative">Negativo 😟</option>
         </select>
+        <input type="date" id="date-from" class="src-select" onchange="onDateFilter()" title="Desde" style="max-width:130px">
+        <input type="date" id="date-to" class="src-select" onchange="onDateFilter()" title="Hasta" style="max-width:130px">
         <div class="view-toggle" id="art-view-toggle">
           <button class="vt-btn on" onclick="setArtView('list',this)" title="Lista">☰</button>
           <button class="vt-btn" onclick="setArtView('grid',this)" title="Grid">⊞</button>
@@ -654,6 +702,34 @@
       </div>
     </div>
 
+    <!-- ─── LOGS ──────────────────────────────── -->
+    <div class="view" id="v-logs">
+      <div class="topbar">
+        <div class="topbar-left">
+          <h2>Logs del sistema</h2>
+          <div id="health-status-badge" style="display:flex;align-items:center;gap:6px;padding:4px 10px;border-radius:20px;background:rgba(99,102,241,0.12);font-size:12px;font-weight:600">
+            <span id="health-status-dot" style="width:8px;height:8px;border-radius:50%;background:#6b7280"></span>
+            <span id="health-status-text">Verificando...</span>
+          </div>
+        </div>
+        <div class="topbar-right">
+          <select id="log-lines" class="src-select" onchange="loadLogs()">
+            <option value="50">Últimas 50 líneas</option>
+            <option value="100" selected>Últimas 100 líneas</option>
+            <option value="200">Últimas 200 líneas</option>
+            <option value="500">Últimas 500 líneas</option>
+          </select>
+          <button class="btn btn-p btn-sm" onclick="loadLogs()">↻ Actualizar</button>
+        </div>
+      </div>
+      <!-- Health checks grid -->
+      <div id="health-checks-grid" class="health-grid" style="margin-bottom:16px"></div>
+      <!-- Log output -->
+      <div class="log-container">
+        <pre id="log-output" class="log-output">Cargando logs...</pre>
+      </div>
+    </div>
+
   </main>
 </div>
 
@@ -722,9 +798,19 @@
         <h3 id="r-title"></h3>
         <div class="reader-meta" id="r-meta"></div>
       </div>
-      <button class="btn btn-g btn-sm" onclick="closeReader()">✕</button>
+      <div style="display:flex;gap:6px;align-items:flex-start">
+        <button id="r-save-btn" class="btn btn-g btn-sm" onclick="toggleSave()" title="Guardar artículo">🔖</button>
+        <button class="btn btn-g btn-sm" onclick="closeReader()">✕</button>
+      </div>
     </div>
     <img id="r-thumb" class="reader-thumb" src="" alt="" style="display:none">
+    <!-- Structured summary (new format) -->
+    <div id="r-structured" class="reader-structured" style="display:none">
+      <div class="rs-item rs-keypoint"><span class="rs-label">🎯 Punto clave</span><p id="r-keypoint"></p></div>
+      <div class="rs-item rs-context"><span class="rs-label">📌 Contexto</span><p id="r-context"></p></div>
+      <div class="rs-item rs-impact"><span class="rs-label">💥 Impacto</span><p id="r-impact"></p></div>
+    </div>
+    <!-- Fallback plain summary -->
     <div class="reader-summary" id="r-summary"></div>
     <div class="reader-body" id="r-body"></div>
     <div class="reader-foot">
@@ -778,11 +864,28 @@
 <div class="sidebar-backdrop" id="sidebar-backdrop" onclick="closeSidebar()"></div>
 <button class="mob-toggle" id="mob-toggle" onclick="toggleSidebar()">☰</button>
 <div id="toast" class="toast"></div>
+<script src="js/api.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/articles.js"></script>
+<script src="js/kanban.js"></script>
+<script src="js/sources.js"></script>
+<script src="js/charts.js"></script>
+<script src="js/config.js"></script>
+<script src="js/health.js"></script>
 <script src="app.js"></script>
 <script>
   // Service Worker registration (PWA)
   if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('/sw.js').catch(() => {});
+    navigator.serviceWorker.register('/sw.js').then(reg => {
+      // Show install prompt when available
+      window.addEventListener('beforeinstallprompt', e => {
+        e.preventDefault();
+        window._pwaPrompt = e;
+        // Show install button if it exists
+        const btn = document.getElementById('pwa-install-btn');
+        if (btn) btn.style.display = 'inline-flex';
+      });
+    }).catch(() => {});
   }
   // JWT Auth check + show logout button
   (async () => {

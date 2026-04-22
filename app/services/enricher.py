@@ -31,9 +31,12 @@ EJEMPLOS:
 - "Gobierno anuncia reforma fiscal que afecta salarios" → score: 8, sentiment: negative
 - "Terremoto magnitude 7.2 sacude la capital, víctimas" → score: 10, sentiment: negative
 
-Formato de respuesta:
+Formato de respuesta (resumen en 3 partes estructuradas):
 {{
-  "summary": "<resumen en español, 2-3 oraciones directas: quién, qué, cuándo, dónde, impacto>",
+  "summary": "<resumen completo en español, 2-3 oraciones: quién, qué, cuándo, dónde, impacto>",
+  "key_point": "<1 oración: el hecho central de la noticia>",
+  "context_note": "<1 oración: antecedente o contexto necesario para entenderla>",
+  "impact": "<1 oración: consecuencia concreta o quiénes se ven afectados>",
   "category": "<categoría>",
   "score": <entero 1-10>,
   "sentiment": "<positive|neutral|negative>"
@@ -73,21 +76,23 @@ async def _call_ai(content: str) -> str:
     return resp.choices[0].message.content.strip()
 
 
-def _parse_response(raw: str) -> tuple[str | None, str | None, int | None, str | None]:
-    """Parse AI JSON response into (summary, category, score, sentiment)."""
-    # Strip markdown code blocks
+def _parse_response(raw: str) -> tuple[str | None, str | None, str | None, str | None, str | None, int | None, str | None]:
+    """Parse AI JSON → (summary, key_point, context_note, impact, category, score, sentiment)."""
     if raw.startswith("```"):
         raw = raw.split("```")[1]
         if raw.startswith("json"):
             raw = raw[4:]
         raw = raw.strip()
 
-    data = json.loads(raw)  # raises json.JSONDecodeError if invalid
+    data = json.loads(raw)
 
-    summary   = (data.get("summary") or "").strip() or None
-    category  = data.get("category")
-    score     = data.get("score")
-    sentiment = data.get("sentiment", "neutral")
+    summary      = (data.get("summary") or "").strip() or None
+    key_point    = (data.get("key_point") or "").strip() or None
+    context_note = (data.get("context_note") or "").strip() or None
+    impact       = (data.get("impact") or "").strip() or None
+    category     = data.get("category")
+    score        = data.get("score")
+    sentiment    = data.get("sentiment", "neutral")
 
     if category not in VALID_CATEGORIES:
         category = None
@@ -97,18 +102,17 @@ def _parse_response(raw: str) -> tuple[str | None, str | None, int | None, str |
             score = None
     except (TypeError, ValueError):
         score = None
-
     if sentiment not in VALID_SENTIMENTS:
         sentiment = "neutral"
 
-    return summary, category, score, sentiment
+    return summary, key_point, context_note, impact, category, score, sentiment
 
 
 async def enrich_article(
     title: str, text: str
-) -> tuple[str | None, str | None, int | None, str | None]:
+) -> tuple[str | None, str | None, str | None, str | None, str | None, int | None, str | None]:
     """
-    Single AI call → (summary, category, score, sentiment). All can be None.
+    Single AI call → (summary, key_point, context_note, impact, category, score, sentiment).
     Retries up to MAX_ATTEMPTS times with exponential backoff on JSON parse failure.
     """
     content = f"Título: {title}\n\nTexto: {text[:6000]}"
@@ -117,7 +121,7 @@ async def enrich_article(
         try:
             raw = await _call_ai(content)
             result = _parse_response(raw)
-            summary, category, score, sentiment = result
+            _, _, _, _, category, score, sentiment = result
             logger.debug(f"Enriched: cat={category} score={score} sentiment={sentiment}")
             return result
 
@@ -135,6 +139,6 @@ async def enrich_article(
             if attempt + 1 < MAX_ATTEMPTS:
                 await asyncio.sleep(2 ** attempt)
             else:
-                return None, None, None, None
+                return None, None, None, None, None, None, None
 
-    return None, None, None, None
+    return None, None, None, None, None, None, None

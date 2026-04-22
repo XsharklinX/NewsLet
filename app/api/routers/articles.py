@@ -36,6 +36,7 @@ def list_articles(
     min_score: int | None = Query(None, ge=1, le=10),
     search: str | None = Query(None, max_length=200),
     date_from: str | None = Query(None, description="ISO datetime — only articles fetched after this"),
+    date_to:   str | None = Query(None, description="ISO datetime — only articles fetched before this"),
     page: int = Query(1, ge=1),
     page_size: int = Query(20, ge=1, le=100),
     db: Session = Depends(get_db),
@@ -62,6 +63,13 @@ def list_articles(
             from datetime import datetime as _dt
             cutoff = _dt.fromisoformat(date_from.replace("Z", "+00:00")).replace(tzinfo=None)
             query = query.filter(Article.fetched_at >= cutoff)
+        except ValueError:
+            pass
+    if date_to:
+        try:
+            from datetime import datetime as _dt
+            ceiling = _dt.fromisoformat(date_to.replace("Z", "+00:00")).replace(tzinfo=None)
+            query = query.filter(Article.fetched_at <= ceiling)
         except ValueError:
             pass
 

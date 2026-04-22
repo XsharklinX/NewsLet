@@ -49,13 +49,15 @@ async def summarize_article(article: Article, db: Session) -> Summary | None:
         logger.warning(f"Article {article.id} has too little text, skipping")
         return None
 
-    # Step 2: Single AI call (summary + category + score + sentiment)
-    summary_text, category, score, sentiment = None, None, None, None
+    # Step 2: Single AI call (summary + structured fields + category + score + sentiment)
+    summary_text, key_point, context_note, impact, category, score, sentiment = (
+        None, None, None, None, None, None, None
+    )
     if settings.enrich_articles:
         try:
             from app.services.enricher import enrich_article
-            summary_text, category, score, sentiment = await enrich_article(
-                article.title, ai_text
+            summary_text, key_point, context_note, impact, category, score, sentiment = (
+                await enrich_article(article.title, ai_text)
             )
         except Exception as e:
             logger.error(f"Enrichment failed for article {article.id}: {e}")
@@ -89,6 +91,9 @@ async def summarize_article(article: Article, db: Session) -> Summary | None:
     summary = Summary(
         article_id=article.id,
         summary_text=summary_text,
+        key_point=key_point,
+        context_note=context_note,
+        impact=impact,
         model_used=model_name,
         tokens_used=0,
     )
@@ -198,7 +203,7 @@ async def reenrich_articles(db: Session, limit: int = 50) -> int:
             continue
         try:
             from app.services.enricher import enrich_article
-            _, category, score, sentiment = await enrich_article(article.title, ai_text)
+            _, _, _, _, category, score, sentiment = await enrich_article(article.title, ai_text)
 
             updated = False
             if category and not article.category:

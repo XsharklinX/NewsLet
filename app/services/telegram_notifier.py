@@ -36,17 +36,40 @@ async def send_message(chat_id: str, text: str, parse_mode: str = "HTML", reply_
     return result is not None
 
 
-async def send_article(article: Article, db: Session) -> bool:
-    """Send a single article summary to Telegram and update status to 'sent'."""
-    summary_text = article.summary.summary_text if article.summary else "Sin resumen disponible."
+def _format_article_message(article: Article) -> str:
+    """Format an article as a Telegram HTML message, using structured summary when available."""
+    s = article.summary
 
-    # Use HTML parse mode - much simpler escaping
-    message = (
-        f"<b>{_esc(article.title)}</b>\n\n"
-        f"{_esc(summary_text)}\n\n"
-        f'<a href="{article.url}">Leer mas</a>'
+    # Metadata line
+    score_badge = f"⭐ {article.relevance_score}/10  " if article.relevance_score else ""
+    cat_badge   = f"🏷 {article.category}  " if article.category else ""
+    sentiment_icon = {"positive": "🟢", "negative": "🔴", "neutral": "🔵"}.get(
+        article.sentiment or "", ""
     )
 
+    meta = f"{score_badge}{cat_badge}{sentiment_icon}".strip()
+    header = f"<b>{_esc(article.title)}</b>"
+    if meta:
+        header += f"\n<i>{meta}</i>"
+
+    # Structured summary (new format) or plain fallback
+    if s and s.key_point:
+        body = (
+            f"\n🎯 <b>Punto clave:</b> {_esc(s.key_point)}"
+            + (f"\n📌 <b>Contexto:</b> {_esc(s.context_note)}" if s.context_note else "")
+            + (f"\n💥 <b>Impacto:</b> {_esc(s.impact)}" if s.impact else "")
+        )
+    elif s:
+        body = f"\n{_esc(s.summary_text)}"
+    else:
+        body = "\n<i>Sin resumen disponible.</i>"
+
+    return f"{header}{body}\n\n<a href=\"{article.url}\">Leer artículo completo →</a>"
+
+
+async def send_article(article: Article, db: Session) -> bool:
+    """Send a single article summary to Telegram and update status to 'sent'."""
+    message = _format_article_message(article)
     success = await send_message(settings.telegram_chat_id, message)
     if success:
         article.status = "sent"
@@ -58,14 +81,19 @@ async def send_article(article: Article, db: Session) -> bool:
 async def send_digest(articles: list[Article]) -> bool:
     """Send a daily digest with multiple article summaries."""
     if not articles:
-        return await send_message(settings.telegram_chat_id, "<b>Digest del dia</b>\n\nNo hay noticias nuevas hoy.")
+        return await send_message(settings.telegram_chat_id, "<b>📰 Digest del día</b>\n\nNo hay noticias nuevas hoy.")
 
-    lines = ["<b>Digest del dia</b>\n"]
+    lines = [f"<b>📰 Digest del día</b> — {len(articles)} noticias\n"]
     for i, article in enumerate(articles, 1):
-        summary = article.summary.summary_text if article.summary else "Sin resumen."
-        lines.append(f"<b>{i}. {_esc(article.title)}</b>")
-        lines.append(f"{_esc(summary)}")
-        lines.append(f'<a href="{article.url}">Leer</a>\n')
+        s = article.summary
+        score = f" ⭐{article.relevance_score}" if article.relevance_score else ""
+        lines.append(f"<b>{i}.{score} {_esc(article.title)}</b>")
+        if s and s.key_point:
+            lines.append(f"🎯 {_esc(s.key_point)}")
+        elif s:
+            snippet = s.summary_text[:150].rstrip()
+            lines.append(_esc(snippet + ("..." if len(s.summary_text) > 150 else "")))
+        lines.append(f'<a href="{article.url}">Leer →</a>\n')
 
     message = "\n".join(lines)
     if len(message) > 4000:

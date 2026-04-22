@@ -25,12 +25,13 @@ _offset = 0
 # ── Command sets ──────────────────────────────────────────────────────────
 # Public users can use these commands (read-only, no moderation power)
 PUBLIC_COMMANDS = {"/start", "/help", "/noticias", "/buscar",
-                   "/leer", "/suscribir", "/cancelar"}
+                   "/leer", "/suscribir", "/cancelar", "/trending"}
 
 ADMIN_HELP = """<b>NewsLet Pro — Admin</b>
 
 <b>📰 Noticias</b>
-/noticias — Últimas noticias (con botones de acción)
+/noticias — Últimas noticias (paginadas, con botones)
+/trending — Noticias más relevantes del día
 /buscar &lt;término&gt; — Buscar artículos
 /leer &lt;id&gt; — Leer artículo completo
 /aprobar &lt;id&gt; — Aprobar artículo
@@ -39,6 +40,7 @@ ADMIN_HELP = """<b>NewsLet Pro — Admin</b>
 <b>⚙️ Operaciones</b>
 /fetch — Buscar y resumir noticias ahora
 /digest — Enviar digest ahora
+/semanal — Informe semanal ahora
 /stats — Estadísticas + salud de fuentes
 
 <b>🔧 Configuración</b>
@@ -48,7 +50,8 @@ ADMIN_HELP = """<b>NewsLet Pro — Admin</b>
 
 PUBLIC_HELP = """<b>NewsLet Pro</b> — Noticias curadas en español
 
-/noticias — Últimas noticias
+/noticias — Últimas noticias (paginadas)
+/trending — Lo más relevante del día
 /buscar &lt;término&gt; — Buscar por tema
 /leer &lt;id&gt; — Leer artículo completo
 /suscribir — Recibir digest diario
@@ -155,36 +158,67 @@ async def cmd_misuscripcion(chat_id: str):
         db.close()
 
 
-async def cmd_noticias_public(chat_id: str):
-    """Public version — shows only 'sent' articles."""
+PAGE_SIZE = 5
+
+
+def _nav_buttons(page: int, total: int, action: str, extra: dict | None = None) -> list:
+    """Build ◀/▶ pagination inline keyboard row."""
+    pages = (total + PAGE_SIZE - 1) // PAGE_SIZE
+    if pages <= 1:
+        return []
+    row = []
+    if page > 0:
+        d = {"a": action, "p": page - 1}
+        if extra:
+            d.update(extra)
+        row.append({"text": "◀ Anterior", "callback_data": json.dumps(d)})
+    start = page * PAGE_SIZE + 1
+    end   = min(start + PAGE_SIZE - 1, total)
+    row.append({"text": f"{start}-{end} de {total}", "callback_data": "noop"})
+    if page < pages - 1:
+        d = {"a": action, "p": page + 1}
+        if extra:
+            d.update(extra)
+        row.append({"text": "Siguiente ▶", "callback_data": json.dumps(d)})
+    return [row] if row else []
+
+
+async def cmd_noticias_public(chat_id: str, page: int = 0):
+    """Public version — shows only 'sent' articles, paginated."""
     db = SessionLocal()
     try:
+        total = db.query(Article).filter(Article.status == "sent").count()
         articles = (
             db.query(Article)
             .options(joinedload(Article.summary), joinedload(Article.source))
             .filter(Article.status == "sent")
             .order_by(Article.fetched_at.desc())
-            .limit(5)
+            .offset(page * PAGE_SIZE)
+            .limit(PAGE_SIZE)
             .all()
         )
         if not articles:
             await send_message(chat_id, "Todavía no hay noticias publicadas. ¡Volvé más tarde!")
             return
 
-        for a in articles:
-            summary = a.summary.summary_text if a.summary else a.original_text or ""
-            if len(summary) > 200:
-                summary = summary[:200] + "…"
-            source_name = a.source.name if a.source else ""
+        start = page * PAGE_SIZE + 1
+        end   = min(start + PAGE_SIZE - 1, total)
+        header = f"<b>📰 Noticias</b>  <i>{start}-{end} de {total}</i>\n"
+        lines  = [header]
+        for i, a in enumerate(articles, start):
+            s = a.summary
+            summary = (s.key_point or s.summary_text[:150] + "…") if s else ""
+            src = a.source.name if a.source else ""
             cat = f" · {a.category}" if a.category else ""
-            text = (
-                f"<b>{_esc(a.title)}</b>\n\n"
-                f"{_esc(summary)}\n\n"
-                f"📌 {_esc(source_name)}{cat}\n"
-                f'<a href="{a.url}">Leer completo</a> · /leer {a.id}'
-            )
-            await send_message(chat_id, text)
-            await asyncio.sleep(0.4)
+            lines.append(f"<b>{i}. {_esc(a.title)}</b>")
+            if summary:
+                lines.append(f"   {_esc(summary)}")
+            lines.append(f"   📌 <i>{_esc(src)}{cat}</i>")
+            lines.append(f'   <a href="{a.url}">Leer</a> · /leer {a.id}\n')
+
+        nav = _nav_buttons(page, total, "noticias_pub")
+        await send_message(chat_id, "\n".join(lines),
+                           reply_markup={"inline_keyboard": nav} if nav else None)
     finally:
         db.close()
 
@@ -286,35 +320,49 @@ async def cmd_suscriptores(chat_id: str):
         db.close()
 
 
-async def cmd_noticias_admin(chat_id: str):
-    """Admin version — shows all recent articles with action buttons."""
+async def cmd_noticias_admin(chat_id: str, page: int = 0):
+    """Admin version — shows all recent articles with action buttons, paginated."""
     db = SessionLocal()
     try:
+        total    = db.query(Article).count()
         articles = (
             db.query(Article)
             .options(joinedload(Article.summary), joinedload(Article.source))
             .order_by(Article.fetched_at.desc())
-            .limit(5)
+            .offset(page * PAGE_SIZE)
+            .limit(PAGE_SIZE)
             .all()
         )
         if not articles:
             await send_message(chat_id, "No hay artículos. Usa /fetch para buscar.")
             return
 
+        start = page * PAGE_SIZE + 1
+        end   = min(start + PAGE_SIZE - 1, total)
+        await send_message(chat_id, f"<b>📋 Artículos</b>  <i>{start}-{end} de {total}</i>")
+
         for a in articles:
-            summary = a.summary.summary_text if a.summary else "Sin resumen"
-            source_name = a.source.name if a.source else "?"
+            s = a.summary
+            if s and s.key_point:
+                summary_line = f"🎯 {_esc(s.key_point)}"
+            elif s:
+                summary_line = _esc(s.summary_text[:160] + ("…" if len(s.summary_text) > 160 else ""))
+            else:
+                summary_line = "<i>Sin resumen</i>"
+
+            src   = a.source.name if a.source else "?"
             cat   = f" · {_esc(a.category)}" if a.category else ""
             score = f" · ⭐{a.relevance_score}/10" if a.relevance_score else ""
+            status_icon = {"pending": "⏳", "approved": "✅", "rejected": "❌", "sent": "📤"}.get(a.status, "")
             text = (
-                f"<b>{_esc(a.title)}</b>\n\n"
-                f"{_esc(summary)}\n\n"
-                f"📌 {_esc(source_name)}{cat}{score}\n"
-                f'<a href="{a.url}">Leer</a> · ID: {a.id}'
+                f"{status_icon} <b>{_esc(a.title)}</b>\n\n"
+                f"{summary_line}\n\n"
+                f"📌 <i>{_esc(src)}{cat}{score}</i> · ID: {a.id}\n"
+                f'<a href="{a.url}">Leer artículo →</a>'
             )
             buttons = []
             row = []
-            if not a.summary:
+            if not s:
                 row.append({"text": "🤖 Resumir", "callback_data": json.dumps({"a": "summarize", "id": a.id})})
             if a.status != "approved":
                 row.append({"text": "✅ Aprobar", "callback_data": json.dumps({"a": "approve", "id": a.id})})
@@ -322,11 +370,17 @@ async def cmd_noticias_admin(chat_id: str):
                 row.append({"text": "❌ Rechazar", "callback_data": json.dumps({"a": "reject", "id": a.id})})
             if row:
                 buttons.append(row)
-            if a.summary and a.status != "sent":
-                buttons.append([{"text": "📤 Enviar", "callback_data": json.dumps({"a": "send", "id": a.id})}])
+            if s and a.status not in ("sent", "rejected"):
+                buttons.append([{"text": "📤 Enviar a Telegram", "callback_data": json.dumps({"a": "send", "id": a.id})}])
 
             await send_message(chat_id, text, reply_markup={"inline_keyboard": buttons} if buttons else None)
-            await asyncio.sleep(0.4)
+            await asyncio.sleep(0.3)
+
+        # Pagination nav for the admin list
+        nav = _nav_buttons(page, total, "noticias_adm")
+        if nav:
+            await send_message(chat_id, "─── Navegación ───",
+                               reply_markup={"inline_keyboard": nav})
     finally:
         db.close()
 
@@ -361,6 +415,101 @@ async def cmd_buscar_admin(chat_id: str, term: str):
                 lines.append(f"   {_esc(summary)}")
             lines.append(f'   <a href="{a.url}">Leer</a> · /leer {a.id}\n')
         await send_message(chat_id, "\n".join(lines))
+    finally:
+        db.close()
+
+
+async def cmd_trending(chat_id: str):
+    """Show top articles by relevance score in the last 48 hours."""
+    from datetime import timedelta
+    db = SessionLocal()
+    try:
+        cutoff = datetime.utcnow() - timedelta(hours=48)
+        articles = (
+            db.query(Article)
+            .options(joinedload(Article.summary), joinedload(Article.source))
+            .filter(
+                Article.fetched_at >= cutoff,
+                Article.relevance_score.isnot(None),
+                Article.status != "rejected",
+            )
+            .order_by(Article.relevance_score.desc(), Article.fetched_at.desc())
+            .limit(8)
+            .all()
+        )
+        if not articles:
+            await send_message(chat_id, "No hay artículos con score en las últimas 48h. Prueba /fetch primero.")
+            return
+
+        lines = ["<b>🔥 Trending — más relevantes (48h)</b>\n"]
+        for i, a in enumerate(articles, 1):
+            s = a.summary
+            score = f"⭐{a.relevance_score}/10" if a.relevance_score else ""
+            sent_icon = {"positive": "🟢", "negative": "🔴", "neutral": "🔵"}.get(a.sentiment or "", "")
+            kp = _esc(s.key_point) if s and s.key_point else _esc((s.summary_text[:100] + "…") if s else "")
+            lines.append(f"<b>{i}. {score} {sent_icon} {_esc(a.title)}</b>")
+            if kp:
+                lines.append(f"   {kp}")
+            lines.append(f'   <a href="{a.url}">Leer →</a>\n')
+
+        await send_message(chat_id, "\n".join(lines))
+    finally:
+        db.close()
+
+
+async def cmd_semanal(chat_id: str):
+    """Send a weekly report summary via Telegram."""
+    from datetime import timedelta
+    from sqlalchemy import func
+    db = SessionLocal()
+    try:
+        cutoff = datetime.utcnow() - timedelta(days=7)
+        total      = db.query(Article).filter(Article.fetched_at >= cutoff).count()
+        sent_count = db.query(Article).filter(Article.fetched_at >= cutoff, Article.status == "sent").count()
+        avg_score  = db.query(func.avg(Article.relevance_score)).filter(
+            Article.fetched_at >= cutoff, Article.relevance_score.isnot(None)
+        ).scalar()
+
+        # Top 5 articles of the week
+        top = (
+            db.query(Article)
+            .options(joinedload(Article.summary))
+            .filter(Article.fetched_at >= cutoff, Article.relevance_score.isnot(None))
+            .order_by(Article.relevance_score.desc())
+            .limit(5)
+            .all()
+        )
+
+        # Category distribution
+        cat_rows = (
+            db.query(Article.category, func.count(Article.id))
+            .filter(Article.fetched_at >= cutoff, Article.category.isnot(None))
+            .group_by(Article.category)
+            .order_by(func.count(Article.id).desc())
+            .limit(4)
+            .all()
+        )
+
+        lines = [
+            "<b>📊 Informe Semanal — NewsLet Pro</b>\n",
+            f"📰 Artículos recolectados: <b>{total}</b>",
+            f"📤 Enviados a suscriptores: <b>{sent_count}</b>",
+            f"⭐ Score promedio: <b>{avg_score:.1f}/10</b>" if avg_score else "",
+        ]
+        if cat_rows:
+            cat_str = "  ·  ".join(f"{cat}: {n}" for cat, n in cat_rows)
+            lines.append(f"🏷 Categorías: {cat_str}")
+
+        lines.append("\n<b>🏆 Top 5 de la semana:</b>")
+        for i, a in enumerate(top, 1):
+            s = a.summary
+            kp = _esc(s.key_point) if s and s.key_point else ""
+            lines.append(f"<b>{i}. ⭐{a.relevance_score} {_esc(a.title)}</b>")
+            if kp:
+                lines.append(f"   {kp}")
+            lines.append(f'   <a href="{a.url}">Leer →</a>')
+
+        await send_message(chat_id, "\n".join(filter(None, lines)))
     finally:
         db.close()
 
@@ -736,11 +885,29 @@ async def handle_callback(cb: dict):
 
     # Moderation callbacks are admin-only
     ADMIN_ACTIONS = {"approve", "reject", "send", "summarize",
-                     "toggle_src", "toggle_kw", "refresh_fuentes", "reenable_src"}
+                     "toggle_src", "toggle_kw", "refresh_fuentes", "reenable_src",
+                     "noticias_adm"}
 
     if action in ADMIN_ACTIONS and not adm:
         await _tg("answerCallbackQuery", callback_query_id=cb_id,
                   text="⛔ Solo administradores")
+        return
+
+    # Pagination callbacks (no DB session needed for routing)
+    if action == "noop":
+        await _tg("answerCallbackQuery", callback_query_id=cb_id, text="")
+        return
+
+    if action == "noticias_pub":
+        page = payload.get("p", 0)
+        await _tg("answerCallbackQuery", callback_query_id=cb_id, text="Cargando...")
+        await cmd_noticias_public(chat_id, page)
+        return
+
+    if action == "noticias_adm":
+        page = payload.get("p", 0)
+        await _tg("answerCallbackQuery", callback_query_id=cb_id, text="Cargando...")
+        await cmd_noticias_admin(chat_id, page)
         return
 
     db = SessionLocal()
@@ -854,9 +1021,12 @@ async def _process_update(update: dict):
         # Public commands (available to everyone)
         elif cmd == "/noticias":
             if adm:
-                await cmd_noticias_admin(chat_id)
+                await cmd_noticias_admin(chat_id, 0)
             else:
-                await cmd_noticias_public(chat_id)
+                await cmd_noticias_public(chat_id, 0)
+
+        elif cmd == "/trending":
+            await cmd_trending(chat_id)
 
         elif cmd == "/buscar":
             if adm:
@@ -890,6 +1060,8 @@ async def _process_update(update: dict):
             await cmd_fetch(chat_id)
         elif cmd == "/digest":
             await cmd_digest(chat_id)
+        elif cmd == "/semanal":
+            await cmd_semanal(chat_id)
         elif cmd == "/fuentes":
             await cmd_fuentes(chat_id)
         elif cmd == "/config":

@@ -130,6 +130,19 @@ def run_db_migrations():
             if col not in src_cols:
                 conn.execute(text(sql))
                 logger.info(f"Migration: added sources.{col}")
+
+        # Summary structured fields
+        _summary_cols_sql = [
+            ("key_point",    "ALTER TABLE summaries ADD COLUMN key_point TEXT"),
+            ("context_note", "ALTER TABLE summaries ADD COLUMN context_note TEXT"),
+            ("impact",       "ALTER TABLE summaries ADD COLUMN impact TEXT"),
+        ]
+        sum_cols = existing("summaries")
+        for col, sql in _summary_cols_sql:
+            if col not in sum_cols:
+                conn.execute(text(sql))
+                logger.info(f"Migration: added summaries.{col}")
+
         conn.commit()
 
 

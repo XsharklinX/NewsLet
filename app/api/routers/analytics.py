@@ -148,3 +148,48 @@ def get_trending(
 
     topics = [TrendingTopic(word=w, count=c) for w, c in counter.most_common(limit)]
     return TrendingOut(topics=topics, window_hours=hours)
+
+
+@router.get("/logs")
+def get_logs(lines: int = Query(100, ge=10, le=500)):
+    """Return the last N lines from the application log file."""
+    from pathlib import Path
+    from app.config import settings
+
+    log_path = Path(settings.log_file)
+    if not log_path.exists():
+        return {"lines": [], "path": str(log_path)}
+
+    try:
+        with open(log_path, "r", encoding="utf-8", errors="replace") as f:
+            all_lines = f.readlines()
+        tail = [l.rstrip() for l in all_lines[-lines:] if l.strip()]
+        return {"lines": tail, "total": len(all_lines), "path": str(log_path)}
+    except Exception as e:
+        return {"lines": [f"Error reading log: {e}"], "total": 0, "path": str(log_path)}
+
+
+@router.get("/health")
+def health_check(db: Session = Depends(get_db)):
+    """Detailed health check for the panel status indicator."""
+    from app.scheduler.jobs import scheduler
+    checks = {}
+
+    # DB connectivity
+    try:
+        db.execute(__import__("sqlalchemy").text("SELECT 1"))
+        checks["database"] = "ok"
+    except Exception as e:
+        checks["database"] = f"error: {e}"
+
+    # Scheduler
+    checks["scheduler"] = "ok" if scheduler.running else "stopped"
+
+    # Article counts
+    from app.models import Article, Source
+    checks["articles_total"]  = db.query(Article).count()
+    checks["sources_active"]  = db.query(Source).filter(Source.is_active == True).count()
+    checks["sources_disabled"] = db.query(Source).filter(Source.is_active == False).count()
+
+    all_ok = all(v == "ok" for k, v in checks.items() if isinstance(v, str))
+    return {"status": "ok" if all_ok else "degraded", "checks": checks}

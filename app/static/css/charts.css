@@ -1,0 +1,184 @@
+/* ═══════════════════════════════════════════════
+   PAGINATION
+═══════════════════════════════════════════════ */
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 20px;
+}
+.page-btn {
+  padding: 7px 13px;
+  border-radius: var(--radius-xs);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--transition);
+}
+.page-btn:hover { border-color: var(--border-light); color: var(--text); }
+.page-btn.active { background: var(--primary-soft); border-color: var(--border-glow); color: var(--primary-hover); }
+.page-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+/* ═══════════════════════════════════════════════
+   KANBAN
+═══════════════════════════════════════════════ */
+.kanban-board {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  align-items: start;
+  padding-bottom: 40px;
+}
+.kanban-col {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  min-height: 200px;
+  transition: border-color var(--transition);
+}
+.kanban-col.drag-over {
+  border-color: var(--border-glow);
+  box-shadow: 0 0 0 2px var(--primary-deep);
+}
+.kanban-col-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  font-size: 13px;
+  font-weight: 700;
+  border-bottom: 1px solid var(--border);
+  gap: 8px;
+  position: sticky;
+  top: 0;
+  background: var(--surface);
+  z-index: 1;
+}
+.kanban-col-header span:first-child { display: flex; align-items: center; gap: 8px; }
+.kanban-col-count {
+  background: var(--surface-glass);
+  border: 1px solid var(--border);
+  border-radius: 100px;
+  padding: 1px 8px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+.kanban-cards { padding: 10px; display: flex; flex-direction: column; gap: 8px; min-height: 100px; }
+.kanban-card {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 12px;
+  cursor: grab;
+  transition: all var(--transition);
+  position: relative;
+}
+.kanban-card:hover {
+  border-color: var(--border-light);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-sm);
+}
+.kanban-card:active { cursor: grabbing; }
+.kanban-card.dragging { opacity: 0.4; }
+.kanban-card-title { font-size: 13px; font-weight: 500; line-height: 1.35; margin-bottom: 8px; }
+.kanban-card-meta { display: flex; gap: 5px; flex-wrap: wrap; }
+
+/* ═══════════════════════════════════════════════
+   CHARTS
+═══════════════════════════════════════════════ */
+.charts-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+  gap: 20px;
+}
+.chart-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
+  transition: border-color var(--transition);
+}
+.chart-card:hover { border-color: var(--border-light); }
+.chart-card h3 {
+  font-size: 13px;
+  font-weight: 700;
+  margin-bottom: 16px;
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+.chart-card h3::before {
+  content: '';
+  width: 3px; height: 14px;
+  border-radius: 2px;
+  background: var(--grad-primary);
+}
+.chart-canvas-wrapper {
+  position: relative;
+  height: 240px;
+}
+
+/* ═══════════════════════════════════════════════
+   HEATMAP
+═══════════════════════════════════════════════ */
+.heatmap-section { margin-bottom: 32px; }
+.heatmap-label { font-size: 13px; font-weight: 700; color: var(--text-secondary); margin-bottom: 12px; }
+.heatmap-bars {
+  display: flex;
+  align-items: flex-end;
+  gap: 5px;
+  height: 80px;
+}
+.heatmap-bar-wrap { display: flex; flex-direction: column; align-items: center; gap: 5px; flex: 1; }
+.heatmap-bar {
+  width: 100%;
+  min-height: 4px;
+  border-radius: 4px 4px 0 0;
+  transition: all var(--transition-slow);
+  position: relative;
+  cursor: default;
+}
+.heatmap-bar:hover { opacity: 0.85; }
+.heatmap-bar-label { font-size: 9px; color: var(--text-muted); font-weight: 500; }
+
+.heatmap-week {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.heatmap-day {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+  min-width: 140px;
+}
+.heatmap-day-name {
+  width: 70px;
+  font-size: 12px;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+.heatmap-day-bar-wrap {
+  flex: 1;
+  height: 18px;
+  background: var(--surface-glass);
+  border-radius: 4px;
+  overflow: hidden;
+}
+.heatmap-day-bar {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.6s cubic-bezier(0.4,0,0.2,1);
+}
+.heatmap-day-count { font-size: 11px; color: var(--text-muted); width: 30px; text-align: right; }
+
+/* ═══════════════════════════════════════════════

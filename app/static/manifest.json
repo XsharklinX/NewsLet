@@ -1,12 +1,14 @@
 {
   "name": "NewsLet Pro",
   "short_name": "NewsLet",
-  "description": "Sistema profesional de agregación y distribución de noticias",
+  "description": "Sistema profesional de agregación, análisis y distribución de noticias",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#0f172a",
   "theme_color": "#818cf8",
   "orientation": "portrait-primary",
+  "lang": "es",
+  "categories": ["news", "productivity"],
   "icons": [
     {
       "src": "icons/icon-192.png",
@@ -21,6 +23,24 @@
       "purpose": "any maskable"
     }
   ],
-  "categories": ["news", "productivity"],
-  "lang": "es"
+  "shortcuts": [
+    {
+      "name": "Noticias pendientes",
+      "short_name": "Pendientes",
+      "url": "/?view=arts&status=pending",
+      "description": "Ver artículos pendientes de revisión"
+    },
+    {
+      "name": "Fetch ahora",
+      "short_name": "Fetch",
+      "url": "/?action=fetch",
+      "description": "Buscar noticias nuevas"
+    },
+    {
+      "name": "Dashboard",
+      "short_name": "Dashboard",
+      "url": "/?view=dash",
+      "description": "Panel principal"
+    }
+  ]
 }

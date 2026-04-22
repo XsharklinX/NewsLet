@@ -284,6 +284,53 @@ async def _job_cluster():
         db.close()
 
 
+async def job_weekly_report():
+    """Send weekly report every Monday via Telegram and optionally email."""
+    logger.info("Scheduler: generating weekly report")
+    if not settings.telegram_bot_token or not settings.telegram_chat_id:
+        return
+    try:
+        from app.services.telegram_bot import cmd_semanal
+        await cmd_semanal(settings.telegram_chat_id)
+        logger.info("Scheduler: weekly report sent via Telegram")
+    except Exception as e:
+        logger.exception(f"Scheduler weekly report error: {e}")
+
+    # Optional: email report
+    if settings.smtp_enabled and settings.smtp_to:
+        try:
+            from sqlalchemy import func
+            from app.models import Article
+            db = SessionLocal()
+            cutoff = datetime.utcnow() - timedelta(days=7)
+            total      = db.query(Article).filter(Article.fetched_at >= cutoff).count()
+            sent_count = db.query(Article).filter(Article.fetched_at >= cutoff, Article.status == "sent").count()
+            avg_score  = db.query(func.avg(Article.relevance_score)).filter(
+                Article.fetched_at >= cutoff, Article.relevance_score.isnot(None)
+            ).scalar()
+            db.close()
+
+            from app.services.email_notifier import send_email
+            subject = f"📊 Informe Semanal NewsLet Pro — {datetime.utcnow().strftime('%d/%m/%Y')}"
+            body = (
+                f"<h2>Informe Semanal NewsLet Pro</h2>"
+                f"<p>Semana del {(datetime.utcnow() - timedelta(days=7)).strftime('%d/%m/%Y')} "
+                f"al {datetime.utcnow().strftime('%d/%m/%Y')}</p>"
+                f"<ul>"
+                f"<li>📰 Artículos recolectados: <strong>{total}</strong></li>"
+                f"<li>📤 Enviados: <strong>{sent_count}</strong></li>"
+                f"<li>⭐ Score promedio: <strong>{avg_score:.1f}/10</strong></li>"
+                f"</ul>"
+            ) if avg_score else (
+                f"<h2>Informe Semanal NewsLet Pro</h2>"
+                f"<ul><li>📰 Artículos: {total}</li><li>📤 Enviados: {sent_count}</li></ul>"
+            )
+            await send_email(subject=subject, body=body)
+            logger.info("Scheduler: weekly report sent via email")
+        except Exception as e:
+            logger.warning(f"Scheduler weekly report email failed: {e}")
+
+
 def reschedule_digest(hour: int):
     scheduler.reschedule_job("daily_digest", trigger=CronTrigger(hour=hour, minute=0))
     logger.info(f"Daily digest rescheduled to {hour:02d}:00")
@@ -336,6 +383,13 @@ def start_scheduler():
         )
         logger.info(f"DB backup scheduled → {effective_backup_dir}")
 
+    # Weekly report — every Monday at 08:00
+    scheduler.add_job(
+        job_weekly_report,
+        CronTrigger(day_of_week="mon", hour=8, minute=0),
+        id="weekly_report", replace_existing=True,
+    )
+
     # Weekly cleanup — every Sunday at 03:00
     scheduler.add_job(
         job_cleanup,
@@ -346,5 +400,5 @@ def start_scheduler():
     scheduler.start()
     logger.info(
         f"Scheduler started: fetch every {settings.fetch_interval_minutes}min, "
-        f"digest at {digest_hour:02d}:00, cleanup Sundays 03:00"
+        f"digest at {digest_hour:02d}:00, weekly report Mondays 08:00, cleanup Sundays 03:00"
     )

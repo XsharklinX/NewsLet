@@ -73,6 +73,10 @@ class Summary(Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     article_id: Mapped[int] = mapped_column(Integer, ForeignKey("articles.id"), unique=True, nullable=False)
     summary_text: Mapped[str] = mapped_column(Text, nullable=False)
+    # Structured summary fields (populated for new articles)
+    key_point: Mapped[str | None] = mapped_column(Text, nullable=True)    # punto clave
+    context_note: Mapped[str | None] = mapped_column(Text, nullable=True) # contexto
+    impact: Mapped[str | None] = mapped_column(Text, nullable=True)       # impacto
     model_used: Mapped[str] = mapped_column(String(50), nullable=False)
     tokens_used: Mapped[int] = mapped_column(Integer, default=0)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
