@@ -251,6 +251,13 @@ document.addEventListener("click", e => {
 
   // Poll notification badge every 60s
   setInterval(loadNotifBadge, 60000);
+
+  // Auto-refresh dashboard + stats every 10 minutes
+  setInterval(() => {
+    const currentView = document.querySelector(".view.on")?.id;
+    if (currentView === "v-dash") { loadStats(); loadDash(); }
+    else loadStats();
+  }, 10 * 60 * 1000);
 })();
 
 /* ══════════════════════════════════════════════════════

@@ -197,7 +197,7 @@ async function loadDash() {
     const d = await api("/articles?page=1&page_size=10");
     setViewClass(c, dashView);
     if (!d.articles.length) {
-      c.innerHTML = `<div class="empty"><span class="e-icon">📰</span><h3>Sin artículos</h3><p>Usa "Fetch ahora" para obtener noticias</p></div>`;
+      c.innerHTML = `<div class="empty"><span class="e-icon">📰</span><h3>Sin artículos</h3><p>Usa "Actualizar ahora" para obtener noticias</p></div>`;
       return;
     }
     c.innerHTML = d.articles.map(a => card(a, dashView === "compact")).join("");
@@ -299,7 +299,7 @@ async function loadArts(p) {
     const c = document.getElementById("art-list");
     setViewClass(c, artView);
     if (!d.articles.length) {
-      c.innerHTML = `<div class="empty"><span class="e-icon">🔍</span><h3>${searchQ ? "Sin resultados" : "Sin artículos"}</h3><p>${searchQ ? "Prueba otros términos" : "Usa Fetch ahora"}</p></div>`;
+      c.innerHTML = `<div class="empty"><span class="e-icon">🔍</span><h3>${searchQ ? "Sin resultados" : "Sin artículos"}</h3><p>${searchQ ? "Prueba otros términos" : "Usa Actualizar ahora"}</p></div>`;
       document.getElementById("paging").innerHTML = "";
       return;
     }
@@ -554,12 +554,12 @@ async function doSummarize() {
 }
 
 async function doDigest() {
-  toast("✉ Enviando digest...", "info");
+  toast("✉ Enviando noticias diarias...", "info");
   try {
     await api("/digest/now", { method: "POST" });
-    toast("✉ Digest enviado", "ok");
+    toast("✉ Noticias diarias enviadas", "ok");
     loadStats(); loadNotifBadge();
-  } catch(e) { toast("Error al enviar digest", "err"); }
+  } catch(e) { toast("Error al enviar noticias diarias", "err"); }
 }
 
 async function doReenrich() {

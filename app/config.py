@@ -46,7 +46,7 @@ class Settings(BaseSettings):
             object.__setattr__(self, "database_url", _default_db_url())
 
     # Scheduler
-    fetch_interval_minutes: int = 30
+    fetch_interval_minutes: int = 10
     digest_hour: int = 8
 
     # Timezone for display / digest scheduling (pytz name, e.g. "America/Argentina/Buenos_Aires")
