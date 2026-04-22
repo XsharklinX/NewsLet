@@ -5,9 +5,12 @@ from pydantic_settings import BaseSettings
 def _default_db_url() -> str:
     """
     Resolve the best DB path for the current environment:
-    - Railway: uses DATABASE_URL env var pointing to a volume mount
+    - Fly.io: /app/data/newslet.db (persistent volume)
     - Local dev: ./newslet.db
     """
+    fly_volume = "/app/data"
+    if os.path.isdir(fly_volume):
+        return f"sqlite:///{fly_volume}/newslet.db"
     return "sqlite:///./newslet.db"
 
 
