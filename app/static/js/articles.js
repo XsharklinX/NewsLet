@@ -1,4 +1,4 @@
-   STATS
+/* STATS
 ══════════════════════════════════════════════════════ */
 async function loadStats() {
   try {
@@ -584,6 +584,4 @@ function dlPDF() {
   if (filterCat)   params.set("category", filterCat);
   if (filterScore) params.set("min_score", filterScore);
   window.open(API + "/digest/pdf?" + params, "_blank");
-}
-
-/* ══════════════════════════════════════════════════════
+}

@@ -1,4 +1,4 @@
-   KANBAN
+/* KANBAN
 ══════════════════════════════════════════════════════ */
 async function loadKanban() {
   const statuses = ["pending", "approved", "rejected", "sent"];
@@ -61,6 +61,4 @@ document.addEventListener("dragleave", e => {
 document.addEventListener("dragend", () => {
   document.querySelectorAll(".kb-card.dragging").forEach(c => c.classList.remove("dragging"));
   document.querySelectorAll(".kanban-col.drag-over").forEach(c => c.classList.remove("drag-over"));
-});
-
-/* ══════════════════════════════════════════════════════
+});

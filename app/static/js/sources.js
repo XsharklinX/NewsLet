@@ -1,4 +1,4 @@
-   SOURCES
+/* SOURCES
 ══════════════════════════════════════════════════════ */
 async function loadSrcs() {
   try {
@@ -110,6 +110,4 @@ async function loadCatFilter() {
     sel.innerHTML = '<option value="">Todas las categorías</option>';
     d.categories.forEach(c => { sel.innerHTML += `<option value="${esc(c)}">${esc(c)}</option>`; });
   } catch {}
-}
-
-/* ══════════════════════════════════════════════════════
+}

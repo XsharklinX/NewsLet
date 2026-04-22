@@ -1,4 +1,4 @@
-   CHARTS
+/* CHARTS
 ══════════════════════════════════════════════════════ */
 async function loadCharts() {
   const days = document.getElementById("chart-days")?.value || 7;
@@ -144,6 +144,4 @@ function searchTrend(word) {
   searchQ = word;
   document.getElementById("q").value = word;
   go("arts");
-}
-
-/* ══════════════════════════════════════════════════════
+}

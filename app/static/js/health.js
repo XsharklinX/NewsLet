@@ -1,4 +1,4 @@
-   HEALTH CHECK
+/* HEALTH CHECK
 ══════════════════════════════════════════════════════ */
 async function checkHealth() {
   const dot   = document.getElementById("health-dot");

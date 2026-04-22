@@ -233,6 +233,4 @@ function animateCount(el, target, suffix = "") {
     else el.classList.add("stat-count-up");
   }
   requestAnimationFrame(step);
-}
-
-/* ══════════════════════════════════════════════════════
+}

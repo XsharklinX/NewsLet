@@ -1,4 +1,4 @@
-   KEYWORDS
+/* KEYWORDS
 ══════════════════════════════════════════════════════ */
 async function loadKeywords() {
   try {
@@ -339,6 +339,4 @@ async function testEmail() {
   } catch (e) {
     toast("Error: " + e.message, "err");
   }
-}
-
-/* ══════════════════════════════════════════════════════
+}
