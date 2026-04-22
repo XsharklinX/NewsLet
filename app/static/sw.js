@@ -3,22 +3,22 @@
  * Strategy: Cache-first for static assets, Network-first for API calls.
  * Supports: offline fallback, push notifications, background sync.
  */
-const CACHE_NAME = 'newslet-v3';
+const CACHE_NAME = 'newslet-v4';
 
 const STATIC_ASSETS = [
   '/',
   '/index.html',
   '/login.html',
   '/style.css',
-  '/app.js',
-  '/js/api.js',
-  '/js/ui.js',
-  '/js/articles.js',
-  '/js/kanban.js',
-  '/js/sources.js',
-  '/js/charts.js',
-  '/js/config.js',
-  '/js/health.js',
+  '/app.js?v=4',
+  '/js/api.js?v=4',
+  '/js/ui.js?v=4',
+  '/js/articles.js?v=4',
+  '/js/kanban.js?v=4',
+  '/js/sources.js?v=4',
+  '/js/charts.js?v=4',
+  '/js/config.js?v=4',
+  '/js/health.js?v=4',
   '/manifest.json',
 ];
 
