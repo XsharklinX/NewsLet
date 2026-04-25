@@ -3211,6 +3211,17 @@ kbd {
 
 /* Sources (JS-generated) */
 .src-inactive { opacity: 0.6; }
+.src-dead { border-color: rgba(239,68,68,0.4) !important; }
+.src-health-err {
+  font-size: 10px; font-weight: 700; padding: 2px 6px;
+  border-radius: 5px; background: rgba(239,68,68,0.15);
+  color: #ef4444; flex-shrink: 0; cursor: help;
+}
+.src-health-warn {
+  font-size: 10px; font-weight: 700; padding: 2px 6px;
+  border-radius: 5px; background: rgba(234,179,8,0.15);
+  color: #eab308; flex-shrink: 0; cursor: help;
+}
 .src-top {
   display: flex;
   align-items: center;

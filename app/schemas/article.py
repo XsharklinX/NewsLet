@@ -26,6 +26,10 @@ class SourceOut(BaseModel):
     url: str
     is_active: bool
     created_at: datetime
+    consecutive_failures: int = 0
+    last_error: Optional[str] = None
+    last_success_at: Optional[datetime] = None
+    disabled_at: Optional[datetime] = None
     model_config = {"from_attributes": True}
 
 

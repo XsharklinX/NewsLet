@@ -10,19 +10,20 @@ El sistema corre 24/7 en un servidor propio, recolecta noticias cada 10 minutos,
 
 ## ¿Para qué sirve?
 
-| Problema | Solución |
-|---|---|
-| Revisar 20+ sitios de noticias a mano | El sistema las recolecta solo, cada 10 minutos |
-| No saber qué noticias son importantes | La IA puntúa cada artículo del 1 al 10 |
-| Distribuir noticias a un equipo por Telegram | Envío automático con resumen en español |
-| Perder noticias relevantes | Alertas por palabras clave configurables |
-| No tener estadísticas de cobertura | Panel con gráficas, tendencias y mapas de actividad |
+| Problema                                     | Solución                                            |
+| -------------------------------------------- | --------------------------------------------------- |
+| Revisar 20+ sitios de noticias a mano        | El sistema las recolecta solo, cada 10 minutos      |
+| No saber qué noticias son importantes        | La IA puntúa cada artículo del 1 al 10              |
+| Distribuir noticias a un equipo por Telegram | Envío automático con resumen en español             |
+| Perder noticias relevantes                   | Alertas por palabras clave configurables            |
+| No tener estadísticas de cobertura           | Panel con gráficas, tendencias y mapas de actividad |
 
 ---
 
 ## Características principales
 
 ### Recolección automática
+
 - **RSS feeds** — Cualquier sitio web con feed RSS/Atom
 - **NewsAPI** — API de noticias con búsqueda por términos
 - **Web scraping** — Sitios sin RSS (WordPress, sitios custom)
@@ -30,6 +31,7 @@ El sistema corre 24/7 en un servidor propio, recolecta noticias cada 10 minutos,
 - **Extracción de texto completo** — Scraping del artículo original
 
 ### Análisis con inteligencia artificial
+
 - **Resumen en español** — 2-3 oraciones concisas
 - **Punto clave** — El hecho central de la noticia
 - **Contexto** — Antecedente relevante
@@ -40,6 +42,7 @@ El sistema corre 24/7 en un servidor propio, recolecta noticias cada 10 minutos,
 - **Auto-aprobación** — Artículos con score alto se aprueban solos
 
 ### Distribución
+
 - **Bot de Telegram** — Comandos para admins y suscriptores públicos
 - **Noticias diarias** — Digest automático cada día a la hora configurada
 - **Envío individual** — Artículo específico a demanda
@@ -49,6 +52,7 @@ El sistema corre 24/7 en un servidor propio, recolecta noticias cada 10 minutos,
 - **PDF** — Digest exportable en formato PDF
 
 ### Panel editorial web
+
 - **Dashboard** — Estadísticas en tiempo real vía WebSocket
 - **Artículos** — Lista con filtros por estado, categoría, score, fecha, sentimiento
 - **Kanban** — Vista de flujo editorial (pendiente → aprobado → enviado)
@@ -92,10 +96,10 @@ Análisis IA (resumen + score + categoría + sentimiento)
 
 ## Versión actual
 
-| Componente | Versión |
-|---|---|
-| NewsLet Pro | v3.0 |
-| Python | 3.12 |
-| FastAPI | 0.115+ |
-| IA por defecto | Groq (Llama 3.3 70B) |
-| Base de datos | SQLite (producción) / PostgreSQL (opcional) |
+| Componente     | Versión                                     |
+| -------------- | ------------------------------------------- |
+| NewsLet Pro    | v3.0                                        |
+| Python         | 3.12                                        |
+| FastAPI        | 0.115+                                      |
+| IA por defecto | Groq (Llama 3.3 70B)                        |
+| Base de datos  | SQLite (producción) / PostgreSQL (opcional) |

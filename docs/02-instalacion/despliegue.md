@@ -94,6 +94,7 @@ En el plan gratuito de Koyeb, el sistema de archivos **no es persistente**.
 La base de datos se pierde al redesplegar. Opciones:
 
 1. **Usar PostgreSQL externo** (Supabase free tier, Neon.tech, Railway):
+   
    ```env
    DATABASE_URL=postgresql://user:pass@host:5432/dbname
    ```
@@ -129,6 +130,7 @@ fly deploy
 ```
 
 **fly.toml mínimo:**
+
 ```toml
 app = "mi-newslet"
 primary_region = "gru"

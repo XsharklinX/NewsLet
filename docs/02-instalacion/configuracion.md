@@ -9,13 +9,13 @@ Copia `.env.example` como punto de partida y edita solo lo que necesitas.
 
 ### IA — Proveedor principal
 
-| Variable | Por defecto | Descripción |
-|---|---|---|
-| `AI_PROVIDER` | `groq` | Proveedor de IA: `groq` o `openai` |
-| `GROQ_API_KEY` | _(vacío)_ | Clave API de Groq (recomendado — gratis) |
-| `GROQ_MODEL` | `llama-3.3-70b-versatile` | Modelo de Groq a usar |
-| `OPENAI_API_KEY` | _(vacío)_ | Clave API de OpenAI (alternativa de pago) |
-| `OPENAI_MODEL` | `gpt-4o-mini` | Modelo de OpenAI a usar |
+| Variable         | Por defecto               | Descripción                               |
+| ---------------- | ------------------------- | ----------------------------------------- |
+| `AI_PROVIDER`    | `groq`                    | Proveedor de IA: `groq` o `openai`        |
+| `GROQ_API_KEY`   | _(vacío)_                 | Clave API de Groq (recomendado — gratis)  |
+| `GROQ_MODEL`     | `llama-3.3-70b-versatile` | Modelo de Groq a usar                     |
+| `OPENAI_API_KEY` | _(vacío)_                 | Clave API de OpenAI (alternativa de pago) |
+| `OPENAI_MODEL`   | `gpt-4o-mini`             | Modelo de OpenAI a usar                   |
 
 > Si `AI_PROVIDER=groq` y `GROQ_API_KEY` está vacío, el sistema funcionará pero sin resúmenes automáticos.
 
@@ -23,30 +23,31 @@ Copia `.env.example` como punto de partida y edita solo lo que necesitas.
 
 ### NewsAPI
 
-| Variable | Por defecto | Descripción |
-|---|---|---|
-| `NEWSAPI_KEY` | _(vacío)_ | Clave de [newsapi.org](https://newsapi.org). Sin ella, solo se usan RSS y scrapers |
+| Variable      | Por defecto | Descripción                                                                        |
+| ------------- | ----------- | ---------------------------------------------------------------------------------- |
+| `NEWSAPI_KEY` | _(vacío)_   | Clave de [newsapi.org](https://newsapi.org). Sin ella, solo se usan RSS y scrapers |
 
 ---
 
 ### Telegram
 
-| Variable | Por defecto | Descripción |
-|---|---|---|
-| `TELEGRAM_BOT_TOKEN` | _(vacío)_ | Token del bot (`@BotFather`). Sin él, no hay notificaciones |
-| `TELEGRAM_CHAT_ID` | _(vacío)_ | Chat ID del administrador principal |
-| `TELEGRAM_ADMIN_IDS` | _(vacío)_ | Lista de Chat IDs adicionales con acceso admin, separados por comas |
-| `WEBHOOK_BASE_URL` | _(vacío)_ | URL pública HTTPS para modo webhook (ej: `https://mi-app.koyeb.app`). Vacío = polling (dev local) |
+| Variable             | Por defecto | Descripción                                                                                       |
+| -------------------- | ----------- | ------------------------------------------------------------------------------------------------- |
+| `TELEGRAM_BOT_TOKEN` | _(vacío)_   | Token del bot (`@BotFather`). Sin él, no hay notificaciones                                       |
+| `TELEGRAM_CHAT_ID`   | _(vacío)_   | Chat ID del administrador principal                                                               |
+| `TELEGRAM_ADMIN_IDS` | _(vacío)_   | Lista de Chat IDs adicionales con acceso admin, separados por comas                               |
+| `WEBHOOK_BASE_URL`   | _(vacío)_   | URL pública HTTPS para modo webhook (ej: `https://mi-app.koyeb.app`). Vacío = polling (dev local) |
 
 ---
 
 ### Base de datos
 
-| Variable | Por defecto | Descripción |
-|---|---|---|
+| Variable       | Por defecto              | Descripción                           |
+| -------------- | ------------------------ | ------------------------------------- |
 | `DATABASE_URL` | `sqlite:///./newslet.db` | URL de conexión SQLAlchemy. Ejemplos: |
 
 **Ejemplos de `DATABASE_URL`:**
+
 ```
 # SQLite local (por defecto)
 DATABASE_URL=sqlite:///./newslet.db
@@ -62,66 +63,66 @@ DATABASE_URL=postgresql://user:password@host:5432/dbname
 
 ### Scheduler
 
-| Variable | Por defecto | Descripción |
-|---|---|---|
-| `FETCH_INTERVAL_MINUTES` | `10` | Cada cuántos minutos se recolectan noticias |
-| `DIGEST_HOUR` | `8` | Hora del digest diario (0–23, en la zona horaria configurada) |
-| `APP_TIMEZONE` | `America/Argentina/Buenos_Aires` | Zona horaria para el digest y fechas mostradas |
+| Variable                 | Por defecto                      | Descripción                                                   |
+| ------------------------ | -------------------------------- | ------------------------------------------------------------- |
+| `FETCH_INTERVAL_MINUTES` | `10`                             | Cada cuántos minutos se recolectan noticias                   |
+| `DIGEST_HOUR`            | `8`                              | Hora del digest diario (0–23, en la zona horaria configurada) |
+| `APP_TIMEZONE`           | `America/Argentina/Buenos_Aires` | Zona horaria para el digest y fechas mostradas                |
 
 ---
 
 ### Análisis con IA
 
-| Variable | Por defecto | Descripción |
-|---|---|---|
-| `RELEVANCE_THRESHOLD` | `5` | Score mínimo (1–10) para auto-aprobar artículos |
-| `ENRICH_ARTICLES` | `true` | Habilitar categorización + score automático |
-| `SCRAPE_FULL_TEXT` | `true` | Scrapear el texto completo del artículo antes de resumir |
+| Variable              | Por defecto | Descripción                                              |
+| --------------------- | ----------- | -------------------------------------------------------- |
+| `RELEVANCE_THRESHOLD` | `5`         | Score mínimo (1–10) para auto-aprobar artículos          |
+| `ENRICH_ARTICLES`     | `true`      | Habilitar categorización + score automático              |
+| `SCRAPE_FULL_TEXT`    | `true`      | Scrapear el texto completo del artículo antes de resumir |
 
 ---
 
 ### Seguridad y autenticación
 
-| Variable | Por defecto | Descripción |
-|---|---|---|
-| `ADMIN_PASSWORD` | _(vacío)_ | Contraseña del panel web. Vacío = sin login requerido |
-| `JWT_SECRET` | `change-me-in-production-please` | Secreto para firmar tokens JWT. **Cambiar en producción** |
-| `JWT_EXPIRE_MINUTES` | `1440` | Tiempo de vida del token JWT (1440 min = 24 horas) |
-| `PANEL_PIN` | _(vacío)_ | PIN de 4+ dígitos para proteger el panel HTML (capa adicional) |
-| `SERVICE_KEY` | _(vacío)_ | Clave para llamadas de servicio (CI/CD, GitHub Actions) |
+| Variable             | Por defecto                      | Descripción                                                    |
+| -------------------- | -------------------------------- | -------------------------------------------------------------- |
+| `ADMIN_PASSWORD`     | _(vacío)_                        | Contraseña del panel web. Vacío = sin login requerido          |
+| `JWT_SECRET`         | `change-me-in-production-please` | Secreto para firmar tokens JWT. **Cambiar en producción**      |
+| `JWT_EXPIRE_MINUTES` | `1440`                           | Tiempo de vida del token JWT (1440 min = 24 horas)             |
+| `PANEL_PIN`          | _(vacío)_                        | PIN de 4+ dígitos para proteger el panel HTML (capa adicional) |
+| `SERVICE_KEY`        | _(vacío)_                        | Clave para llamadas de servicio (CI/CD, GitHub Actions)        |
 
 ---
 
 ### Email (SMTP)
 
-| Variable | Por defecto | Descripción |
-|---|---|---|
-| `SMTP_ENABLED` | `false` | Habilitar envío de digest por email |
-| `SMTP_HOST` | `smtp.gmail.com` | Servidor SMTP |
-| `SMTP_PORT` | `587` | Puerto SMTP (587 = STARTTLS, 465 = SSL) |
-| `SMTP_USER` | _(vacío)_ | Usuario de autenticación SMTP |
-| `SMTP_PASSWORD` | _(vacío)_ | Contraseña SMTP (para Gmail: usar App Password) |
-| `SMTP_FROM` | _(vacío)_ | Dirección de envío |
-| `SMTP_TO` | _(vacío)_ | Destinatarios, separados por comas |
+| Variable        | Por defecto      | Descripción                                     |
+| --------------- | ---------------- | ----------------------------------------------- |
+| `SMTP_ENABLED`  | `false`          | Habilitar envío de digest por email             |
+| `SMTP_HOST`     | `smtp.gmail.com` | Servidor SMTP                                   |
+| `SMTP_PORT`     | `587`            | Puerto SMTP (587 = STARTTLS, 465 = SSL)         |
+| `SMTP_USER`     | _(vacío)_        | Usuario de autenticación SMTP                   |
+| `SMTP_PASSWORD` | _(vacío)_        | Contraseña SMTP (para Gmail: usar App Password) |
+| `SMTP_FROM`     | _(vacío)_        | Dirección de envío                              |
+| `SMTP_TO`       | _(vacío)_        | Destinatarios, separados por comas              |
 
 ---
 
 ### Rate limiting y logs
 
-| Variable | Por defecto | Descripción |
-|---|---|---|
-| `RATE_LIMIT_PER_MINUTE` | `60` | Solicitudes por minuto por IP en la API |
-| `LOG_FILE` | `logs/newslet.log` | Ruta del archivo de log |
-| `LOG_MAX_BYTES` | `10485760` | Tamaño máximo del log antes de rotar (10 MB) |
-| `LOG_BACKUP_COUNT` | `5` | Número de archivos de log a conservar |
+| Variable                | Por defecto        | Descripción                                  |
+| ----------------------- | ------------------ | -------------------------------------------- |
+| `RATE_LIMIT_PER_MINUTE` | `60`               | Solicitudes por minuto por IP en la API      |
+| `LOG_FILE`              | `logs/newslet.log` | Ruta del archivo de log                      |
+| `LOG_MAX_BYTES`         | `10485760`         | Tamaño máximo del log antes de rotar (10 MB) |
+| `LOG_BACKUP_COUNT`      | `5`                | Número de archivos de log a conservar        |
 
 ---
 
 ### Backup
 
-| Variable | Por defecto | Descripción |
-|---|---|---|
-| `BACKUP_DIR` | _(vacío)_ | Directorio local para backups de la DB. Ej: `/app/data/backups` |
+| Variable     | Por defecto | Descripción                                                     |
+| ------------ | ----------- | --------------------------------------------------------------- |
+| `BACKUP_DIR` | _(vacío)_   | Directorio local para backups de la DB. Ej: `/app/data/backups` |
 
 Si `BACKUP_DIR` está configurado o el directorio `/app/data` existe (Fly.io), se hacen backups automáticos a las 02:00 UTC y se envía el archivo `.db` al chat de Telegram del admin.
 
@@ -129,9 +130,9 @@ Si `BACKUP_DIR` está configurado o el directorio `/app/data` existe (Fly.io), s
 
 ### Salud de fuentes
 
-| Variable | Por defecto | Descripción |
-|---|---|---|
-| `SOURCE_MAX_FAILURES` | `5` | Fallos consecutivos antes de auto-deshabilitar una fuente |
+| Variable              | Por defecto | Descripción                                               |
+| --------------------- | ----------- | --------------------------------------------------------- |
+| `SOURCE_MAX_FAILURES` | `5`         | Fallos consecutivos antes de auto-deshabilitar una fuente |
 
 ---
 

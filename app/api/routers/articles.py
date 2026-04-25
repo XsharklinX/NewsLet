@@ -126,6 +126,60 @@ def export_articles_csv(
     )
 
 
+@router.get("/articles/export/markdown")
+def export_articles_markdown(
+    status: str | None = None,
+    category: str | None = None,
+    min_score: int | None = Query(None, ge=1, le=10),
+    count: int = Query(20, ge=1, le=200),
+    db: Session = Depends(get_db),
+):
+    """Export filtered articles as a Markdown digest."""
+    query = db.query(Article).options(joinedload(Article.summary), joinedload(Article.source))
+    if status:
+        query = query.filter(Article.status == status)
+    if category:
+        query = query.filter(Article.category == category)
+    if min_score is not None:
+        query = query.filter(Article.relevance_score >= min_score)
+
+    articles = query.order_by(Article.fetched_at.desc()).limit(count).all()
+
+    lines = [
+        "# Digest NewsLet Pro",
+        "",
+        f"_Generado: {datetime.now().strftime('%d/%m/%Y %H:%M')}_",
+        "",
+        "---",
+        "",
+    ]
+    for i, a in enumerate(articles, 1):
+        score_str = f" · ⭐ {a.relevance_score}/10" if a.relevance_score else ""
+        cat_str   = f" · {a.category}" if a.category else ""
+        src_str   = a.source.name if a.source else ""
+        lines.append(f"## {i}. {a.title}")
+        lines.append("")
+        lines.append(f"**Fuente:** {src_str}{cat_str}{score_str}")
+        lines.append("")
+        if a.summary:
+            lines.append(a.summary.summary_text)
+            lines.append("")
+            if a.summary.key_point:
+                lines.append(f"**Punto clave:** {a.summary.key_point}")
+                lines.append("")
+        lines.append(f"[Leer artículo completo]({a.url})")
+        lines.append("")
+        lines.append("---")
+        lines.append("")
+
+    filename = f"newslet_digest_{datetime.now().strftime('%Y%m%d')}.md"
+    return Response(
+        content="\n".join(lines).encode("utf-8"),
+        media_type="text/markdown",
+        headers={"Content-Disposition": f"attachment; filename={filename}"},
+    )
+
+
 @router.get("/articles/{article_id}", response_model=ArticleOut)
 def get_article(article_id: int, db: Session = Depends(get_db)):
     article = (

@@ -2,19 +2,19 @@
 
 ## Stack tecnológico
 
-| Capa | Tecnología | Rol |
-|---|---|---|
-| **Backend** | FastAPI 0.115+ | Servidor HTTP + WebSocket + API REST |
-| **ORM / DB** | SQLAlchemy 2.x + SQLite | Persistencia de datos |
-| **Scheduler** | APScheduler 3.x | Jobs automáticos (fetch, digest, backup) |
-| **IA** | Groq (Llama 3.3 70B) / OpenAI (GPT-4o-mini) | Resúmenes, scores, categorías |
-| **HTTP client** | httpx (async) | NewsAPI, Telegram Bot API, scrapers |
-| **RSS** | feedparser | Parsing de feeds RSS/Atom |
-| **Frontend** | HTML + JS Vanilla + Chart.js | Panel editorial (sin build step) |
-| **Bot** | Telegram Bot API | Polling (dev) / Webhook (producción) |
-| **Autenticación** | JWT (PyJWT) | Login de administrador |
-| **Rate limiting** | slowapi | Protección de endpoints |
-| **Deploy** | Docker | Contenedor único, compatible con Koyeb/Fly.io/Railway |
+| Capa              | Tecnología                                  | Rol                                                   |
+| ----------------- | ------------------------------------------- | ----------------------------------------------------- |
+| **Backend**       | FastAPI 0.115+                              | Servidor HTTP + WebSocket + API REST                  |
+| **ORM / DB**      | SQLAlchemy 2.x + SQLite                     | Persistencia de datos                                 |
+| **Scheduler**     | APScheduler 3.x                             | Jobs automáticos (fetch, digest, backup)              |
+| **IA**            | Groq (Llama 3.3 70B) / OpenAI (GPT-4o-mini) | Resúmenes, scores, categorías                         |
+| **HTTP client**   | httpx (async)                               | NewsAPI, Telegram Bot API, scrapers                   |
+| **RSS**           | feedparser                                  | Parsing de feeds RSS/Atom                             |
+| **Frontend**      | HTML + JS Vanilla + Chart.js                | Panel editorial (sin build step)                      |
+| **Bot**           | Telegram Bot API                            | Polling (dev) / Webhook (producción)                  |
+| **Autenticación** | JWT (PyJWT)                                 | Login de administrador                                |
+| **Rate limiting** | slowapi                                     | Protección de endpoints                               |
+| **Deploy**        | Docker                                      | Contenedor único, compatible con Koyeb/Fly.io/Railway |
 
 ---
 
@@ -164,9 +164,9 @@ Cuando el scheduler completa un fetch, emite `fetch_complete` → el dashboard s
 
 ## Autenticación
 
-| Modo | Descripción |
-|---|---|
-| **Sin contraseña** | `ADMIN_PASSWORD` vacío → panel accesible sin login |
-| **JWT** | `ADMIN_PASSWORD` configurado → login en `/login.html`, token en `Authorization: Bearer` |
-| **PIN** | `PANEL_PIN` configurado → middleware bloquea acceso al panel HTML |
-| **Service Key** | `SERVICE_KEY` → header `X-Service-Key` para llamadas programáticas (CI/CD) |
+| Modo               | Descripción                                                                             |
+| ------------------ | --------------------------------------------------------------------------------------- |
+| **Sin contraseña** | `ADMIN_PASSWORD` vacío → panel accesible sin login                                      |
+| **JWT**            | `ADMIN_PASSWORD` configurado → login en `/login.html`, token en `Authorization: Bearer` |
+| **PIN**            | `PANEL_PIN` configurado → middleware bloquea acceso al panel HTML                       |
+| **Service Key**    | `SERVICE_KEY` → header `X-Service-Key` para llamadas programáticas (CI/CD)              |

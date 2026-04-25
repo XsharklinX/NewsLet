@@ -579,6 +579,14 @@ function dlCSV() {
   window.open(API + "/articles/export/csv?" + params, "_blank");
 }
 
+function dlMarkdown() {
+  const params = new URLSearchParams({ count: 30 });
+  if (filterStatus) params.set("status",    filterStatus);
+  if (filterCat)    params.set("category",  filterCat);
+  if (filterScore)  params.set("min_score", filterScore);
+  window.open(API + "/articles/export/markdown?" + params, "_blank");
+}
+
 function dlPDF() {
   const params = new URLSearchParams({ limit: 20, min_score: 0 });
   if (filterCat)   params.set("category", filterCat);

@@ -10,23 +10,37 @@ async function loadSrcs() {
     }
 
     // Load stats for each source in parallel (fire-and-forget, update cards)
-    c.innerHTML = list.map(s => `<div class="src-card${s.is_active ? "" : " src-inactive"}" id="src-${s.id}">
-      <div class="src-top">
-        <span class="src-name">${esc(s.name)}</span>
-        <span class="src-type">${s.source_type}</span>
-      </div>
-      <div class="src-url" title="${esc(s.url)}">${esc(s.url)}</div>
-      <div class="src-stats" id="src-stats-${s.id}">
-        <div class="src-stat"><span>Artículos</span><strong>—</strong></div>
-        <div class="src-stat"><span>Score avg</span><strong>—</strong></div>
-      </div>
-      <div style="margin-top:12px;display:flex;justify-content:space-between;align-items:center">
-        <button class="btn ${s.is_active ? "btn-warn" : "btn-s"} btn-xs" onclick="toggleSrc(${s.id})">
-          ${s.is_active ? "⏸ Pausar" : "▶ Activar"}
-        </button>
-        <button class="btn btn-d btn-xs" onclick="delSrc(${s.id},'${esc(s.name)}')">Eliminar</button>
-      </div>
-    </div>`).join("");
+    c.innerHTML = list.map(s => {
+      const isDead = s.disabled_at || (!s.is_active && s.consecutive_failures > 0);
+      const healthBadge = isDead
+        ? `<span class="src-health-err" title="${esc(s.last_error || '')}">⚠ ${s.consecutive_failures} fallos</span>`
+        : s.consecutive_failures > 0
+          ? `<span class="src-health-warn" title="${esc(s.last_error || '')}">⚡ ${s.consecutive_failures}</span>`
+          : "";
+      const reactivarBtn = isDead
+        ? `<button class="btn btn-s btn-xs" onclick="reenableSrc(${s.id})" title="Resetea fallos y reactiva">↺ Reactivar</button>`
+        : `<button class="btn ${s.is_active ? "btn-warn" : "btn-s"} btn-xs" onclick="toggleSrc(${s.id})">
+             ${s.is_active ? "⏸ Pausar" : "▶ Activar"}
+           </button>`;
+      return `<div class="src-card${s.is_active ? "" : " src-inactive"}${isDead ? " src-dead" : ""}" id="src-${s.id}">
+        <div class="src-top">
+          <span class="src-name">${esc(s.name)}</span>
+          <div style="display:flex;gap:4px;align-items:center">
+            ${healthBadge}
+            <span class="src-type">${s.source_type}</span>
+          </div>
+        </div>
+        <div class="src-url" title="${esc(s.url)}">${esc(s.url)}</div>
+        <div class="src-stats" id="src-stats-${s.id}">
+          <div class="src-stat"><span>Artículos</span><strong>—</strong></div>
+          <div class="src-stat"><span>Score avg</span><strong>—</strong></div>
+        </div>
+        <div style="margin-top:12px;display:flex;justify-content:space-between;align-items:center">
+          ${reactivarBtn}
+          <button class="btn btn-d btn-xs" onclick="delSrc(${s.id},'${esc(s.name)}')">Eliminar</button>
+        </div>
+      </div>`;
+    }).join("");
 
     document.getElementById("n-srcs").textContent = list.length;
 
@@ -47,6 +61,14 @@ async function loadSrcs() {
 async function toggleSrc(id) {
   try { await api(`/sources/${id}/toggle`, { method: "PATCH" }); loadSrcs(); }
   catch(e) { toast("Error", "err"); }
+}
+
+async function reenableSrc(id) {
+  try {
+    await api(`/sources/${id}/reenable`, { method: "POST" });
+    toast("✓ Fuente reactivada", "ok");
+    loadSrcs();
+  } catch(e) { toast("Error al reactivar", "err"); }
 }
 
 async function delSrc(id, name) {

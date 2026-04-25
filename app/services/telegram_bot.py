@@ -391,10 +391,16 @@ async def cmd_buscar_admin(chat_id: str, term: str):
         return
     db = SessionLocal()
     try:
+        from app.models import Summary
         articles = (
             db.query(Article)
+            .outerjoin(Article.summary)
             .options(joinedload(Article.summary), joinedload(Article.source))
-            .filter(Article.title.ilike(f"%{term}%"))
+            .filter(
+                Article.title.ilike(f"%{term}%") |
+                Summary.summary_text.ilike(f"%{term}%") |
+                Summary.key_point.ilike(f"%{term}%")
+            )
             .order_by(Article.fetched_at.desc())
             .limit(5)
             .all()
