@@ -1,19 +1,33 @@
 /* CHARTS
 ══════════════════════════════════════════════════════ */
-function chartEmpty(id, msg = "Sin datos para el período seleccionado") {
-  const wrap = document.getElementById(id)?.parentElement;
-  if (wrap) wrap.innerHTML = `<div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--text-muted);font-size:13px">${msg}</div>`;
+function chartMsg(id, msg, color = "var(--text-muted)") {
+  const el = document.getElementById(id);
+  if (!el) return;
+  const wrap = el.parentElement || el;
+  // Replace canvas with message div so it's always visible
+  wrap.innerHTML = `<div style="display:flex;align-items:center;justify-content:center;
+    height:100%;color:${color};font-size:13px;text-align:center;padding:16px">${msg}</div>`;
 }
+// Keep old name as alias
+const chartEmpty = (id, msg) => chartMsg(id, msg);
 
 async function loadCharts() {
+  // Show loading state
+  ["chart-daily","chart-cat","chart-sentiment"].forEach(id =>
+    chartMsg(id, "Cargando...", "var(--text-muted)")
+  );
+
   if (typeof Chart === "undefined") {
-    ["chart-daily","chart-cat","chart-sentiment"].forEach(id => chartEmpty(id, "Chart.js no disponible (sin conexión)"));
+    ["chart-daily","chart-cat","chart-sentiment"].forEach(id =>
+      chartMsg(id, "⚠ Chart.js no disponible — recarga la página", "var(--warning)")
+    );
     return;
   }
 
   const days = parseInt(document.getElementById("chart-days")?.value || "7", 10);
   try {
     const d = await api(`/stats/chart?days=${days}`);
+    console.log("[charts] data:", d);
 
     const chartOpts = {
       responsive: true, maintainAspectRatio: false,
@@ -108,7 +122,7 @@ async function loadCharts() {
   } catch(e) {
     console.error("[charts]", e);
     ["chart-daily","chart-cat","chart-sentiment"].forEach(id =>
-      chartEmpty(id, `Error al cargar: ${e.message}`)
+      chartMsg(id, `⚠ Error: ${e.message}`, "var(--danger)")
     );
   }
 }
