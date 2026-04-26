@@ -50,7 +50,6 @@ function go(v) {
   if (v === "arts")     { loadArts(); loadSrcFilter(); }
   if (v === "kanban")   loadKanban();
   if (v === "srcs")     loadSrcs();
-  if (v === "charts")   loadCharts();
   if (v === "heatmap")  loadHeatmap();
   if (v === "trending") loadTrending();
   if (v === "kw")       loadKeywords();
@@ -205,8 +204,7 @@ document.addEventListener("keydown", e => {
   if (key === "1")  { e.preventDefault(); go("dash"); return; }
   if (key === "2")  { e.preventDefault(); go("arts"); return; }
   if (key === "3")  { e.preventDefault(); go("kanban"); return; }
-  if (key === "4")  { e.preventDefault(); go("charts"); return; }
-  if (key === "5")  { e.preventDefault(); go("trending"); return; }
+  if (key === "4")  { e.preventDefault(); go("trending"); return; }
   if (key === "g")  { e.preventDefault(); cycleArtView(); return; }
 });
 

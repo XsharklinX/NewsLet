@@ -15,7 +15,6 @@ let savedSearches  = JSON.parse(localStorage.getItem("savedSearches") || "[]");
 let savedArticles  = JSON.parse(localStorage.getItem("savedArticles")  || "[]");
 let filterDateFrom = "";
 let filterDateTo   = "";
-let chartDaily = null, chartCat = null, chartSentiment = null;
 let readerArticleId = null;
 let draggedId = null;
 let wsReconnectDelay = 1000;
