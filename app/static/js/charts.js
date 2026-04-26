@@ -1,7 +1,17 @@
 /* CHARTS
 ══════════════════════════════════════════════════════ */
+function chartEmpty(id, msg = "Sin datos para el período seleccionado") {
+  const wrap = document.getElementById(id)?.parentElement;
+  if (wrap) wrap.innerHTML = `<div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--text-muted);font-size:13px">${msg}</div>`;
+}
+
 async function loadCharts() {
-  const days = document.getElementById("chart-days")?.value || 7;
+  if (typeof Chart === "undefined") {
+    ["chart-daily","chart-cat","chart-sentiment"].forEach(id => chartEmpty(id, "Chart.js no disponible (sin conexión)"));
+    return;
+  }
+
+  const days = parseInt(document.getElementById("chart-days")?.value || "7", 10);
   try {
     const d = await api(`/stats/chart?days=${days}`);
 
@@ -13,68 +23,94 @@ async function loadCharts() {
     const tickColor = "#71717a";
 
     // Daily
-    const ctxD = document.getElementById("chart-daily").getContext("2d");
-    if (chartDaily) chartDaily.destroy();
-    chartDaily = new Chart(ctxD, {
-      type: "line",
-      data: {
-        labels: d.daily.map(r => r.day),
-        datasets: [{
-          label: "Artículos",
-          data: d.daily.map(r => r.count),
-          borderColor: "#6366f1", backgroundColor: "rgba(99,102,241,0.10)",
-          borderWidth: 2, pointRadius: 4, pointBackgroundColor: "#6366f1",
-          fill: true, tension: 0.4,
-        }],
-      },
-      options: {
-        ...chartOpts,
-        plugins: { ...chartOpts.plugins, legend: { display: false } },
-        scales: {
-          x: { ticks: { color: tickColor, font: { size: 10 } }, grid: { color: gridColor } },
-          y: { ticks: { color: tickColor, font: { size: 10 }, stepSize: 1 }, grid: { color: gridColor }, beginAtZero: true },
+    const dailyEl = document.getElementById("chart-daily");
+    if (!dailyEl) return;
+    if (chartDaily) { chartDaily.destroy(); chartDaily = null; }
+    if (!d.daily?.length) {
+      chartEmpty("chart-daily");
+    } else {
+      chartDaily = new Chart(dailyEl.getContext("2d"), {
+        type: "line",
+        data: {
+          labels: d.daily.map(r => r.day),
+          datasets: [{
+            label: "Artículos",
+            data: d.daily.map(r => r.count),
+            borderColor: "#6366f1", backgroundColor: "rgba(99,102,241,0.10)",
+            borderWidth: 2, pointRadius: 4, pointBackgroundColor: "#6366f1",
+            fill: true, tension: 0.4,
+          }],
         },
-      },
-    });
+        options: {
+          ...chartOpts,
+          plugins: { ...chartOpts.plugins, legend: { display: false } },
+          scales: {
+            x: { ticks: { color: tickColor, font: { size: 10 } }, grid: { color: gridColor } },
+            y: { ticks: { color: tickColor, font: { size: 10 }, stepSize: 1 }, grid: { color: gridColor }, beginAtZero: true },
+          },
+        },
+      });
+    }
 
     // Category doughnut
     const palette = ["#6366f1","#22c55e","#3b82f6","#eab308","#ef4444","#a855f7","#f97316","#14b8a6"];
-    const ctxC = document.getElementById("chart-cat").getContext("2d");
-    if (chartCat) chartCat.destroy();
-    chartCat = new Chart(ctxC, {
-      type: "doughnut",
-      data: {
-        labels: d.categories.map(r => r.category),
-        datasets: [{ data: d.categories.map(r => r.count), backgroundColor: palette, borderColor: "var(--bg)", borderWidth: 2 }],
-      },
-      options: { ...chartOpts, cutout: "65%" },
-    });
+    const catEl = document.getElementById("chart-cat");
+    if (chartCat) { chartCat.destroy(); chartCat = null; }
+    if (!d.categories?.length) {
+      chartEmpty("chart-cat", "Sin categorías aún");
+    } else {
+      chartCat = new Chart(catEl.getContext("2d"), {
+        type: "doughnut",
+        data: {
+          labels: d.categories.map(r => r.category),
+          datasets: [{ data: d.categories.map(r => r.count), backgroundColor: palette, borderColor: "var(--bg)", borderWidth: 2 }],
+        },
+        options: { ...chartOpts, cutout: "65%" },
+      });
+    }
 
     // Sentiment bar
-    const ctxS = document.getElementById("chart-sentiment").getContext("2d");
-    if (chartSentiment) chartSentiment.destroy();
+    const sentEl = document.getElementById("chart-sentiment");
+    if (chartSentiment) { chartSentiment.destroy(); chartSentiment = null; }
     const sentColors = { positive: "#22c55e", neutral: "#3b82f6", negative: "#ef4444" };
-    chartSentiment = new Chart(ctxS, {
-      type: "bar",
-      data: {
-        labels: (d.sentiments || []).map(r => r.sentiment),
-        datasets: [{
-          label: "Artículos",
-          data: (d.sentiments || []).map(r => r.count),
-          backgroundColor: (d.sentiments || []).map(r => sentColors[r.sentiment] || "#6366f1"),
-          borderRadius: 6,
-        }],
-      },
-      options: {
-        ...chartOpts,
-        plugins: { ...chartOpts.plugins, legend: { display: false } },
-        scales: {
-          x: { ticks: { color: tickColor }, grid: { display: false } },
-          y: { ticks: { color: tickColor, stepSize: 1 }, grid: { color: gridColor }, beginAtZero: true },
+    if (!d.sentiments?.length) {
+      chartEmpty("chart-sentiment", "Sin datos de sentimiento");
+    } else {
+      chartSentiment = new Chart(sentEl.getContext("2d"), {
+        type: "bar",
+        data: {
+          labels: d.sentiments.map(r => r.sentiment),
+          datasets: [{
+            label: "Artículos",
+            data: d.sentiments.map(r => r.count),
+            backgroundColor: d.sentiments.map(r => sentColors[r.sentiment] || "#6366f1"),
+            borderRadius: 6,
+          }],
         },
-      },
+        options: {
+          ...chartOpts,
+          plugins: { ...chartOpts.plugins, legend: { display: false } },
+          scales: {
+            x: { ticks: { color: tickColor }, grid: { display: false } },
+            y: { ticks: { color: tickColor, stepSize: 1 }, grid: { color: gridColor }, beginAtZero: true },
+          },
+        },
+      });
+    }
+
+    // Force resize after creation (handles cases where container wasn't fully painted)
+    requestAnimationFrame(() => {
+      chartDaily?.resize();
+      chartCat?.resize();
+      chartSentiment?.resize();
     });
-  } catch(e) { console.error(e); }
+
+  } catch(e) {
+    console.error("[charts]", e);
+    ["chart-daily","chart-cat","chart-sentiment"].forEach(id =>
+      chartEmpty(id, `Error al cargar: ${e.message}`)
+    );
+  }
 }
 
 /* ══════════════════════════════════════════════════════
