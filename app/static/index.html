@@ -897,28 +897,11 @@
 <script src="js/config.js?v=7"></script>
 <script src="js/health.js?v=7"></script>
 <script>
-  // Service Worker: unregister any stale SW first, then re-register
+  // Unregister any existing Service Worker so updates are always immediate
   if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.getRegistrations().then(regs => {
-      const stale = regs.filter(r => !r.active?.scriptURL?.includes('sw.js') ||
-        (r.active && r.active.state !== 'activated'));
-      // Always unregister all and reload once to ensure fresh assets
-      const key = 'sw_cleared_v8';
-      if (!sessionStorage.getItem(key) && regs.length > 0) {
-        sessionStorage.setItem(key, '1');
-        Promise.all(regs.map(r => r.unregister())).then(() => location.reload(true));
-      } else {
-        // Re-register with updated SW
-        navigator.serviceWorker.register('/sw.js').then(reg => {
-          window.addEventListener('beforeinstallprompt', e => {
-            e.preventDefault();
-            window._pwaPrompt = e;
-            const btn = document.getElementById('pwa-install-btn');
-            if (btn) btn.style.display = 'inline-flex';
-          });
-        }).catch(() => {});
-      }
-    });
+    navigator.serviceWorker.getRegistrations()
+      .then(regs => regs.forEach(r => r.unregister()))
+      .catch(() => {});
   }
   // JWT Auth check + show logout button
   (async () => {
