@@ -1,14 +1,14 @@
 /**
  * NewsLet Service Worker v2.0
- * Strategy: Cache-first for static assets, Network-first for API calls.
- * Supports: offline fallback, push notifications, background sync.
+ * Strategy:
+ *   - HTML pages (index.html, /):  Network-first (always fresh, SW never blocks updates)
+ *   - JS/CSS assets with ?v=N:     Cache-first (immutable by version)
+ *   - API / WebSocket:             Network-first, offline JSON fallback
  */
-const CACHE_NAME = 'newslet-v7';
+const CACHE_NAME = 'newslet-v8';
 
+// Only cache truly immutable assets (versioned JS/CSS). NOT index.html.
 const STATIC_ASSETS = [
-  '/',
-  '/index.html',
-  '/login.html',
   '/style.css',
   '/app.js?v=7',
   '/js/api.js?v=7',
@@ -43,7 +43,7 @@ const OFFLINE_HTML = `<!DOCTYPE html>
   <button onclick="location.reload()">↻ Reintentar</button>
 </div></body></html>`;
 
-// ── Install: pre-cache static shell ──────────────────────────────────────────
+// ── Install: pre-cache versioned assets only ──────────────────────────────────
 self.addEventListener('install', event => {
   event.waitUntil(
     caches.open(CACHE_NAME).then(cache =>
@@ -85,7 +85,30 @@ self.addEventListener('fetch', event => {
     return;
   }
 
-  // Cache-first for static assets, with offline HTML fallback
+  // Network-first for HTML pages — ensures updates are picked up immediately
+  if (event.request.destination === 'document' ||
+      url.pathname === '/' ||
+      url.pathname.endsWith('.html')) {
+    event.respondWith(
+      fetch(event.request)
+        .then(response => {
+          if (response.ok) {
+            caches.open(CACHE_NAME).then(cache => cache.put(event.request, response.clone()));
+          }
+          return response;
+        })
+        .catch(() =>
+          caches.match(event.request).then(cached =>
+            cached || new Response(OFFLINE_HTML, {
+              headers: { 'Content-Type': 'text/html; charset=utf-8' }
+            })
+          )
+        )
+    );
+    return;
+  }
+
+  // Cache-first for versioned JS/CSS assets
   event.respondWith(
     caches.match(event.request).then(cached => {
       if (cached) return cached;
@@ -93,14 +116,7 @@ self.addEventListener('fetch', event => {
         if (!response || response.status !== 200 || response.type === 'opaque') return response;
         caches.open(CACHE_NAME).then(cache => cache.put(event.request, response.clone()));
         return response;
-      }).catch(() => {
-        // Offline fallback for navigation requests
-        if (event.request.destination === 'document') {
-          return new Response(OFFLINE_HTML, {
-            headers: { 'Content-Type': 'text/html; charset=utf-8' }
-          });
-        }
-      });
+      }).catch(() => undefined);
     })
   );
 });
