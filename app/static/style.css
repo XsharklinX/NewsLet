@@ -3795,3 +3795,49 @@ input[type="date"].src-select { color-scheme:dark; }
 .dash-top-score { font-size:11px;font-weight:700;color:#eab308;flex-shrink:0;min-width:28px; }
 .dash-top-title { font-size:12px;color:var(--text);overflow:hidden;display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical; }
 @media (max-width:900px) { .dash-widgets-row { grid-template-columns:1fr; } }
+
+/* ── Bulk action bar ─────────────────────────────── */
+.bulk-bar {
+  position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+  display: flex; align-items: center; gap: 10px;
+  background: var(--surface); border: 1px solid var(--border-glow);
+  border-radius: 14px; padding: 10px 18px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.5), 0 0 0 1px rgba(99,102,241,0.2);
+  z-index: 500; font-size: 13px; font-weight: 600; color: var(--text);
+  animation: slideUp .18s ease;
+}
+.bulk-bar strong { color: var(--primary); }
+@keyframes slideUp {
+  from { opacity:0; transform:translateX(-50%) translateY(12px); }
+  to   { opacity:1; transform:translateX(-50%) translateY(0); }
+}
+
+/* ── Article card checkbox ──────────────────────── */
+.a-check {
+  position: absolute; top: 10px; left: 10px; z-index: 2;
+  width: 20px; height: 20px; display: flex; align-items: center;
+  opacity: 0; transition: opacity .15s; cursor: pointer;
+}
+.a-card:hover .a-check,
+.a-check:has(input:checked) { opacity: 1; }
+.a-check input { width: 16px; height: 16px; accent-color: var(--primary); cursor: pointer; }
+.a-card { position: relative; }
+
+/* ── Health warning banner ───────────────────────── */
+.health-banner {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 12px; padding: 10px 20px;
+  background: rgba(245,158,11,0.12); border-bottom: 1px solid rgba(245,158,11,0.3);
+  font-size: 13px; font-weight: 500; color: #fbbf24;
+}
+.health-banner button {
+  background: none; border: none; color: #fbbf24;
+  font-size: 16px; cursor: pointer; opacity: 0.7; flex-shrink: 0;
+}
+.health-banner button:hover { opacity: 1; }
+
+/* ── AI usage mini widget ────────────────────────── */
+.dash-ai-mini { display: flex; flex-direction: column; gap: 6px; }
+.dash-ai-row  { display: flex; justify-content: space-between; align-items: center; font-size: 12px; }
+.dash-ai-lbl  { color: var(--text-muted); }
+.dash-ai-val  { font-weight: 700; color: var(--text); }

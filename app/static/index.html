@@ -131,6 +131,12 @@
   <!-- ══════════════════════ MAIN ══════════════════════ -->
   <main class="main">
 
+    <!-- Health warning banner (shown when system is degraded) -->
+    <div id="health-banner" class="health-banner" style="display:none">
+      <span id="health-banner-text">⚠ Sistema degradado</span>
+      <button onclick="document.getElementById('health-banner').style.display='none'" title="Cerrar">✕</button>
+    </div>
+
     <!-- ─── DASHBOARD ──────────────────────────────── -->
     <div class="view on" id="v-dash">
       <div class="topbar">
@@ -214,6 +220,14 @@
             <button class="btn btn-g btn-xs" onclick="go('arts')">Ver →</button>
           </div>
           <div id="dash-top-mini" class="dash-top-mini">Cargando...</div>
+        </div>
+        <!-- AI usage widget -->
+        <div class="dash-widget">
+          <div class="dash-widget-head">
+            <span>🤖 Uso de IA</span>
+            <button class="btn btn-g btn-xs" onclick="go('charts')">Ver →</button>
+          </div>
+          <div id="dash-ai-mini" class="dash-ai-mini">Cargando...</div>
         </div>
       </div>
 
@@ -866,16 +880,22 @@
 
 <div class="sidebar-backdrop" id="sidebar-backdrop" onclick="closeSidebar()"></div>
 <button class="mob-toggle" id="mob-toggle" onclick="toggleSidebar()">☰</button>
+<div id="bulk-bar" class="bulk-bar" style="display:none">
+  <span><strong id="bulk-count">0</strong> seleccionados</span>
+  <button class="btn btn-s btn-sm" onclick="bulkApprove()">✓ Aprobar</button>
+  <button class="btn btn-d btn-sm" onclick="bulkReject()">✕ Rechazar</button>
+  <button class="btn btn-g btn-sm" onclick="clearSelection()">✕ Limpiar</button>
+</div>
 <div id="toast" class="toast"></div>
-<script src="app.js?v=5"></script>
-<script src="js/api.js?v=5"></script>
-<script src="js/ui.js?v=5"></script>
-<script src="js/articles.js?v=5"></script>
-<script src="js/kanban.js?v=5"></script>
-<script src="js/sources.js?v=5"></script>
-<script src="js/charts.js?v=5"></script>
-<script src="js/config.js?v=5"></script>
-<script src="js/health.js?v=5"></script>
+<script src="app.js?v=6"></script>
+<script src="js/api.js?v=6"></script>
+<script src="js/ui.js?v=6"></script>
+<script src="js/articles.js?v=6"></script>
+<script src="js/kanban.js?v=6"></script>
+<script src="js/sources.js?v=6"></script>
+<script src="js/charts.js?v=6"></script>
+<script src="js/config.js?v=6"></script>
+<script src="js/health.js?v=6"></script>
 <script>
   // Service Worker registration (PWA)
   if ('serviceWorker' in navigator) {

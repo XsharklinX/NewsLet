@@ -21,7 +21,7 @@ async function checkHealth() {
     // Render health checks grid
     const grid = document.getElementById("health-checks-grid");
     if (grid && h.checks) {
-      grid.innerHTML = Object.entries(h.checks).map(([k, v]) => {
+      grid.innerHTML = Object.entries(h.checks).filter(([k]) => k !== "warnings").map(([k, v]) => {
         const isOk = v === "ok" || typeof v === "number";
         const icon = isOk ? "🟢" : "🔴";
         const val  = typeof v === "number" ? v : (v === "ok" ? "OK" : v);
@@ -31,6 +31,19 @@ async function checkHealth() {
           <div class="hc-val">${val}</div>
         </div>`;
       }).join("");
+    }
+
+    // Warning banner in dashboard
+    const banner     = document.getElementById("health-banner");
+    const bannerText = document.getElementById("health-banner-text");
+    if (banner && bannerText) {
+      const warnings = Array.isArray(h.warnings) ? h.warnings : [];
+      if (warnings.length > 0) {
+        bannerText.textContent = "⚠ " + warnings.join(" · ");
+        banner.style.display = "flex";
+      } else {
+        banner.style.display = "none";
+      }
     }
   } catch {
     const color = "#ef4444";

@@ -1,3 +1,54 @@
+/* ══════════════════════════════════════════════════════
+   BULK SELECTION
+══════════════════════════════════════════════════════ */
+const selectedIds = new Set();
+
+function toggleSelect(id, cb) {
+  if (cb.checked) selectedIds.add(id);
+  else selectedIds.delete(id);
+  updateBulkBar();
+}
+
+function updateBulkBar() {
+  const bar = document.getElementById("bulk-bar");
+  const cnt = document.getElementById("bulk-count");
+  if (!bar) return;
+  if (selectedIds.size > 0) {
+    bar.style.display = "flex";
+    if (cnt) cnt.textContent = selectedIds.size;
+  } else {
+    bar.style.display = "none";
+  }
+}
+
+function clearSelection() {
+  selectedIds.clear();
+  document.querySelectorAll(".a-check input").forEach(cb => cb.checked = false);
+  updateBulkBar();
+}
+
+async function bulkApprove() {
+  if (!selectedIds.size) return;
+  const ids = [...selectedIds];
+  try {
+    const d = await api("/articles/bulk-approve", { method: "POST", body: JSON.stringify(ids) });
+    toast(`✓ ${d.approved} artículos aprobados`, "ok");
+    clearSelection();
+    loadArts(); loadStats(); loadDash();
+  } catch(e) { toast("Error al aprobar en lote", "err"); }
+}
+
+async function bulkReject() {
+  if (!selectedIds.size) return;
+  const ids = [...selectedIds];
+  try {
+    const d = await api("/articles/bulk-reject", { method: "POST", body: JSON.stringify(ids) });
+    toast(`✕ ${d.rejected} artículos rechazados`, "ok");
+    clearSelection();
+    loadArts(); loadStats(); loadDash();
+  } catch(e) { toast("Error al rechazar en lote", "err"); }
+}
+
 /* STATS
 ══════════════════════════════════════════════════════ */
 async function loadStats() {
@@ -77,6 +128,9 @@ function card(a, compact = false) {
     : "";
 
   return `<div class="a-card ${statusCls}" data-id="${a.id}">
+    <label class="a-check" onclick="event.stopPropagation()" title="Seleccionar">
+      <input type="checkbox" onchange="toggleSelect(${a.id},this)" ${selectedIds.has(a.id) ? "checked" : ""}>
+    </label>
     ${thumbHtml}
     <div class="a-body">
       <div class="a-title" onclick="openReader(${a.id})">
@@ -264,13 +318,39 @@ async function loadDashWidgets() {
       }
     }
   } catch {}
+
+  // AI usage widget
+  try {
+    const u = await api("/stats/ai-usage?days=7");
+    const el = document.getElementById("dash-ai-mini");
+    if (el) {
+      const todayTokens = u.daily.length ? u.daily[u.daily.length - 1].tokens : 0;
+      el.innerHTML = `
+        <div class="dash-ai-row">
+          <span class="dash-ai-lbl">Total tokens</span>
+          <span class="dash-ai-val">${u.total_tokens.toLocaleString()}</span>
+        </div>
+        <div class="dash-ai-row">
+          <span class="dash-ai-lbl">Resúmenes</span>
+          <span class="dash-ai-val">${u.total_summaries.toLocaleString()}</span>
+        </div>
+        <div class="dash-ai-row">
+          <span class="dash-ai-lbl">Hoy</span>
+          <span class="dash-ai-val">${todayTokens.toLocaleString()} tok</span>
+        </div>
+        <div class="dash-ai-row">
+          <span class="dash-ai-lbl">Coste est.</span>
+          <span class="dash-ai-val" style="color:var(--success)">$${u.estimated_cost_usd}</span>
+        </div>`;
+    }
+  } catch {}
 }
 
 /* ══════════════════════════════════════════════════════
    ARTICLES LIST
 ══════════════════════════════════════════════════════ */
 async function loadArts(p) {
-  if (p !== undefined) pg = p;
+  if (p !== undefined) { pg = p; clearSelection(); }
   const params = new URLSearchParams({ page: pg, page_size: 20 });
   if (filterStatus)    params.set("status",    filterStatus);
   if (filterSrc)       params.set("source_id", filterSrc);

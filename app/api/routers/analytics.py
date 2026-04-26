@@ -191,5 +191,43 @@ def health_check(db: Session = Depends(get_db)):
     checks["sources_active"]  = db.query(Source).filter(Source.is_active == True).count()
     checks["sources_disabled"] = db.query(Source).filter(Source.is_active == False).count()
 
+    # Config warnings
+    from app.config import get_settings
+    settings = get_settings()
+    warnings = []
+    if not settings.groq_api_key and not settings.openai_api_key:
+        warnings.append("Sin API key de IA (GROQ_API_KEY o OPENAI_API_KEY)")
+    if not settings.telegram_bot_token:
+        warnings.append("Sin TELEGRAM_BOT_TOKEN — notificaciones desactivadas")
+    if checks["sources_active"] == 0:
+        warnings.append("No hay fuentes activas — no se obtendrán noticias")
+    checks["warnings"] = warnings
+
     all_ok = all(v == "ok" for k, v in checks.items() if isinstance(v, str))
-    return {"status": "ok" if all_ok else "degraded", "checks": checks}
+    return {"status": "ok" if all_ok else "degraded", "checks": checks, "warnings": warnings}
+
+
+@router.get("/stats/ai-usage")
+def ai_usage_stats(days: int = Query(7, ge=1, le=30), db: Session = Depends(get_db)):
+    """Token consumption per day + total cost estimate."""
+    cutoff = datetime.utcnow() - timedelta(days=days)
+    daily = (
+        db.query(
+            cast(Summary.created_at, Date).label("day"),
+            func.sum(Summary.tokens_used).label("tokens"),
+            func.count(Summary.id).label("count"),
+        )
+        .filter(Summary.created_at >= cutoff)
+        .group_by("day").order_by("day").all()
+    )
+    total_tokens = db.query(func.sum(Summary.tokens_used)).scalar() or 0
+    total_count  = db.query(func.count(Summary.id)).scalar() or 0
+    # Groq Llama 3.3 70B: $0.59/1M tokens (blended); rough estimate
+    cost_usd = round(float(total_tokens) * 0.00000059, 4)
+    return {
+        "daily":              [{"day": str(r.day), "tokens": r.tokens or 0, "count": r.count} for r in daily],
+        "total_tokens":       total_tokens,
+        "total_summaries":    total_count,
+        "estimated_cost_usd": cost_usd,
+        "days":               days,
+    }
