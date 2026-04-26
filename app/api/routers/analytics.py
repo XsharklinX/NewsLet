@@ -192,8 +192,7 @@ def health_check(db: Session = Depends(get_db)):
     checks["sources_disabled"] = db.query(Source).filter(Source.is_active == False).count()
 
     # Config warnings
-    from app.config import get_settings
-    settings = get_settings()
+    from app.config import settings
     warnings = []
     if not settings.groq_api_key and not settings.openai_api_key:
         warnings.append("Sin API key de IA (GROQ_API_KEY o OPENAI_API_KEY)")
