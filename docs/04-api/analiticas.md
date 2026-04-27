@@ -9,6 +9,7 @@ Base URL: `/api/v1`
 Estadísticas generales del sistema en tiempo real. Usado por el dashboard.
 
 **Respuesta (200):**
+
 ```json
 {
   "total_articles": 1250,
@@ -33,11 +34,12 @@ Artículos recolectados por día en los últimos N días.
 
 **Query params:**
 
-| Param | Por defecto | Descripción |
-|---|---|---|
-| `days` | `30` | Número de días hacia atrás |
+| Param  | Por defecto | Descripción                |
+| ------ | ----------- | -------------------------- |
+| `days` | `30`        | Número de días hacia atrás |
 
 **Respuesta (200):**
+
 ```json
 [
   { "date": "2024-01-14", "count": 45 },
@@ -52,6 +54,7 @@ Artículos recolectados por día en los últimos N días.
 Distribución de artículos por categoría.
 
 **Respuesta (200):**
+
 ```json
 [
   { "category": "Tecnología", "count": 320 },
@@ -67,6 +70,7 @@ Distribución de artículos por categoría.
 Distribución por sentimiento.
 
 **Respuesta (200):**
+
 ```json
 [
   { "sentiment": "neutral", "count": 650 },
@@ -82,6 +86,7 @@ Distribución por sentimiento.
 Histograma de scores de relevancia (1-10).
 
 **Respuesta (200):**
+
 ```json
 [
   { "score": 1, "count": 12 },
@@ -99,6 +104,7 @@ Histograma de scores de relevancia (1-10).
 Mapa de actividad: cantidad de artículos publicados por día de la semana y hora del día.
 
 **Respuesta (200):**
+
 ```json
 [
   { "day": 0, "hour": 8, "count": 23 },
@@ -117,12 +123,13 @@ Palabras más mencionadas en los títulos de los últimos N artículos.
 
 **Query params:**
 
-| Param | Por defecto | Descripción |
-|---|---|---|
-| `hours` | `24` | Ventana temporal en horas |
-| `top` | `20` | Número de palabras a devolver |
+| Param   | Por defecto | Descripción                   |
+| ------- | ----------- | ----------------------------- |
+| `hours` | `24`        | Ventana temporal en horas     |
+| `top`   | `20`        | Número de palabras a devolver |
 
 **Respuesta (200):**
+
 ```json
 [
   { "word": "inteligencia", "count": 45 },
@@ -138,6 +145,7 @@ Palabras más mencionadas en los títulos de los últimos N artículos.
 Rendimiento de cada fuente: artículos aportados, score promedio, tasa de aprobación.
 
 **Respuesta (200):**
+
 ```json
 [
   {
@@ -159,12 +167,13 @@ Rendimiento de cada fuente: artículos aportados, score promedio, tasa de aproba
 
 **Query params:**
 
-| Param | Por defecto | Descripción |
-|---|---|---|
-| `lines` | `100` | Número de líneas a devolver |
-| `level` | _(todos)_ | Filtrar por nivel: `INFO`, `WARNING`, `ERROR` |
+| Param   | Por defecto | Descripción                                   |
+| ------- | ----------- | --------------------------------------------- |
+| `lines` | `100`       | Número de líneas a devolver                   |
+| `level` | _(todos)_   | Filtrar por nivel: `INFO`, `WARNING`, `ERROR` |
 
 **Respuesta (200):**
+
 ```json
 {
   "logs": [
@@ -182,6 +191,7 @@ Rendimiento de cada fuente: artículos aportados, score promedio, tasa de aproba
 Health check del sistema. No requiere autenticación.
 
 **Respuesta (200):**
+
 ```json
 {
   "status": "ok",
@@ -200,10 +210,10 @@ Lista las notificaciones internas del sistema.
 
 **Query params:**
 
-| Param | Por defecto | Descripción |
-|---|---|---|
-| `limit` | `50` | Máximo de notificaciones |
-| `unread_only` | `false` | Solo notificaciones no leídas |
+| Param         | Por defecto | Descripción                   |
+| ------------- | ----------- | ----------------------------- |
+| `limit`       | `50`        | Máximo de notificaciones      |
+| `unread_only` | `false`     | Solo notificaciones no leídas |
 
 ---
 

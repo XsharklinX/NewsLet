@@ -11,20 +11,21 @@ Lista artículos con filtros y paginación.
 
 **Query params (todos opcionales):**
 
-| Param | Tipo | Descripción |
-|---|---|---|
-| `status` | string | Filtrar por estado: `pending`, `approved`, `rejected`, `sent` |
-| `source_id` | int | Filtrar por fuente |
-| `category` | string | Filtrar por categoría (ej: `Tecnología`) |
-| `sentiment` | string | `positive`, `neutral`, `negative` |
-| `min_score` | int (1-10) | Score mínimo de relevancia |
-| `search` | string | Búsqueda en título + texto (máx 200 chars) |
-| `date_from` | ISO datetime | Artículos recolectados después de esta fecha |
-| `date_to` | ISO datetime | Artículos recolectados antes de esta fecha |
-| `page` | int (≥1) | Página actual (por defecto: 1) |
-| `page_size` | int (1-100) | Artículos por página (por defecto: 20) |
+| Param       | Tipo         | Descripción                                                   |
+| ----------- | ------------ | ------------------------------------------------------------- |
+| `status`    | string       | Filtrar por estado: `pending`, `approved`, `rejected`, `sent` |
+| `source_id` | int          | Filtrar por fuente                                            |
+| `category`  | string       | Filtrar por categoría (ej: `Tecnología`)                      |
+| `sentiment` | string       | `positive`, `neutral`, `negative`                             |
+| `min_score` | int (1-10)   | Score mínimo de relevancia                                    |
+| `search`    | string       | Búsqueda en título + texto (máx 200 chars)                    |
+| `date_from` | ISO datetime | Artículos recolectados después de esta fecha                  |
+| `date_to`   | ISO datetime | Artículos recolectados antes de esta fecha                    |
+| `page`      | int (≥1)     | Página actual (por defecto: 1)                                |
+| `page_size` | int (1-100)  | Artículos por página (por defecto: 20)                        |
 
 **Respuesta (200):**
+
 ```json
 {
   "items": [
@@ -70,6 +71,7 @@ Obtiene un artículo específico con su resumen completo.
 Cambia el estado de un artículo.
 
 **Body:**
+
 ```json
 {
   "status": "approved"
@@ -79,6 +81,7 @@ Cambia el estado de un artículo.
 Valores válidos: `pending`, `approved`, `rejected`, `sent`.
 
 **Respuesta (200):**
+
 ```json
 {
   "id": 42,
@@ -93,6 +96,7 @@ Valores válidos: `pending`, `approved`, `rejected`, `sent`.
 Genera o regenera el resumen de un artículo específico mediante IA.
 
 **Respuesta (200):**
+
 ```json
 {
   "summary": "Resumen generado...",
@@ -111,6 +115,7 @@ Genera o regenera el resumen de un artículo específico mediante IA.
 Envía un artículo específico a Telegram inmediatamente.
 
 **Respuesta (200):**
+
 ```json
 {
   "sent": true,
@@ -127,6 +132,7 @@ Envía un artículo específico a Telegram inmediatamente.
 Registra la valoración del editor sobre un artículo.
 
 **Body:**
+
 ```json
 {
   "value": 1
@@ -136,6 +142,7 @@ Registra la valoración del editor sobre un artículo.
 Valores: `1` (like), `-1` (dislike), `0` (resetear).
 
 **Respuesta (200):**
+
 ```json
 {
   "id": 42,
@@ -150,6 +157,7 @@ Valores: `1` (like), `-1` (dislike), `0` (resetear).
 Elimina un artículo y su resumen asociado.
 
 **Respuesta (200):**
+
 ```json
 {
   "deleted": true

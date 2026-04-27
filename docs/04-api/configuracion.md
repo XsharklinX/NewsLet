@@ -11,6 +11,7 @@ Base URL: `/api/v1`
 Lista todas las palabras clave de alerta.
 
 **Respuesta (200):**
+
 ```json
 [
   {
@@ -29,6 +30,7 @@ Lista todas las palabras clave de alerta.
 Agrega una nueva palabra clave.
 
 **Body:**
+
 ```json
 {
   "keyword": "cambio climático"
@@ -59,6 +61,7 @@ Elimina una keyword.
 Obtiene la configuración actual del digest diario.
 
 **Respuesta (200):**
+
 ```json
 {
   "id": 1,
@@ -77,6 +80,7 @@ Obtiene la configuración actual del digest diario.
 Actualiza la configuración del digest.
 
 **Body (todos los campos son opcionales):**
+
 ```json
 {
   "hour": 9,
@@ -104,6 +108,7 @@ Al actualizar `hour`, el scheduler se reprograma automáticamente sin necesidad 
 Lista todos los webhooks configurados.
 
 **Respuesta (200):**
+
 ```json
 [
   {
@@ -124,6 +129,7 @@ Lista todos los webhooks configurados.
 Crea un nuevo webhook.
 
 **Body:**
+
 ```json
 {
   "name": "Zapier",
@@ -134,6 +140,7 @@ Crea un nuevo webhook.
 ```
 
 **Eventos disponibles:**
+
 - `fetch` — se dispara cuando se completa un ciclo de recolección de noticias
 - `keyword` — cuando un artículo coincide con una keyword activa
 - `digest` — cuando se envía el digest diario
@@ -163,6 +170,7 @@ Devuelve los valores actuales de configuración del sistema (variables de entorn
 Los campos sensibles (claves API, contraseñas) se muestran como `••••••••`.
 
 **Respuesta (200):**
+
 ```json
 {
   "settings": {
@@ -181,6 +189,7 @@ Los campos sensibles (claves API, contraseñas) se muestran como `••••�
 Actualiza una o más variables de configuración. Los cambios se escriben en el archivo `.env` y se aplican en tiempo real cuando es posible.
 
 **Body:**
+
 ```json
 {
   "updates": {
@@ -191,6 +200,7 @@ Actualiza una o más variables de configuración. Los cambios se escriben en el 
 ```
 
 **Respuesta (200):**
+
 ```json
 {
   "message": "3 configuraciones actualizadas",

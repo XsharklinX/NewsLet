@@ -8,11 +8,11 @@ Base URL: `/api/v1`
 
 NewsLet Pro soporta tres mecanismos de autenticación, activados según las variables de entorno configuradas:
 
-| Modo | Activación | Uso |
-|---|---|---|
-| **Sin auth** | `ADMIN_PASSWORD` vacío | Panel y API accesibles sin credenciales |
-| **JWT** | `ADMIN_PASSWORD` configurado | Login con contraseña → token Bearer |
-| **Service Key** | `SERVICE_KEY` configurado | Integración con CI/CD, GitHub Actions |
+| Modo            | Activación                   | Uso                                     |
+| --------------- | ---------------------------- | --------------------------------------- |
+| **Sin auth**    | `ADMIN_PASSWORD` vacío       | Panel y API accesibles sin credenciales |
+| **JWT**         | `ADMIN_PASSWORD` configurado | Login con contraseña → token Bearer     |
+| **Service Key** | `SERVICE_KEY` configurado    | Integración con CI/CD, GitHub Actions   |
 
 ---
 
@@ -23,6 +23,7 @@ NewsLet Pro soporta tres mecanismos de autenticación, activados según las vari
 Inicia sesión con la contraseña de administrador. Devuelve un token JWT.
 
 **Body:**
+
 ```json
 {
   "password": "mi_contraseña_admin"
@@ -30,6 +31,7 @@ Inicia sesión con la contraseña de administrador. Devuelve un token JWT.
 ```
 
 **Respuesta exitosa (200):**
+
 ```json
 {
   "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
@@ -38,6 +40,7 @@ Inicia sesión con la contraseña de administrador. Devuelve un token JWT.
 ```
 
 **Respuesta si auth deshabilitada (200):**
+
 ```json
 {
   "token": null,
@@ -46,6 +49,7 @@ Inicia sesión con la contraseña de administrador. Devuelve un token JWT.
 ```
 
 **Error (401):**
+
 ```json
 {
   "detail": "Contraseña incorrecta"
@@ -59,6 +63,7 @@ Inicia sesión con la contraseña de administrador. Devuelve un token JWT.
 Indica si la autenticación JWT está habilitada.
 
 **Respuesta:**
+
 ```json
 {
   "auth_enabled": true
@@ -74,6 +79,7 @@ Genera un token JWT de larga duración (365 días) para uso en automatizaciones.
 **Query param:** `key` — debe coincidir con `SERVICE_KEY` del `.env`.
 
 **Respuesta (200):**
+
 ```json
 {
   "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
@@ -81,6 +87,7 @@ Genera un token JWT de larga duración (365 días) para uso en automatizaciones.
 ```
 
 **Error (403):**
+
 ```json
 {
   "detail": "Invalid service key"
@@ -137,6 +144,7 @@ Este endpoint se registra automáticamente al arrancar cuando `WEBHOOK_BASE_URL`
 Si `PANEL_PIN` está configurado en `.env`, el servidor agrega un middleware HTTP que bloquea el acceso a las páginas HTML del panel (no a la API ni al WebSocket).
 
 El PIN se envía como:
+
 - Header: `X-Panel-Pin: 1234`
 - Query param: `?pin=1234`
 

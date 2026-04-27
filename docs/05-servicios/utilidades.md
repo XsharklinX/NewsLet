@@ -23,6 +23,7 @@ SMTP_TO=destinatario1@email.com,destinatario2@email.com
 ### Uso con Gmail
 
 Gmail requiere una **App Password** (no la contraseña normal):
+
 1. Google Account → Seguridad → Verificación en 2 pasos (debe estar activa)
 2. Seguridad → Contraseñas de aplicaciones → Crear
 3. Copiar la contraseña de 16 caracteres a `SMTP_PASSWORD`
@@ -57,12 +58,12 @@ Envía notificaciones HTTP POST a URLs externas cuando ocurren eventos en el sis
 
 ### Eventos disponibles
 
-| Evento | Cuándo se dispara |
-|---|---|
-| `fetch` | Al completar un ciclo de recolección |
-| `keyword` | Al detectar un artículo con keyword activa |
-| `digest` | Al enviar el digest diario |
-| `approved` | Al aprobar un artículo manualmente |
+| Evento     | Cuándo se dispara                          |
+| ---------- | ------------------------------------------ |
+| `fetch`    | Al completar un ciclo de recolección       |
+| `keyword`  | Al detectar un artículo con keyword activa |
+| `digest`   | Al enviar el digest diario                 |
+| `approved` | Al aprobar un artículo manualmente         |
 
 ### Payload enviado
 
@@ -82,6 +83,7 @@ Para eventos `keyword` y `approved`, `data` incluye el artículo completo.
 ### Verificación con secreto (HMAC)
 
 Si el webhook tiene configurado un `secret`, se incluye el header:
+
 ```
 X-Webhook-Signature: sha256=<hmac-sha256-del-body>
 ```
@@ -105,6 +107,7 @@ push(db, "info", "Limpieza", "57 artículos antiguos eliminados")
 ```
 
 Los tipos tienen iconos distintos en el panel:
+
 - `fetch` → 📡
 - `keyword` → 🔔
 - `digest` → 📰
