@@ -1,5 +1,7 @@
+import hashlib
 import json
 import logging
+import time
 from datetime import datetime
 
 import httpx
@@ -13,6 +15,8 @@ logger = logging.getLogger(__name__)
 
 NEWSAPI_BASE = "https://newsapi.org/v2/everything"
 MAX_CONSECUTIVE_FAILURES = 5
+_NEWSAPI_CACHE: dict[str, tuple[float, list]] = {}
+_CACHE_TTL = 900  # 15 minutes
 
 
 def _record_success(source: Source, db: Session) -> None:
@@ -52,18 +56,33 @@ async def fetch_newsapi_source(source: Source, db: Session) -> int:
     if not params.get("pageSize"):
         params["pageSize"] = 20
 
-    try:
-        async with httpx.AsyncClient(timeout=30) as client:
-            resp = await client.get(NEWSAPI_BASE, params=params)
-            resp.raise_for_status()
-            data = resp.json()
-    except Exception as e:
-        _record_failure(source, db, str(e))
-        logger.error(f"Error fetching NewsAPI {source.name}: {e}")
-        return 0
+    cache_key = hashlib.md5(json.dumps(sorted(params.items())).encode()).hexdigest()
+    now = time.monotonic()
+    if cache_key in _NEWSAPI_CACHE:
+        ts, cached_articles = _NEWSAPI_CACHE[cache_key]
+        if now - ts < _CACHE_TTL:
+            logger.debug(f"NewsAPI cache hit: {source.name}")
+            articles_data = cached_articles
+        else:
+            articles_data = None
+    else:
+        articles_data = None
+
+    if articles_data is None:
+        try:
+            async with httpx.AsyncClient(timeout=30) as client:
+                resp = await client.get(NEWSAPI_BASE, params=params)
+                resp.raise_for_status()
+                data = resp.json()
+            articles_data = data.get("articles", [])
+            _NEWSAPI_CACHE[cache_key] = (time.monotonic(), articles_data)
+        except Exception as e:
+            _record_failure(source, db, str(e))
+            logger.error(f"Error fetching NewsAPI {source.name}: {e}")
+            return 0
 
     new_count = 0
-    for item in data.get("articles", []):
+    for item in articles_data:
         url = item.get("url", "")
         title = item.get("title", "Sin titulo")
         if not url:

@@ -3,6 +3,26 @@
 ══════════════════════════════════════════════════════ */
 const selectedIds = new Set();
 
+/* ── Read tracking ─────────────────────────────────────────────────────── */
+let readIds = new Set(JSON.parse(localStorage.getItem("readIds") || "[]"));
+let filterUnread = false;
+
+function markRead(id) {
+  if (readIds.has(id)) return;
+  readIds.add(id);
+  localStorage.setItem("readIds", JSON.stringify([...readIds]));
+  const c = document.querySelector(`.a-card[data-id="${id}"]`);
+  if (c) { c.classList.add("is-read"); c.querySelector(".a-unread-dot")?.remove(); }
+}
+
+function filUnread(el) {
+  filterUnread = !filterUnread;
+  el.classList.toggle("on", filterUnread);
+  document.querySelectorAll("#art-list .a-card").forEach(c => {
+    c.style.display = (filterUnread && c.classList.contains("is-read")) ? "none" : "";
+  });
+}
+
 function toggleSelect(id, cb) {
   if (cb.checked) selectedIds.add(id);
   else selectedIds.delete(id);
@@ -127,7 +147,9 @@ function card(a, compact = false) {
     ? `<span title="Tema recurrente" style="font-size:10px;color:var(--warning)">🔁</span>`
     : "";
 
-  return `<div class="a-card ${statusCls}" data-id="${a.id}">
+  const isRead = readIds.has(a.id);
+  return `<div class="a-card ${statusCls}${isRead ? " is-read" : ""}" data-id="${a.id}">
+    ${!isRead ? '<span class="a-unread-dot" title="No leído"></span>' : ""}
     <label class="a-check" onclick="event.stopPropagation()" title="Seleccionar">
       <input type="checkbox" onchange="toggleSelect(${a.id},this)" ${selectedIds.has(a.id) ? "checked" : ""}>
     </label>
@@ -262,6 +284,11 @@ async function loadDash() {
 }
 
 async function loadDashWidgets() {
+  const _widgetErr = (id, msg = "Sin datos") => {
+    const el = document.getElementById(id);
+    if (el) el.innerHTML = `<span style="color:var(--text-muted);font-size:12px">${msg}</span>`;
+  };
+
   // Trending mini
   try {
     const t = await api("/stats/trending?hours=24&limit=8");
@@ -279,7 +306,7 @@ async function loadDashWidgets() {
         el.textContent = "Sin datos aún.";
       }
     }
-  } catch {}
+  } catch(e) { console.warn("[widget:trending]", e); _widgetErr("dash-trending-mini", "Sin conexión"); }
 
   // Heatmap mini (activity by hour)
   try {
@@ -297,7 +324,7 @@ async function loadDashWidgets() {
         </div>`;
       }).join("");
     }
-  } catch {}
+  } catch(e) { console.warn("[widget:heatmap]", e); _widgetErr("dash-heatmap-mini"); }
 
   // Top articles by score (last 24h)
   try {
@@ -317,7 +344,7 @@ async function loadDashWidgets() {
         el.textContent = "Sin artículos relevantes hoy.";
       }
     }
-  } catch {}
+  } catch(e) { console.warn("[widget:top]", e); _widgetErr("dash-top-mini"); }
 
   // AI usage widget
   try {
@@ -343,7 +370,7 @@ async function loadDashWidgets() {
           <span class="dash-ai-val" style="color:var(--success)">$${u.estimated_cost_usd}</span>
         </div>`;
     }
-  } catch {}
+  } catch(e) { console.warn("[widget:ai]", e); _widgetErr("dash-ai-mini"); }
 }
 
 /* ══════════════════════════════════════════════════════
@@ -486,6 +513,7 @@ function renderSavedSearches() {
 ══════════════════════════════════════════════════════ */
 async function openReader(id) {
   readerArticleId = id;
+  markRead(id);
   try {
     const a = await api(`/articles/${id}`);
     document.getElementById("r-cat").textContent   = a.category || "";

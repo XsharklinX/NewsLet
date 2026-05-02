@@ -10,7 +10,7 @@ from app.database import get_db
 from app.models import Article, Keyword, Source, Summary
 from app.models.notification import Notification
 from app.schemas.article import (
-    ChartOut, HeatmapOut, HeatmapHourPoint, HeatmapDayPoint,
+    HeatmapOut, HeatmapHourPoint, HeatmapDayPoint,
     StatsOut, TrendingOut, TrendingTopic,
 )
 from app.services.auth import require_auth
@@ -60,36 +60,6 @@ def get_stats(db: Session = Depends(get_db)):
         unread_notifications=unread,
     )
 
-
-@router.get("/stats/chart")
-def get_chart_stats(days: int = Query(7, ge=1, le=90), db: Session = Depends(get_db)):
-    cutoff = datetime.utcnow() - timedelta(days=days)
-
-    daily = (
-        db.query(cast(Article.fetched_at, Date).label("day"), func.count(Article.id).label("count"))
-        .filter(Article.fetched_at >= cutoff)
-        .group_by("day").order_by("day").all()
-    )
-    categories = (
-        db.query(Article.category, func.count(Article.id).label("count"))
-        .filter(Article.category != None)
-        .group_by(Article.category)
-        .order_by(func.count(Article.id).desc()).all()
-    )
-    sentiments = (
-        db.query(Article.sentiment, func.count(Article.id).label("count"))
-        .filter(Article.sentiment != None)
-        .group_by(Article.sentiment).all()
-    )
-    avg_score = db.query(func.avg(Article.relevance_score)).filter(Article.relevance_score != None).scalar()
-
-    return {
-        "daily":      [{"day": str(r.day), "count": r.count} for r in daily],
-        "categories": [{"category": r.category, "count": r.count} for r in categories],
-        "sentiments": [{"sentiment": r.sentiment, "count": r.count} for r in sentiments],
-        "days":       days,
-        "avg_score":  round(float(avg_score), 1) if avg_score else None,
-    }
 
 
 @router.get("/stats/heatmap", response_model=HeatmapOut)

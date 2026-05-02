@@ -1,5 +1,6 @@
 import asyncio
 import logging
+import time
 from datetime import datetime
 from time import mktime
 
@@ -12,10 +13,19 @@ from app.services.deduplicator import compute_hash, is_duplicate
 logger = logging.getLogger(__name__)
 
 MAX_CONSECUTIVE_FAILURES = 5
+_FEED_CACHE: dict[str, tuple[float, list[dict]]] = {}
+_CACHE_TTL = 900  # 15 minutes — avoids re-fetching the same feed within a fetch cycle
 
 
 def _parse_feed(url: str) -> list[dict]:
     """Parse an RSS feed and return entries as dicts. Runs synchronously."""
+    now = time.monotonic()
+    if url in _FEED_CACHE:
+        ts, cached = _FEED_CACHE[url]
+        if now - ts < _CACHE_TTL:
+            logger.debug(f"RSS cache hit: {url}")
+            return cached
+
     feed = feedparser.parse(url)
     entries = []
     for entry in feed.entries:
@@ -29,6 +39,8 @@ def _parse_feed(url: str) -> list[dict]:
             "text": entry.get("summary", entry.get("description", "")),
             "published_at": published,
         })
+
+    _FEED_CACHE[url] = (time.monotonic(), entries)
     return entries
 
 

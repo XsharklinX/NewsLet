@@ -46,7 +46,8 @@ ADMIN_HELP = """<b>NewsLet Pro — Admin</b>
 <b>🔧 Configuración</b>
 /fuentes — Activar/desactivar fuentes
 /config — Ver configuración
-/config hora=8 cantidad=10 score=5 — Cambiar"""
+/config hora=8 cantidad=10 score=5 — Cambiar
+/restore — Restaurar BD (adjunta archivo .db)"""
 
 PUBLIC_HELP = """<b>NewsLet Pro</b> — Noticias curadas en español
 
@@ -870,6 +871,51 @@ async def cmd_salud(chat_id: str):
         db.close()
 
 
+async def cmd_restore(chat_id: str, msg: dict):
+    """Admin: restore SQLite DB from an uploaded .db file attachment."""
+    document = msg.get("document", {})
+    file_name = document.get("file_name", "")
+    if not file_name.endswith(".db"):
+        await send_message(
+            chat_id,
+            "📤 Para restaurar la BD, adjunta el archivo <code>.db</code> como documento.\n"
+            "Ejemplo: envía <code>newslet.db</code> directamente en este chat."
+        )
+        return
+
+    file_id = document.get("file_id")
+    try:
+        file_info = await _tg("getFile", file_id=file_id)
+        file_path = file_info.get("file_path")
+        download_url = f"https://api.telegram.org/file/bot{settings.telegram_bot_token}/{file_path}"
+
+        async with httpx.AsyncClient(timeout=60) as client:
+            resp = await client.get(download_url)
+            resp.raise_for_status()
+            db_bytes = resp.content
+
+        import shutil
+        from pathlib import Path
+        db_path = Path(settings.database_url.replace("sqlite:///", "").lstrip("/"))
+        if not db_path.is_absolute():
+            db_path = Path.cwd() / db_path
+
+        backup_path = db_path.with_suffix(".bak")
+        if db_path.exists():
+            shutil.copy2(db_path, backup_path)
+
+        db_path.write_bytes(db_bytes)
+        await send_message(
+            chat_id,
+            f"✅ <b>Base de datos restaurada</b>\n"
+            f"Archivo: <code>{file_name}</code> ({len(db_bytes):,} bytes)\n"
+            f"Backup: <code>{backup_path.name}</code>\n\n"
+            "⚠️ Reinicia el servidor para que los cambios tengan efecto."
+        )
+    except Exception as e:
+        await send_message(chat_id, f"❌ Error al restaurar: {_esc(str(e))}")
+
+
 # ═══════════════════════════════════════════════════════════════════════════
 # CALLBACK HANDLER (inline buttons) — admin-only actions
 # ═══════════════════════════════════════════════════════════════════════════
@@ -1016,6 +1062,11 @@ async def _process_update(update: dict):
         if "@" in cmd:
             cmd = cmd.split("@")[0]
         rest = text[len(cmd):].strip()
+
+        # Document upload — admin /restore
+        if "document" in msg and adm:
+            await cmd_restore(chat_id, msg)
+            return
 
         # Update subscriber last_seen
         if not adm and cmd in PUBLIC_COMMANDS:

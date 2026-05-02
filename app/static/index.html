@@ -6,7 +6,7 @@
     <title>NewsLet — Panel Editorial</title>
     <link rel="manifest" href="/manifest.json">
     <meta name="theme-color" content="#818cf8">
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style.css?v=8">
 </head>
 <body>
 <div class="app" id="app">
@@ -15,10 +15,14 @@
   <aside class="sidebar" id="sidebar">
     <div class="sidebar-brand">
       <div class="logo">n<span>L</span></div>
-      <div>
+      <div style="flex:1">
         <h1>news<strong>let</strong></h1>
         <span>Panel Editorial</span>
       </div>
+      <button class="notif-btn" onclick="openNotifications()" id="notif-btn" title="Notificaciones (N)" style="flex-shrink:0">
+        <svg viewBox="0 0 20 20" fill="currentColor" style="width:18px;height:18px"><path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z"/></svg>
+        <span class="notif-badge" id="notif-badge" style="display:none">0</span>
+      </button>
     </div>
 
     <nav class="nav-section">
@@ -291,6 +295,7 @@
           <button class="pill pill-time" onclick="filRecent('6h',this)">6h</button>
           <button class="pill pill-time" onclick="filRecent('24h',this)">24h</button>
           <button class="pill pill-time" onclick="filRecent('7d',this)">7 días</button>
+          <button class="pill" id="pill-unread" onclick="filUnread(this)" title="Mostrar solo artículos no leídos">No leído</button>
         </div>
         <!-- Saved searches -->
         <div class="saved-searches" id="saved-searches-bar"></div>
@@ -359,14 +364,34 @@
 
 <!-- ─── HEATMAP ──────────────────────────────── -->
     <div class="view" id="v-heatmap">
-      <div class="topbar"><h2>Heatmap de actividad</h2></div>
-      <div class="heatmap-section">
-        <div class="chart-card">
-          <div class="chart-title">Artículos por hora del día</div>
+      <div class="topbar">
+        <h2>Mapa de actividad</h2>
+        <div class="topbar-right">
+          <button class="btn btn-g btn-sm" onclick="loadHeatmap()">↻ Actualizar</button>
+        </div>
+      </div>
+      <!-- Summary stats -->
+      <div class="hm-summary" id="hm-summary">
+        <div class="hm-stat-card"><div class="hm-stat-val" id="hm-peak-hour">—</div><div class="hm-stat-lbl">Hora pico</div></div>
+        <div class="hm-stat-card"><div class="hm-stat-val" id="hm-peak-day">—</div><div class="hm-stat-lbl">Día más activo</div></div>
+        <div class="hm-stat-card"><div class="hm-stat-val" id="hm-total-arts">—</div><div class="hm-stat-lbl">Total artículos</div></div>
+        <div class="hm-stat-card"><div class="hm-stat-val" id="hm-avg-day">—</div><div class="hm-stat-lbl">Media diaria</div></div>
+      </div>
+      <div class="hm-panels">
+        <!-- Hours -->
+        <div class="hm-panel">
+          <div class="hm-panel-title">
+            <svg viewBox="0 0 20 20" fill="currentColor" style="width:14px;height:14px;opacity:.6"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"/></svg>
+            Artículos por hora del día
+          </div>
           <div id="hm-hours" class="hm-bar-grid"></div>
         </div>
-        <div class="chart-card">
-          <div class="chart-title">Artículos por día de semana</div>
+        <!-- Days -->
+        <div class="hm-panel">
+          <div class="hm-panel-title">
+            <svg viewBox="0 0 20 20" fill="currentColor" style="width:14px;height:14px;opacity:.6"><path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd"/></svg>
+            Artículos por día de semana
+          </div>
           <div id="hm-days" class="hm-week-grid"></div>
         </div>
       </div>
@@ -383,9 +408,26 @@
             <option value="72">Últimos 3 días</option>
             <option value="168">Última semana</option>
           </select>
+          <button class="btn btn-g btn-sm" onclick="loadTrending()">↻</button>
         </div>
       </div>
-      <div id="trending-list" class="trending-cloud"></div>
+      <!-- Summary row -->
+      <div class="trend-summary" id="trend-summary" style="display:none">
+        <span id="trend-total-words" class="trend-stat"></span>
+        <span id="trend-top-word" class="trend-stat"></span>
+        <span id="trend-window" class="trend-stat"></span>
+      </div>
+      <!-- Two-column layout: cloud + ranked list -->
+      <div class="trend-layout">
+        <div class="trend-cloud-panel">
+          <div class="hm-panel-title">Nube de palabras</div>
+          <div id="trending-list" class="trending-cloud"></div>
+        </div>
+        <div class="trend-rank-panel">
+          <div class="hm-panel-title">Top palabras</div>
+          <div id="trending-rank" class="trending-rank-list"></div>
+        </div>
+      </div>
     </div>
 
     <!-- ─── KEYWORDS ──────────────────────────────── -->
@@ -841,11 +883,6 @@
 
 <div class="sidebar-backdrop" id="sidebar-backdrop" onclick="closeSidebar()"></div>
 <button class="mob-toggle" id="mob-toggle" onclick="toggleSidebar()">☰</button>
-<!-- Persistent notification button — fixed in topbar area -->
-<button class="notif-btn notif-fixed" onclick="openNotifications()" id="notif-btn" title="Notificaciones (N)">
-  <svg viewBox="0 0 20 20" fill="currentColor" style="width:18px;height:18px"><path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z"/></svg>
-  <span class="notif-badge" id="notif-badge" style="display:none">0</span>
-</button>
 
 <div id="bulk-bar" class="bulk-bar" style="display:none">
   <span><strong id="bulk-count">0</strong> seleccionados</span>
@@ -854,14 +891,15 @@
   <button class="btn btn-g btn-sm" onclick="clearSelection()">✕ Limpiar</button>
 </div>
 <div id="toast" class="toast"></div>
-<script src="app.js?v=7"></script>
-<script src="js/api.js?v=7"></script>
-<script src="js/ui.js?v=7"></script>
-<script src="js/articles.js?v=7"></script>
-<script src="js/kanban.js?v=7"></script>
-<script src="js/sources.js?v=7"></script>
-<script src="js/config.js?v=7"></script>
-<script src="js/health.js?v=7"></script>
+<script src="app.js?v=8"></script>
+<script src="js/api.js?v=8"></script>
+<script src="js/ui.js?v=8"></script>
+<script src="js/articles.js?v=8"></script>
+<script src="js/kanban.js?v=8"></script>
+<script src="js/sources.js?v=8"></script>
+<script src="js/config.js?v=8"></script>
+<script src="js/health.js?v=8"></script>
+<script src="js/charts.js?v=8"></script>
 <script>
   // Unregister any existing Service Worker so updates are always immediate
   if ('serviceWorker' in navigator) {
