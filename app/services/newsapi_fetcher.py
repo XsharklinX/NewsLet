@@ -81,7 +81,10 @@ async def fetch_newsapi_source(source: Source, db: Session) -> int:
             logger.error(f"Error fetching NewsAPI {source.name}: {e}")
             return 0
 
+    from app.services.rule_engine import apply_rules_to_article
+
     new_count = 0
+    new_articles: list[Article] = []
     for item in articles_data:
         url = item.get("url", "")
         title = item.get("title", "Sin titulo")
@@ -112,10 +115,18 @@ async def fetch_newsapi_source(source: Source, db: Session) -> int:
             status="pending",
         )
         db.add(article)
+        new_articles.append(article)
         new_count += 1
 
     if new_count > 0:
         db.commit()
+        for art in new_articles:
+            db.refresh(art)
+        for art in new_articles:
+            try:
+                await apply_rules_to_article(art, db)
+            except Exception as e:
+                logger.warning(f"Rule engine error for article {art.id}: {e}")
 
     _record_success(source, db)
     logger.info(f"  -> {new_count} new articles from {source.name}")

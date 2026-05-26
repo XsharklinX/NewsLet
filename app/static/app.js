@@ -13,6 +13,8 @@ let artView = localStorage.getItem("artView") || "list";
 let dashView = localStorage.getItem("dashView") || "list";
 let savedSearches  = JSON.parse(localStorage.getItem("savedSearches") || "[]");
 let savedArticles  = JSON.parse(localStorage.getItem("savedArticles")  || "[]");
+let shortlistIds   = new Set(); // Populated by loadShortlist()
+let filterShortlist = false;
 let filterDateFrom = "";
 let filterDateTo   = "";
 let readerArticleId = null;
@@ -65,3 +67,15 @@ const NOTIF_ICON = { fetch: "🔄", keyword: "🔑", digest: "📬", error: "⚠
     }
   });
 })();
+
+async function loadShortlist() {
+  try {
+    const d = await api("/articles?shortlisted=true&page_size=100");
+    shortlistIds = new Set(d.articles.map(a => a.id));
+    if (typeof _updateShortlistBadge === "function") _updateShortlistBadge();
+  } catch (e) {
+    console.warn("Could not load shortlist from server, using local cache as fallback");
+    shortlistIds = new Set(JSON.parse(localStorage.getItem("shortlistIds") || "[]"));
+  }
+}
+loadShortlist();

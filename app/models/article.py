@@ -63,6 +63,9 @@ class Article(Base):
     # Recurring topic flag
     is_recurring: Mapped[bool] = mapped_column(Boolean, default=False)
 
+    # Shortlist (Leer más tarde)
+    is_shortlisted: Mapped[bool] = mapped_column(Boolean, default=False)
+
     source: Mapped["Source"] = relationship(back_populates="articles")
     summary: Mapped["Summary | None"] = relationship(back_populates="article", uselist=False, cascade="all, delete-orphan")
 

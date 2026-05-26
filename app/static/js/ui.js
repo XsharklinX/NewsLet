@@ -53,6 +53,7 @@ function go(v) {
   if (v === "heatmap")  loadHeatmap();
   if (v === "trending") loadTrending();
   if (v === "kw")       loadKeywords();
+  if (v === "rules")    loadRules();
   if (v === "webhooks") loadWebhooks();
   if (v === "cfg")      { loadDigestConfig(); loadSystemStatus(); }
   if (v === "logs")    loadLogs();

@@ -8,7 +8,9 @@ from sqlalchemy.orm import Session, joinedload
 
 from app.database import get_db
 from app.models import Article
-from app.schemas.article import ArticleListOut, ArticleOut, ArticleStatusUpdate
+from app.schemas.article import (
+    ArticleListOut, ArticleOut, ArticleStatusUpdate, ArticleShortlistUpdate
+)
 from app.services.auth import require_auth
 
 from pydantic import BaseModel as _BaseModel
@@ -30,9 +32,11 @@ class _FeedbackBody(_BaseModel):
 @router.get("/articles", response_model=ArticleListOut)
 def list_articles(
     status: str | None = None,
+    shortlisted: bool | None = None,
     source_id: int | None = None,
     category: str | None = None,
     sentiment: str | None = None,
+    tag: str | None = Query(None, max_length=100),
     min_score: int | None = Query(None, ge=1, le=10),
     search: str | None = Query(None, max_length=200),
     date_from: str | None = Query(None, description="ISO datetime — only articles fetched after this"),
@@ -44,12 +48,16 @@ def list_articles(
     query = db.query(Article).options(joinedload(Article.summary), joinedload(Article.source))
     if status:
         query = query.filter(Article.status == status)
+    if shortlisted is not None:
+        query = query.filter(Article.is_shortlisted == shortlisted)
     if source_id:
         query = query.filter(Article.source_id == source_id)
     if category:
         query = query.filter(Article.category == category)
     if sentiment:
         query = query.filter(Article.sentiment == sentiment)
+    if tag:
+        query = query.filter(Article.tags.ilike(f"%{tag}%"))
     if min_score is not None:
         query = query.filter(Article.relevance_score >= min_score)
     if search:
@@ -192,15 +200,15 @@ def get_article(article_id: int, db: Session = Depends(get_db)):
     return article
 
 
-@router.get("/articles/{article_id}/related", response_model=list[ArticleOut])
+@router.get("/articles/{article_id}/related")
 def related_articles(article_id: int, db: Session = Depends(get_db)):
-    """Return up to 5 articles in the same category (excluding self)."""
+    """Return up to 5 articles related by cluster or category (excluding self)."""
     article = db.query(Article).get(article_id)
     if not article:
         raise HTTPException(404, "Artículo no encontrado")
 
     cutoff = datetime.utcnow() - timedelta(days=14)
-    query = (
+    base_query = (
         db.query(Article)
         .options(joinedload(Article.summary), joinedload(Article.source))
         .filter(
@@ -208,10 +216,17 @@ def related_articles(article_id: int, db: Session = Depends(get_db)):
             Article.fetched_at >= cutoff,
         )
     )
-    if article.category:
-        query = query.filter(Article.category == article.category)
+    
+    related = []
+    # 1. Prioritize Cluster
+    if article.cluster_id:
+        related = base_query.filter(Article.cluster_id == article.cluster_id).limit(5).all()
+    
+    # 2. Fallback to Category
+    if not related and article.category:
+        related = base_query.filter(Article.category == article.category).order_by(Article.relevance_score.desc().nulls_last()).limit(5).all()
 
-    return query.order_by(Article.relevance_score.desc().nulls_last()).limit(5).all()
+    return {"articles": related}
 
 
 @router.patch("/articles/{article_id}/status", response_model=ArticleOut)
@@ -220,6 +235,17 @@ def update_article_status(article_id: int, body: ArticleStatusUpdate, db: Sessio
     if not article:
         raise HTTPException(404, "Artículo no encontrado")
     article.status = body.status
+    db.commit()
+    db.refresh(article)
+    return article
+
+
+@router.patch("/articles/{article_id}/shortlist", response_model=ArticleOut)
+def update_article_shortlist(article_id: int, body: ArticleShortlistUpdate, db: Session = Depends(get_db)):
+    article = db.query(Article).get(article_id)
+    if not article:
+        raise HTTPException(404, "Artículo no encontrado")
+    article.is_shortlisted = body.is_shortlisted
     db.commit()
     db.refresh(article)
     return article
@@ -337,3 +363,39 @@ async def run_clustering(db: Session = Depends(get_db)):
     from app.services.topic_clusterer import cluster_articles
     count = await cluster_articles(db)
     return {"clustered": count}
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# TAGS (Tier 1.4)
+# ═══════════════════════════════════════════════════════════════════════════
+
+class _TagsBody(_BaseModel):
+    tags: list[str]
+
+
+@router.get("/tags")
+def list_all_tags(db: Session = Depends(get_db)):
+    """Return all unique tags used across articles."""
+    from sqlalchemy import text as _text
+    rows = db.execute(_text(
+        "SELECT DISTINCT tags FROM articles WHERE tags IS NOT NULL AND tags != ''"
+    )).fetchall()
+    tag_set: set[str] = set()
+    for (tags_str,) in rows:
+        for t in tags_str.split(","):
+            t = t.strip()
+            if t:
+                tag_set.add(t)
+    return {"tags": sorted(tag_set)}
+
+
+@router.patch("/articles/{article_id}/tags")
+def update_article_tags(article_id: int, body: _TagsBody, db: Session = Depends(get_db)):
+    """Set tags for an article (replaces existing tags)."""
+    article = db.query(Article).filter(Article.id == article_id).first()
+    if not article:
+        raise HTTPException(404, "Artículo no encontrado")
+    tags = list(dict.fromkeys(t.strip().lower() for t in body.tags if t.strip()))
+    article.tags = ",".join(tags)
+    db.commit()
+    return {"id": article_id, "tags": tags}

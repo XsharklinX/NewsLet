@@ -85,6 +85,7 @@ def run_db_migrations():
     create_all() handles new tables; this handles new columns on existing tables.
     """
     from app.models.article import Subscriber  # noqa — ensure all models imported
+    from app.models.rule import Rule  # noqa — ensure Rule table is created
     from app.database import Base, _is_sqlite
     from sqlalchemy import text
 
@@ -98,6 +99,7 @@ def run_db_migrations():
         ("cluster_id",           "ALTER TABLE articles ADD COLUMN cluster_id INTEGER"),
         ("feedback",             "ALTER TABLE articles ADD COLUMN feedback INTEGER DEFAULT 0"),
         ("is_recurring",         "ALTER TABLE articles ADD COLUMN is_recurring BOOLEAN DEFAULT FALSE"),
+        ("is_shortlisted",       "ALTER TABLE articles ADD COLUMN is_shortlisted BOOLEAN DEFAULT FALSE"),
     ]
     _source_cols = [
         ("consecutive_failures", "ALTER TABLE sources ADD COLUMN consecutive_failures INTEGER DEFAULT 0"),
@@ -142,6 +144,32 @@ def run_db_migrations():
             if col not in sum_cols:
                 conn.execute(text(sql))
                 logger.info(f"Migration: added summaries.{col}")
+
+        # DigestConfig new fields (Tier 1.3)
+        _digest_cols = [
+            ("recipients",  "ALTER TABLE digest_config ADD COLUMN recipients TEXT"),
+            ("sort_by",     "ALTER TABLE digest_config ADD COLUMN sort_by TEXT DEFAULT 'date'"),
+            ("send_weekly", "ALTER TABLE digest_config ADD COLUMN send_weekly BOOLEAN DEFAULT FALSE"),
+            ("weekly_day",  "ALTER TABLE digest_config ADD COLUMN weekly_day INTEGER DEFAULT 0"),
+            ("weekly_hour", "ALTER TABLE digest_config ADD COLUMN weekly_hour INTEGER DEFAULT 9"),
+        ]
+        try:
+            digest_cols = existing("digest_config")
+            for col, sql in _digest_cols:
+                if col not in digest_cols:
+                    conn.execute(text(sql))
+                    logger.info(f"Migration: added digest_config.{col}")
+        except Exception:
+            pass  # table may not exist yet — create_all handles it
+
+        # Article tags (Tier 1.4)
+        _tag_cols = [
+            ("tags", "ALTER TABLE articles ADD COLUMN tags TEXT DEFAULT ''"),
+        ]
+        for col, sql in _tag_cols:
+            if col not in art_cols:
+                conn.execute(text(sql))
+                logger.info(f"Migration: added articles.{col}")
 
         conn.commit()
 

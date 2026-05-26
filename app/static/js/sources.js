@@ -51,8 +51,10 @@ async function loadSrcs() {
         const el = document.getElementById(`src-stats-${s.id}`);
         if (!el) return;
         el.innerHTML = `
-          <div class="src-stat"><span>Artículos</span><strong>${stats.total_articles}</strong></div>
-          <div class="src-stat"><span>Score avg</span><strong>${stats.avg_score ?? "—"}</strong></div>`;
+          <div class="src-stat"><span>Total</span><strong>${stats.total_articles}</strong></div>
+          <div class="src-stat"><span>Esta semana</span><strong>${stats.articles_week}</strong></div>
+          <div class="src-stat"><span>Score avg</span><strong>${stats.avg_score ?? "—"}</strong></div>
+          <div class="src-stat"><span>Rechazo</span><strong>${stats.rejection_rate}%</strong></div>`;
       } catch {}
     });
   } catch(e) { console.error(e); }
@@ -132,4 +134,107 @@ async function loadCatFilter() {
     sel.innerHTML = '<option value="">Todas las categorías</option>';
     d.categories.forEach(c => { sel.innerHTML += `<option value="${esc(c)}">${esc(c)}</option>`; });
   } catch {}
-}
+}
+
+/* ══════════════════════════════════════════════════════
+   SOURCE PREVIEW (Tier 1.1)
+══════════════════════════════════════════════════════ */
+async function previewSource() {
+  const url  = document.getElementById("f-url").value.trim();
+  const type = document.getElementById("f-type").value;
+  if (!url) { toast("Ingresa una URL primero", "err"); return; }
+
+  const btn  = document.getElementById("preview-btn");
+  const area = document.getElementById("preview-area");
+  btn.disabled = true;
+  btn.textContent = "Probando...";
+  area.style.display = "block";
+  area.innerHTML = `<div class="preview-loading">⟳ Conectando con la fuente...</div>`;
+
+  try {
+    const d = await api("/sources/preview", {
+      method: "POST",
+      body: JSON.stringify({ url, source_type: type }),
+    });
+
+    const ytBadge = d.is_youtube
+      ? `<span class="src-type" style="background:rgba(239,68,68,0.15);color:#f87171;margin-left:6px">▶ YouTube RSS</span>`
+      : "";
+    area.innerHTML = `
+      <div class="preview-head">
+        <span class="preview-feed-title">${esc(d.feed_title || "Feed sin título")}</span>
+        ${ytBadge}
+        <span class="preview-count">${d.total_entries} entradas</span>
+      </div>
+      ${d.resolved_url !== url ? `<div class="preview-resolved">→ URL resuelta: <code>${esc(d.resolved_url)}</code></div>` : ""}
+      <div class="preview-articles">
+        ${(d.articles || []).map(a => `<div class="preview-art">
+          <div class="preview-art-title">${esc(a.title)}</div>
+          ${a.summary ? `<div class="preview-art-sum">${esc(a.summary)}</div>` : ""}
+          ${a.published_at ? `<div class="preview-art-date">${new Date(a.published_at).toLocaleDateString("es")}</div>` : ""}
+        </div>`).join("")}
+      </div>`;
+
+    // Auto-fill resolved URL (YouTube) and name
+    if (d.is_youtube && d.resolved_url) document.getElementById("f-url").value = d.resolved_url;
+    if (d.feed_title && !document.getElementById("f-name").value.trim())
+      document.getElementById("f-name").value = d.feed_title.slice(0, 100);
+
+  } catch(e) {
+    area.innerHTML = `<div class="preview-err">✕ ${esc(e.message || "Error al conectar con la fuente")}</div>`;
+  } finally {
+    btn.disabled = false;
+    btn.textContent = "Probar URL";
+  }
+}
+
+/* ══════════════════════════════════════════════════════
+   POPULAR SOURCES CATALOGUE (Tier 1.1)
+══════════════════════════════════════════════════════ */
+async function showCatalogue() {
+  const overlay = document.getElementById("overlay-catalogue");
+  overlay.classList.add("on");
+  const list = document.getElementById("catalogue-list");
+  list.innerHTML = `<div class="preview-loading">Cargando catálogo...</div>`;
+
+  try {
+    const d = await api("/sources/catalogue");
+    const byCategory = {};
+    d.sources.forEach(s => {
+      if (!byCategory[s.category]) byCategory[s.category] = [];
+      byCategory[s.category].push(s);
+    });
+    list.innerHTML = Object.entries(byCategory).map(([cat, srcs]) => `
+      <div class="catalogue-cat">
+        <div class="catalogue-cat-name">${esc(cat)}</div>
+        <div class="catalogue-items">
+          ${srcs.map(s => `<div class="catalogue-item">
+            <div class="catalogue-item-name">${esc(s.name)}</div>
+            <button class="btn btn-s btn-xs cat-add-btn" onclick="addCatalogueSource('${esc(s.name)}','${s.source_type}','${esc(s.url)}',this)">+ Agregar</button>
+          </div>`).join("")}
+        </div>
+      </div>`).join("");
+  } catch(e) {
+    list.innerHTML = `<div class="preview-err">Error al cargar el catálogo</div>`;
+  }
+}
+
+async function addCatalogueSource(name, type, url, btn) {
+  btn.disabled = true;
+  btn.textContent = "...";
+  try {
+    await api("/sources", { method: "POST", body: JSON.stringify({ name, source_type: type, url }) });
+    btn.textContent = "✓ Agregado";
+    btn.className = "btn btn-ok btn-xs cat-add-btn";
+    loadSrcs(); loadSrcFilter();
+  } catch(e) {
+    if (e.status === 409 || (e.message && e.message.includes("UNIQUE"))) {
+      btn.textContent = "Ya existe";
+    } else {
+      btn.textContent = "Error";
+      btn.disabled = false;
+    }
+  }
+}
+
+function closeCatalogue() { document.getElementById("overlay-catalogue").classList.remove("on"); }

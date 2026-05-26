@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Design Research: News Aggregation Platforms — NewsLet Pro</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; background: #0a0a0f; color: #e4e4f0; line-height: 1.7; padding: 40px 20px; }
+  .container { max-width: 900px; margin: 0 auto; }
+  h1 { font-size: 2rem; font-weight: 800; color: #f4f4f8; margin-bottom: 6px; }
+  .subtitle { color: #6366f1; font-size: 13px; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; margin-bottom: 32px; }
+  h2 { font-size: 1.3rem; font-weight: 700; color: #f4f4f8; margin: 40px 0 16px; padding-bottom: 8px; border-bottom: 1px solid rgba(255,255,255,0.08); }
+  h3 { font-size: 1rem; font-weight: 700; color: #818cf8; margin: 28px 0 10px; }
+  p { margin-bottom: 14px; color: #b0b0c8; }
+  ul, ol { padding-left: 20px; margin-bottom: 14px; }
+  li { margin-bottom: 6px; color: #b0b0c8; }
+  strong { color: #f4f4f8; }
+  code, pre { font-family: 'Cascadia Code', 'Fira Code', 'Consolas', monospace; }
+  pre { background: #111118; border: 1px solid rgba(255,255,255,0.08); border-radius: 10px; padding: 16px; margin: 16px 0; overflow-x: auto; font-size: 12px; line-height: 1.5; color: #a0a0b8; }
+
+  .tldr {
+    background: linear-gradient(135deg, rgba(99,102,241,0.15), rgba(139,92,246,0.08));
+    border: 1px solid rgba(99,102,241,0.3);
+    border-radius: 12px; padding: 20px 24px; margin: 24px 0;
+  }
+  .tldr p { color: #c8c8e0; margin: 0; font-size: 15px; }
+
+  .status-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 10px; margin: 16px 0; }
+  .status-item { background: #111118; border: 1px solid rgba(255,255,255,0.06); border-radius: 8px; padding: 10px 14px; font-size: 13px; }
+  .status-item span { color: #6366f1; margin-right: 6px; }
+
+  .rec-card { background: #111118; border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 20px 24px; margin: 16px 0; }
+  .rec-card h3 { margin-top: 0; }
+  .rec-meta { display: flex; gap: 10px; margin-bottom: 12px; }
+  .badge { display: inline-block; padding: 2px 10px; border-radius: 100px; font-size: 11px; font-weight: 700; }
+  .badge-high { background: rgba(239,68,68,0.15); color: #f87171; border: 1px solid rgba(239,68,68,0.3); }
+  .badge-med { background: rgba(245,158,11,0.15); color: #fbbf24; border: 1px solid rgba(245,158,11,0.3); }
+  .badge-low { background: rgba(34,197,94,0.15); color: #4ade80; border: 1px solid rgba(34,197,94,0.3); }
+  .badge-effort-high { background: rgba(168,85,247,0.15); color: #c084fc; border: 1px solid rgba(168,85,247,0.3); }
+  .badge-effort-med { background: rgba(59,130,246,0.15); color: #60a5fa; border: 1px solid rgba(59,130,246,0.3); }
+  .badge-effort-low { background: rgba(20,184,166,0.15); color: #2dd4bf; border: 1px solid rgba(20,184,166,0.3); }
+
+  table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 13px; }
+  th { background: rgba(99,102,241,0.12); color: #818cf8; font-weight: 700; padding: 10px 14px; text-align: left; border-bottom: 1px solid rgba(99,102,241,0.2); }
+  td { padding: 9px 14px; border-bottom: 1px solid rgba(255,255,255,0.05); color: #b0b0c8; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: rgba(255,255,255,0.02); }
+
+  .roadmap-table td:nth-child(1) { font-weight: 700; }
+  .roadmap-table td:nth-child(2) { color: #f4f4f8; font-weight: 600; }
+
+  .anti-pattern { background: rgba(239,68,68,0.05); border-left: 3px solid #ef4444; border-radius: 0 8px 8px 0; padding: 12px 16px; margin: 10px 0; font-size: 13px; color: #b0b0c8; }
+  .anti-pattern strong { color: #f87171; }
+
+  .unique { background: rgba(99,102,241,0.08); border-left: 3px solid #6366f1; border-radius: 0 8px 8px 0; padding: 12px 16px; margin: 10px 0; font-size: 13px; color: #b0b0c8; }
+  .unique strong { color: #818cf8; }
+
+  .sources { margin-top: 40px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.06); }
+  .sources a { color: #6366f1; text-decoration: none; font-size: 13px; }
+  .sources a:hover { color: #818cf8; text-decoration: underline; }
+  .sources li { margin-bottom: 4px; }
+
+  @media (max-width: 600px) { .rec-meta { flex-direction: column; gap: 6px; } table { font-size: 11px; } th, td { padding: 7px 10px; } }
+</style>
+</head>
+<body>
+<div class="container">
+
+<h1>Design Research: Plataformas de Agregación de Noticias</h1>
+<div class="subtitle">NewsLet Pro · Análisis competitivo · Mayo 2026</div>
+
+<div class="tldr">
+  <p>Las mejores plataformas de 2025-2026 se diferencian en tres ejes: <strong>automatización inteligente</strong> (reglas "si esto → entonces aquello"), <strong>captura de conocimiento</strong> (highlights, notas, anotaciones que persisten), y <strong>estadísticas de lectura personales</strong>. NewsLet ya tiene una base sólida; los próximos movimientos de mayor impacto son una <strong>cola de lectura + modo focus</strong>, un <strong>motor de reglas de automatización</strong>, y <strong>deduplicación cruzada entre fuentes</strong> con UI visible.</p>
+</div>
+
+<h2>Estado actual de NewsLet Pro</h2>
+<div class="status-grid">
+  <div class="status-item"><span>✅</span> Dashboard con widgets, Kanban, vistas lista/grid/compacto</div>
+  <div class="status-item"><span>✅</span> Resúmenes con IA (Groq/OpenAI), categoría, sentimiento, score</div>
+  <div class="status-item"><span>✅</span> Keywords de alerta, heatmap, trending topics</div>
+  <div class="status-item"><span>✅</span> Envío a Telegram, digest diario/semanal con preview</div>
+  <div class="status-item"><span>✅</span> Etiquetas manuales, historial de búsqueda</div>
+  <div class="status-item"><span>✅</span> Catálogo y preview de fuentes (con YouTube RSS)</div>
+  <div class="status-item"><span>✅</span> Source health monitoring (fallos consecutivos)</div>
+  <div class="status-item"><span>✅</span> Webhooks, RSS feed público, exportación CSV/MD/PDF</div>
+  <div class="status-item"><span>✅</span> Deduplicación SHA-256, clustering (sin UI)</div>
+  <div class="status-item"><span>✅</span> Stats por fuente (artículos/semana, tasa de rechazo)</div>
+</div>
+
+<h2>Recomendaciones Priorizadas</h2>
+
+<div class="rec-card">
+  <h3>1. Cola de lectura + Modo Focus</h3>
+  <div class="rec-meta">
+    <span class="badge badge-high">🔴 Impacto Alto</span>
+    <span class="badge badge-effort-med">Esfuerzo Medio</span>
+  </div>
+  <p>Readwise Reader y Matter definen el estándar moderno. Artículos tienen tres estados — <strong>inbox, para_luego, archivado</strong>. El modo focus muestra solo el artículo, sin sidebar, con controles tipográficos (tamaño, fuente, espaciado, columna ancha/estrecha).</p>
+  <pre>┌─────────────────────────────────────────────────────┐
+│  [← Volver]   Tecnología · ⭐ 8/10        [☰] [Aa] │
+├─────────────────────────────────────────────────────┤
+│                                                     │
+│          TÍTULO DEL ARTÍCULO                        │
+│          El País · hace 2h · 4 min lectura          │
+│                                                     │
+│  🎯 Punto clave: ...                                │
+│  📌 Contexto: ...                                   │
+│                                                     │
+│  ─────────────────────────────────────────          │
+│  Texto completo con tipografía cómoda...            │
+│  [seleccionar texto → highlights aparecen]          │
+│                                                     │
+│  ─────────────────────────────────────────          │
+│  [✓ Aprobar] [✉ Enviar] [🔖 Guardar] [→ Siguiente] │
+└─────────────────────────────────────────────────────┘</pre>
+</div>
+
+<div class="rec-card">
+  <h3>2. Motor de Reglas de Automatización (IF/THEN)</h3>
+  <div class="rec-meta">
+    <span class="badge badge-high">🔴 Impacto Alto</span>
+    <span class="badge badge-effort-high">Esfuerzo Alto</span>
+  </div>
+  <p>Inoreader lidera esto. Las reglas son el principal motivo por el que los usuarios de poder pagan. Modelo simple: IF (condición) THEN (acción). Inoreader tiene 50 filtros/reglas en Pro; en 2025 añadió triggers de IA y acciones hacia apps externas.</p>
+  <pre>┌─────────────────────────────────────────────┐
+│  ✦ Nueva regla                              │
+│                                             │
+│  CUANDO  [score] [>=] [8]                   │
+│  Y       [categoría] [es] [Tecnología]      │
+│                                             │
+│  ENTONCES  [✓] Auto-aprobar                 │
+│            [✉] Enviar a Telegram            │
+│            [🏷] Añadir etiqueta: "destacado" │
+│                                             │
+│  [Guardar regla]  [Probar con artículos]    │
+└─────────────────────────────────────────────┘</pre>
+  <p><strong>Condiciones:</strong> keyword · score · fuente · categoría · sentimiento · fecha</p>
+  <p><strong>Acciones:</strong> auto-aprobar · auto-rechazar · auto-enviar · etiquetar · webhook · notificar</p>
+</div>
+
+<div class="rec-card">
+  <h3>3. Highlights y Anotaciones en el Reader</h3>
+  <div class="rec-meta">
+    <span class="badge badge-med">🟡 Impacto Medio-Alto</span>
+    <span class="badge badge-effort-med">Esfuerzo Medio</span>
+  </div>
+  <p>Readwise Reader es el referente absoluto aquí. Al seleccionar texto en el reader modal, aparece un mini-toolbar con opciones de highlight y nota. Las anotaciones persisten y se pueden exportar a Notion/Obsidian.</p>
+  <pre> "La inflación cayó un 2% en marzo..."
+  ╔══════════════════════════════════════╗
+  ║  [🟡 Marcar] [🔴 Importante] [📝 Nota] ║
+  ╚══════════════════════════════════════╝
+
+Futura página "Mis Highlights":
+┌──────────────────────────────────────┐
+│  🟡 "La inflación cayó..."           │
+│     El País · 08/05/2026             │
+│     [📝 Nota] [→ Artículo original]  │
+└──────────────────────────────────────┘</pre>
+</div>
+
+<div class="rec-card">
+  <h3>4. Deduplicación / Clustering con UI visible</h3>
+  <div class="rec-meta">
+    <span class="badge badge-med">🟡 Impacto Medio-Alto</span>
+    <span class="badge badge-effort-low">Esfuerzo Bajo</span>
+  </div>
+  <p>NewsLet ya tiene <code>cluster_id</code> en la base de datos, pero no hay ninguna UI que lo muestre. Readwise Reader hace "cross-source synthesis" — muestra cuando múltiples fuentes cubren el mismo evento. Añadir un badge visible en las tarjetas es de bajo esfuerzo y alto valor percibido.</p>
+  <pre>┌──────────────────────────────────────────────┐
+│  📰 El BCE sube tipos al 3.5%                │
+│  ⭐ 9/10  · Economía  · 🔗 4 fuentes         │
+│                                              │
+│  También cubierto por:                       │
+│  • El País  • Reuters ES  • Expansión  [+1] │
+└──────────────────────────────────────────────┘</pre>
+</div>
+
+<div class="rec-card">
+  <h3>5. Estadísticas Personales de Lectura</h3>
+  <div class="rec-meta">
+    <span class="badge badge-med">🟡 Impacto Medio</span>
+    <span class="badge badge-effort-low">Esfuerzo Bajo</span>
+  </div>
+  <p>Ningún competidor lo hace excepcionalmente bien — oportunidad de diferenciación. Los datos ya existen (readIds en localStorage, artículos enviados, scores). Solo falta agregar y visualizar.</p>
+  <pre>┌──────────────────────────────────────────────────┐
+│  📊 Tu actividad editorial esta semana           │
+│                                                  │
+│  Artículos leídos:     47    ████████░░  +12%   │
+│  Aprobados:            23    ██████░░░░           │
+│  Tiempo estimado:    1h 40m                      │
+│  Categoría favorita: Tecnología (40%)            │
+│  Mejor hora:         10:00 – 12:00               │
+│  Tasa de aprobación:  49%   ↑ desde 38%         │
+└──────────────────────────────────────────────────┘</pre>
+</div>
+
+<div class="rec-card">
+  <h3>6. Integraciones de Salida (Slack, Discord, Notion)</h3>
+  <div class="rec-meta">
+    <span class="badge badge-med">🟡 Impacto Medio</span>
+    <span class="badge badge-effort-med">Esfuerzo Medio</span>
+  </div>
+  <p>Feedly Pro conecta nativamente con Slack, MS Teams, Notion, Trello, HubSpot. NewsLet tiene Telegram + webhooks genéricos. Una integración nativa de Slack (POST a Slack Webhook con formato rico) aumentaría mucho el valor para equipos pequeños.</p>
+  <pre>Distribución:
+[Telegram ✓] [Slack □] [Discord □] [Email ✓] [Webhook ✓] [Notion □]</pre>
+</div>
+
+<div class="rec-card">
+  <h3>7. Editor Visual del Digest (diferenciador único)</h3>
+  <div class="rec-meta">
+    <span class="badge badge-low">🟢 Impacto Alto a largo plazo</span>
+    <span class="badge badge-effort-high">Esfuerzo Alto</span>
+  </div>
+  <p>El flujo Aprobar → Editar → Enviar ya existe. Añadir un editor drag-and-drop sencillo para reordenar artículos, escribir intro y previsualizar lo haría genuinamente competitivo para newsletter creators — un nicho poco servido.</p>
+  <pre>┌─────────────────────────────────────────────────────┐
+│  📧 Editor del Digest — Miércoles 8 mayo            │
+│                                                     │
+│  Introducción:  [Hoy en tecnología y economía...]   │
+│                                                     │
+│  ① ══ El BCE sube tipos ═══════════════ [✕][↕] │
+│  ② ══ Apple lanza nuevo iPad ═══════════ [✕][↕] │
+│  ③ ══ Meta cierra acuerdo con... ═══════ [✕][↕] │
+│                          [+ Añadir artículo]        │
+│                                                     │
+│  [Vista previa] [Enviar ahora] [Programar]          │
+└─────────────────────────────────────────────────────┘</pre>
+</div>
+
+<h2>Comparativa con la competencia</h2>
+<table>
+  <thead>
+    <tr>
+      <th>Característica</th>
+      <th>Feedly</th>
+      <th>Inoreader</th>
+      <th>Readwise</th>
+      <th>NewsLet</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr><td>Cola de lectura (inbox/later)</td><td>✓</td><td>✓</td><td>✓✓✓</td><td>Parcial</td></tr>
+    <tr><td>Modo focus/lectura</td><td>✓</td><td>✓</td><td>✓✓</td><td>✓ Reader modal</td></tr>
+    <tr><td>AI summaries</td><td>✓ (Pro)</td><td>✓ (Pro)</td><td>✓</td><td><strong>✓ Gratis</strong></td></tr>
+    <tr><td>Reglas de automatización</td><td>Básico</td><td>✓✓✓</td><td>✗</td><td>Solo keywords</td></tr>
+    <tr><td>Highlights / anotaciones</td><td>✗</td><td>✓</td><td>✓✓✓</td><td>✗</td></tr>
+    <tr><td>Keyboard shortcuts</td><td>✓</td><td>✓✓</td><td>✓✓</td><td>✓</td></tr>
+    <tr><td>Filtros avanzados</td><td>✓</td><td>✓✓✓</td><td>✓✓</td><td>✓✓</td></tr>
+    <tr><td>Source health monitoring</td><td>✗</td><td>✗</td><td>✗</td><td><strong>✓✓</strong></td></tr>
+    <tr><td>Heatmap / activity analytics</td><td>✗</td><td>✗</td><td>✗</td><td><strong>✓</strong></td></tr>
+    <tr><td>Digest configurable</td><td>Básico</td><td>✓</td><td>✓</td><td><strong>✓✓</strong></td></tr>
+    <tr><td>Webhooks salida</td><td>✗</td><td>✓</td><td>✗</td><td>✓</td></tr>
+    <tr><td>Deduplicación inteligente</td><td>✗</td><td>Básico</td><td>✓</td><td>✓ (sin UI)</td></tr>
+    <tr><td>Etiquetas manuales</td><td>✓</td><td>✓✓</td><td>✓✓</td><td>✓</td></tr>
+    <tr><td>RSS feed público</td><td>✗</td><td>✗</td><td>✗</td><td><strong>✓</strong></td></tr>
+  </tbody>
+</table>
+
+<h2>Anti-patterns a evitar</h2>
+
+<div class="anti-pattern"><strong>Demasiadas opciones visibles a la vez</strong> — Inoreader sufre de esto. El panel de poder puede abrumar al usuario casual. NewsLet debe mantener la simplicidad como ventaja competitiva frente a Inoreader.</div>
+
+<div class="anti-pattern"><strong>Empty states sin guía</strong> — El estado "Sin artículos" no debe ser solo texto. Debe ofrecer un CTA inmediato: "Probar fuentes populares →". Los mejores apps onboardean con acciones, no con instrucciones.</div>
+
+<div class="anti-pattern"><strong>AI como excusa de paywall</strong> — Feedly pone casi todo lo útil en Pro+. NewsLet tiene AI gratis, lo cual es una ventaja diferencial enorme. Mantenerlo así mientras sea posible.</div>
+
+<div class="anti-pattern"><strong>Diseño que envejece</strong> — NewsBlur es el ejemplo de lo que pasa cuando no se actualiza el look & feel (parece de 2008 aunque se rediseñó en 2022). El dark theme moderno de NewsLet es un activo que hay que cuidar.</div>
+
+<div class="anti-pattern"><strong>Sync solo en una dirección</strong> — Las integraciones que solo exportan tienen menos retención. Cuando sea posible, cerrar el loop (ej: artículo aprobado en Notion → marcarlo como enviado en NewsLet).</div>
+
+<h2>Ángulos únicos de diferenciación</h2>
+
+<div class="unique"><strong>Source Intelligence Dashboard</strong> — Ningún competidor muestra health scores, failure rates, rejection rates y average relevance en una sola vista. NewsLet ya lo tiene. Añadir gráficas de evolución temporal sería genuinamente único en el mercado.</div>
+
+<div class="unique"><strong>Posicionamiento como herramienta editorial</strong> — Feedly es business intelligence, Inoreader es para power users, Readwise es para retención de conocimiento. NewsLet puede ser <strong>la herramienta editorial para creadores de newsletters y equipos pequeños</strong> — ese nicho está poco servido y crece rápidamente.</div>
+
+<div class="unique"><strong>El digest como producto final</strong> — Ningún RSS reader ofrece un editor drag-and-drop de digest con preview visual. El flujo Aprobar → Editar → Enviar ya existe en NewsLet; solo falta la capa de edición visual.</div>
+
+<h2>Roadmap Tier 2 sugerido</h2>
+<table class="roadmap-table">
+  <thead>
+    <tr><th>Prioridad</th><th>Feature</th><th>Complejidad</th><th>Diferenciación</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>🔴 Alta</td><td>Cola de lectura (inbox/later)</td><td>Media</td><td>Media</td></tr>
+    <tr><td>🔴 Alta</td><td>Motor de reglas (IF/THEN)</td><td>Alta</td><td>Muy alta</td></tr>
+    <tr><td>🟡 Media</td><td>Highlights en reader</td><td>Media</td><td>Alta</td></tr>
+    <tr><td>🟡 Media</td><td>Clustering UI (badge cross-source)</td><td>Baja</td><td>Alta</td></tr>
+    <tr><td>🟡 Media</td><td>Stats personales de lectura</td><td>Baja</td><td>Media</td></tr>
+    <tr><td>🟡 Media</td><td>Integración Slack/Discord</td><td>Media</td><td>Media</td></tr>
+    <tr><td>🟢 Baja</td><td>Editor visual del digest</td><td>Alta</td><td>Muy alta</td></tr>
+    <tr><td>🟢 Baja</td><td>Entrenamiento implícito IA (de approve/reject)</td><td>Alta</td><td>Alta</td></tr>
+    <tr><td>🟢 Baja</td><td>Ingesta newsletters por email</td><td>Muy alta</td><td>Media</td></tr>
+  </tbody>
+</table>
+
+<div class="sources">
+  <h2>Fuentes</h2>
+  <ul>
+    <li><a href="https://www.readless.app/blog/best-rss-readers-2026">Best RSS Readers 2026 — Readless Blog</a></li>
+    <li><a href="https://www.inoreader.com/blog/2025/12/inoreader-2025-intelligence-and-automation-in-one-content-hub.html">Inoreader 2025: Intelligence and Automation</a></li>
+    <li><a href="https://siteefy.com/tools/feedly">Feedly AI Features — Siteefy</a></li>
+    <li><a href="https://zapier.com/blog/best-rss-feed-reader-apps/">The 3 best RSS reader apps in 2026 — Zapier</a></li>
+    <li><a href="https://readwise.io/read">Readwise Reader — Official</a></li>
+    <li><a href="https://www.readless.app/blog/feedly-vs-inoreader-vs-newsblur-2026">Feedly vs Inoreader vs NewsBlur 2026 — Readless</a></li>
+    <li><a href="https://5of10.com/articles/dashboard-design-best-practices/">Dashboard Design Best Practices 2025 — 5of10</a></li>
+    <li><a href="https://robertbreen.com/2025/02/27/elevate-your-online-reading-with-matter/">Matter Reading App — Robert Breen</a></li>
+    <li><a href="https://www.eleken.co/blog-posts/empty-state-ux">Empty State UX — Eleken</a></li>
+  </ul>
+</div>
+
+</div>
+</body>
+</html>

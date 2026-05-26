@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Design Research: Automation Rules & Editorial UX — NewsLet v3.0</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    background: #0f1117; color: #e2e8f0;
+    line-height: 1.7; font-size: 15px;
+  }
+  .container { max-width: 920px; margin: 0 auto; padding: 40px 24px 80px; }
+
+  h1 { font-size: 2rem; font-weight: 800; color: #f8fafc; margin-bottom: 6px; }
+  h2 { font-size: 1.3rem; font-weight: 700; color: #a5b4fc; margin: 44px 0 16px;
+       padding-bottom: 8px; border-bottom: 1px solid #1e293b; }
+  h3 { font-size: 1.05rem; font-weight: 700; color: #e2e8f0; margin: 28px 0 10px; }
+  h4 { font-size: 0.92rem; font-weight: 700; color: #94a3b8; margin: 20px 0 8px; text-transform: uppercase; letter-spacing: 0.05em; }
+  p  { margin-bottom: 12px; color: #cbd5e1; }
+  a  { color: #818cf8; }
+
+  .meta { color: #64748b; font-size: 13px; margin-bottom: 32px; }
+
+  .tldr {
+    background: linear-gradient(135deg, rgba(99,102,241,0.12), rgba(139,92,246,0.08));
+    border: 1px solid rgba(99,102,241,0.3);
+    border-radius: 14px; padding: 24px 28px; margin: 28px 0;
+  }
+  .tldr-label { font-size: 11px; font-weight: 800; text-transform: uppercase;
+                letter-spacing: 0.1em; color: #818cf8; margin-bottom: 12px; }
+  .tldr ol { padding-left: 20px; }
+  .tldr li { margin-bottom: 10px; color: #e2e8f0; }
+  .tldr strong { color: #a5b4fc; }
+
+  .rec-card {
+    background: #161b27; border: 1px solid #1e293b;
+    border-radius: 12px; padding: 20px 24px; margin-bottom: 16px;
+  }
+  .rec-card.high { border-left: 3px solid #6366f1; }
+  .rec-card.medium { border-left: 3px solid #f59e0b; }
+  .rec-card.low { border-left: 3px solid #6b7280; }
+  .priority-badge {
+    display: inline-block; font-size: 10px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.06em;
+    padding: 2px 8px; border-radius: 20px; margin-bottom: 10px;
+  }
+  .badge-high   { background: rgba(99,102,241,0.15); color: #818cf8; }
+  .badge-medium { background: rgba(245,158,11,0.15); color: #fbbf24; }
+  .badge-low    { background: rgba(107,114,128,0.15); color: #9ca3af; }
+
+  pre, code {
+    font-family: 'Cascadia Code', 'Fira Code', 'Consolas', monospace;
+    font-size: 12.5px;
+  }
+  pre {
+    background: #0d1117; border: 1px solid #1e293b;
+    border-radius: 10px; padding: 18px 20px;
+    overflow-x: auto; margin: 16px 0; color: #7dd3fc;
+    white-space: pre;
+  }
+  code { background: rgba(99,102,241,0.12); color: #a5b4fc;
+         padding: 2px 6px; border-radius: 4px; }
+
+  table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 13px; }
+  th { background: #1e293b; color: #94a3b8; font-weight: 700;
+       padding: 10px 14px; text-align: left; }
+  td { padding: 9px 14px; border-bottom: 1px solid #1e293b; color: #cbd5e1; }
+  tr:hover td { background: rgba(255,255,255,0.02); }
+
+  ul, ol { padding-left: 22px; margin-bottom: 14px; }
+  li { margin-bottom: 6px; color: #cbd5e1; }
+  strong { color: #e2e8f0; }
+
+  .tool-card {
+    background: #161b27; border: 1px solid #1e293b;
+    border-radius: 10px; padding: 18px 22px; margin-bottom: 14px;
+  }
+  .tool-name { font-weight: 800; color: #f8fafc; font-size: 1rem; margin-bottom: 6px; }
+  .tool-tag  { display: inline-block; background: rgba(34,197,94,0.1); color: #4ade80;
+               border-radius: 6px; padding: 1px 8px; font-size: 11px; font-weight: 700;
+               margin-left: 8px; }
+
+  .pattern-grid {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 12px; margin: 16px 0;
+  }
+  .pattern-item {
+    background: #161b27; border: 1px solid #1e293b;
+    border-radius: 10px; padding: 16px;
+  }
+  .pattern-icon { font-size: 1.4rem; margin-bottom: 8px; }
+  .pattern-title { font-weight: 700; color: #e2e8f0; margin-bottom: 4px; }
+  .pattern-desc { font-size: 13px; color: #94a3b8; }
+
+  .anti-pattern-row { background: rgba(239,68,68,0.06); border-left: 3px solid #ef4444; }
+  .anti-pattern-row td { color: #fca5a5; }
+  .anti-pattern-row td:first-child { font-weight: 700; }
+
+  .section-intro { color: #94a3b8; font-size: 14px; margin-top: -8px; margin-bottom: 20px; }
+
+  @media (max-width: 640px) {
+    .pattern-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <h1>Design Research: Automation Rules &amp; Editorial UX</h1>
+  <p class="meta">Fecha: 2026-05-10 · Producto: NewsLet v3.0 · Plataforma: Desktop/Web</p>
+  <p class="meta">Herramientas analizadas: Inoreader · Zapier · Readwise Reader · Matter · Instapaper · Ghost · Beehiiv · Mailchimp · Airtable · Notion · Hypothesis · Kindle</p>
+
+  <div class="tldr">
+    <div class="tldr-label">TL;DR — Los 3 hallazgos más importantes</div>
+    <ol>
+      <li><strong>El constructor de reglas más efectivo (Inoreader) muestra un contador de matches diarios por regla.</strong> Sin feedback, los usuarios asumen que sus reglas están rotas. Agregar esto a NewsLet es trabajo de 30 minutos.</li>
+      <li><strong>La separación Feed/Cola es la arquitectura mental más importante en lectores modernos</strong> (Readwise Reader, Matter, Reeder). NewsLet mezcla todo en una lista — una vista "Para leer después" real, separada de la lista principal, sería un diferenciador claro.</li>
+      <li><strong>No existe un editor de digest con bloque nativo de artículo</strong> en ninguna herramienta del mercado. Ghost tiene el Bookmark Card más cercano pero solo con URLs externas. NewsLet puede ser la primera con artículos propios de la DB como bloques drag-and-drop.</li>
+    </ol>
+  </div>
+
+  <!-- ══════════════════════════════════════════ -->
+  <h2>Recomendaciones — En orden de prioridad</h2>
+
+  <div class="rec-card high">
+    <span class="priority-badge badge-high">Prioridad Alta · Esfuerzo Bajo</span>
+    <h3>1. Match counter + log de actividad en reglas</h3>
+    <p>El anti-pattern más documentado en builders de reglas: sin feedback, los usuarios no saben si una regla funciona o está rota silenciosamente. Inoreader muestra matches diarios en cada tarjeta de regla.</p>
+    <pre>┌──────────────────────────────────────────────────┐
+│  ⚡ Auto-aprobar Tecnología          [▶ Activa]  │
+│  SI categoría=Tecnología AND score≥7             │
+│  ENTONCES aprobar                                │
+├──────────────────────────────────────────────────┤
+│  Hoy: 4  │  Total: 127  │  Última: hace 14 min  │
+│  [✏ Editar]  [⏸ Pausar]  [🗑 Eliminar]           │
+└──────────────────────────────────────────────────┘</pre>
+    <p><strong>Implementación:</strong> Actualizar <code>Rule.match_count</code> y <code>Rule.last_matched_at</code> en <code>rule_engine.py</code> al ejecutar acciones (ya existe en el modelo). Mostrarlos en <code>rules.js</code> en la tarjeta de cada regla.</p>
+  </div>
+
+  <div class="rec-card high">
+    <span class="priority-badge badge-high">Prioridad Alta · Esfuerzo Bajo</span>
+    <h3>2. Lógica AND / OR en condiciones de reglas</h3>
+    <p>Actualmente NewsLet usa AND implícito (todas las condiciones deben cumplirse). Inoreader ofrece toggle AND/OR por grupo de condiciones. La diferencia entre "contiene 'AI' AND score≥7" vs "contiene 'AI' OR contiene 'ML'" es enorme para filtraje de contenido.</p>
+    <pre>CONDITIONS  ( ● AND  ○ OR )
+┌────────────────────────────────────────┐
+│ [Título/texto ▼] [contiene ▼] [AI]  × │
+│ [Score       ▼] [≥         ▼] [7 ]  × │
+└────────────────────────────────────────┘
+[+ Añadir condición]</pre>
+    <p><strong>Implementación:</strong> Agregar campo <code>logic</code> ("and"/"or") al JSON de condiciones. Actualizar <code>_evaluate_rule()</code> en <code>rule_engine.py</code> y el modal en <code>rules.js</code>.</p>
+  </div>
+
+  <div class="rec-card high">
+    <span class="priority-badge badge-high">Prioridad Alta · Esfuerzo Bajo</span>
+    <h3>3. Tiempo de lectura estimado por artículo</h3>
+    <p>Readwise Reader, Matter e Instapaper muestran el tiempo estimado de lectura en la lista. Es fundamental para decidir qué leer ahora vs. más tarde. Se calcula en segundos: <code>word_count / 200</code>.</p>
+    <pre>□ OpenAI lanza nuevo modelo               8 min  ⭐9
+  MIT Technology Review · hace 2h          [★][✓][✕]
+
+□ The future of distributed work          24 min
+  The Atlantic · ayer                      [★][✓][✕]
+
+□ Briefing semanal de ciberseguridad       3 min  ⭐7
+  Krebs on Security · hace 4h              [★][✓][✕]</pre>
+  </div>
+
+  <div class="rec-card high">
+    <span class="priority-badge badge-high">Prioridad Alta · Esfuerzo Medio</span>
+    <h3>4. Cola de lectura con separación Feed / Cola</h3>
+    <p>La arquitectura ganadora de Readwise Reader: <strong>Feed</strong> (stream pasivo que llega) vs <strong>Cola</strong> (curado activo). El shortlist actual de NewsLet es un proto-cola. Expandirlo en vistas predefinidas:</p>
+    <pre>SIDEBAR                    ARTÍCULOS (Vista "Para leer")
+┌─────────────────┐        ┌──────────────────────────────────┐
+│ 📰 Feed         │        │  Para leer (8)     Filtrar: [Todo▼]│
+│   Pendientes(24)│        │  ──────────────────────────────  │
+│   Recientes     │        │  □ AI overtakes...     8 min  ⭐ │
+│                 │        │    MIT Tech Review  [✓][→][✕]    │
+│ 📚 Cola         │        │                                  │
+│ ★ Para leer (8) │───────►│  □ Future of work     12 min    │
+│   Continuar (3) │        │    The Atlantic     [✓][→][✕]    │
+│   Rápidas <5min │        │                                  │
+│   Largas >20min │        │  □ Open-source LLMs    4 min ⭐  │
+│                 │        │    HackerNews       [✓][→][✕]    │
+└─────────────────┘        └──────────────────────────────────┘</pre>
+  </div>
+
+  <div class="rec-card medium">
+    <span class="priority-badge badge-medium">Prioridad Media · Esfuerzo Alto</span>
+    <h3>5. Editor de digest drag-and-drop con Article Card nativo</h3>
+    <p>El gap más grande del mercado: ningún editor tiene un bloque "Article Card" que consuma artículos de su propia base de datos. Ghost tiene Bookmark Card solo con URLs externas. NewsLet puede ser el primero con artículos de la DB como bloques configurables.</p>
+    <pre>DIGEST EDITOR
+┌────────────────────────────────────────────────────────┐
+│  📬 Noticias de la semana        [Vista previa] [Enviar]│
+│  ──────────────────────────────────────────────────────│
+│  Intro: "Esta semana en tecnología..."                 │
+│                                                        │
+│  /  <- Slash command                                   │
+│  ┌──────────────────────────────┐                      │
+│  │ 📰 Artículo de la base de datos                    │
+│  │ 🔗 Enlace externo (URL)                             │
+│  │ ✍  Texto libre                                      │
+│  │ ─── Separador                                       │
+│  └──────────────────────────────┘                      │
+│                                                        │
+│  ┌──── ARTICLE CARD ─────────────────────────────┐     │
+│  │ [img]  TECNOLOGÍA · hace 2h · ⭐ 9/10         │     │
+│  │        OpenAI lanza nuevo modelo GPT-5...     │     │
+│  │        "Según el resumen IA, el modelo supera │     │
+│  │         benchmarks en razonamiento..."        │     │
+│  │        MIT Technology Review                  │     │
+│  │        [Leer más →]           [✕][↕ mover]   │     │
+│  └───────────────────────────────────────────────┘     │
+│  [+ Añadir bloque]                                     │
+└────────────────────────────────────────────────────────┘</pre>
+  </div>
+
+  <div class="rec-card medium">
+    <span class="priority-badge badge-medium">Prioridad Media · Esfuerzo Alto</span>
+    <h3>6. Resaltados y anotaciones en el reader</h3>
+    <p>Patrón de Readwise Reader y Kindle 2024: toolbar contextual que aparece <strong>debajo</strong> del texto seleccionado (no encima — eso cubre lo que quieres ver). Resaltados guardados en DB enlazados al artículo.</p>
+    <pre>READER MODAL — Anotación en contexto
+┌──────────────────────────────────────────────────────┐
+│  The algorithm computes a weighted average           │
+│  ═══════════════════════════════════════             │ ← seleccionado
+│  across all input nodes before forwarding.           │
+│                                                      │
+│           ┌──────────────────────────────┐           │
+│           │ [💛 Resaltar] [📝 Nota] [🏷]  │           │
+│           └──────────────────────────────┘           │
+│           ^ toolbar aparece DEBAJO de la selección   │
+│                                                      │
+│  ┌── Nota guardada ──────────────────────────────┐   │
+│  │ 💛 "Este es el paso donde se aplica attention"│   │
+│  │    Tag: #ml  [✕]                              │   │
+│  └───────────────────────────────────────────────┘   │
+└──────────────────────────────────────────────────────┘</pre>
+  </div>
+
+  <div class="rec-card low">
+    <span class="priority-badge badge-low">Prioridad Baja · Diferenciador futuro</span>
+    <h3>7. Gmail clip warning en el digest</h3>
+    <p>Beehiiv es el único que avisa cuando el email supera 102KB (el límite de Gmail antes de truncar). Un digest largo con muchos artículos puede truncarse silenciosamente. Agregar un contador de caracteres/KB con advertencia en el editor de digest.</p>
+  </div>
+
+  <div class="rec-card low">
+    <span class="priority-badge badge-low">Prioridad Baja · Diferenciador futuro</span>
+    <h3>8. Ordenamiento "Lindy" en la cola de lectura</h3>
+    <p>Matter ofrece un modo de ordenamiento que prioriza artículos con fecha de publicación más antigua — contrarresta el sesgo de recencia. Muestra artículos que valen la pena más allá del ciclo de 24h. Un toggle simple en el selector de orden de la lista.</p>
+  </div>
+
+  <!-- ══════════════════════════════════════════ -->
+  <h2>Patrones que se repiten en las mejores herramientas</h2>
+  <p class="section-intro">Lo que tienen en común las apps que los usuarios adoran.</p>
+
+  <div class="pattern-grid">
+    <div class="pattern-item">
+      <div class="pattern-icon">⚡</div>
+      <div class="pattern-title">Trigger → Condición → Acción</div>
+      <div class="pattern-desc">Todo constructor exitoso usa este modelo de 3 pasos aunque la lógica subyacente sea compleja. La complejidad se revela paso a paso, no toda a la vez.</div>
+    </div>
+    <div class="pattern-item">
+      <div class="pattern-icon">📰 / 📚</div>
+      <div class="pattern-title">Feed y Cola separados</div>
+      <div class="pattern-desc">Stream pasivo (RSS que llega) vs cola activa (lo que curé deliberadamente). Mezclarlos en una lista crea ansiedad constante por el unread count.</div>
+    </div>
+    <div class="pattern-item">
+      <div class="pattern-icon">/</div>
+      <div class="pattern-title">Slash-command > drag desde panel</div>
+      <div class="pattern-desc">Ghost y Beehiiv adoptaron el modelo de bloques de Notion. Más rápido para teclado, más descubrible para nuevos usuarios que el drag-from-panel de Mailchimp.</div>
+    </div>
+    <div class="pattern-item">
+      <div class="pattern-icon">⌨️</div>
+      <div class="pattern-title">Paridad teclado + mouse</div>
+      <div class="pattern-desc">Readwise Reader hace cada acción core alcanzable por teclado (H=highlight, T=tag, N=nota, S=shortlist, E=archivo). Los flujos solo-mouse rompen el estado de flow de power users.</div>
+    </div>
+    <div class="pattern-item">
+      <div class="pattern-icon">📊</div>
+      <div class="pattern-title">Múltiples vistas, mismos datos</div>
+      <div class="pattern-desc">Airtable y Notion demuestran que Kanban + Calendario + Tabla + Galería sobre los mismos datos elimina 3 herramientas. Cambiar de vista = tab click, no migración.</div>
+    </div>
+    <div class="pattern-item">
+      <div class="pattern-icon">🔢</div>
+      <div class="pattern-title">Feedback de actividad</div>
+      <div class="pattern-desc">Contadores de matches en reglas, señal "inbox cero", progreso de lectura. Sin feedback visible, los usuarios no saben si sus configuraciones funcionan o están rotas silenciosamente.</div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════ -->
+  <h2>Anti-patterns a evitar</h2>
+
+  <table>
+    <thead>
+      <tr><th>Anti-pattern</th><th>Quién lo hace</th><th>Consecuencia</th></tr>
+    </thead>
+    <tbody>
+      <tr class="anti-pattern-row">
+        <td>Reglas sin contador de matches</td>
+        <td>La mayoría (incluyendo NewsLet)</td>
+        <td>Usuarios no saben si funcionan — abandono</td>
+      </tr>
+      <tr class="anti-pattern-row">
+        <td>Sin lógica AND/OR explícita</td>
+        <td>NewsLet (actual)</td>
+        <td>Solo filtraje básico posible — power users frustrados</td>
+      </tr>
+      <tr class="anti-pattern-row">
+        <td>Feed y Cola en una sola lista</td>
+        <td>Inoreader (parcial)</td>
+        <td>Ansiedad permanente por artículos no leídos</td>
+      </tr>
+      <tr class="anti-pattern-row">
+        <td>Toolbar de anotación encima del texto</td>
+        <td>Kindle (hasta 2024)</td>
+        <td>Cubre exactamente lo que el usuario quiere ver</td>
+      </tr>
+      <tr class="anti-pattern-row">
+        <td>Sin bloque nativo de artículo en digest editor</td>
+        <td>Todos (Ghost el más cercano)</td>
+        <td>RSS solo disponible en builders legacy o externos</td>
+      </tr>
+      <tr class="anti-pattern-row">
+        <td>Reglas sin prioridad explícita</td>
+        <td>Inoreader</td>
+        <td>Conflictos silenciosos entre reglas — resultado impredecible</td>
+      </tr>
+      <tr class="anti-pattern-row">
+        <td>Sin vista "Continuar leyendo"</td>
+        <td>Instapaper</td>
+        <td>Pierdes el hilo entre sesiones — re-lees artículos ya empezados</td>
+      </tr>
+      <tr class="anti-pattern-row">
+        <td>Canvas de workflow para reglas simples</td>
+        <td>n8n</td>
+        <td>Abruma a non-developers — abandono del builder</td>
+      </tr>
+      <tr class="anti-pattern-row">
+        <td>Builder legacy solo con RSS, moderno sin RSS</td>
+        <td>Mailchimp</td>
+        <td>Los usuarios no pueden tener undo/redo Y RSS automation</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- ══════════════════════════════════════════ -->
+  <h2>Análisis por herramienta</h2>
+
+  <div class="tool-card">
+    <div class="tool-name">Inoreader Rules <span class="tool-tag">Gold Standard</span></div>
+    <p><strong>Estructura:</strong> Trigger → Condiciones (AND/OR) → Acciones (múltiples por regla)</p>
+    <p><strong>Tipos de condición:</strong> Título/contenido contiene, autor, URL, idioma, categorías RSS, presencia de adjuntos</p>
+    <p><strong>Tipos de acción:</strong> Asignar tag, guardar en Read Later, enviar por email, generar resumen IA, traducir (100/día), añadir nota, notificación push, marcar como leído, enviar webhook, exportar a Google Drive / Instapaper / OneNote / Evernote / Dropbox / Raindrop.io</p>
+    <p><strong>Diferenciadores únicos:</strong> Contador de matches diario en dashboard · "Copiar de" clona una regla · Backfill contra contenido histórico · Encadenamiento de reglas (trigger = "otra regla coincidió")</p>
+    <p><strong>Anti-pattern:</strong> Sin UI de prioridad — cuando múltiples reglas coinciden, el orden de ejecución es implícito.</p>
+  </div>
+
+  <div class="tool-card">
+    <div class="tool-name">Readwise Reader <span class="tool-tag">Arquitectura Feed/Cola</span></div>
+    <p><strong>Flujo de documentos:</strong> Feed (Unseen/Seen) → Library (Inbox → Later → Archive) o (Later → Shortlist → Archive)</p>
+    <p><strong>Vistas filtradas predefinidas:</strong> Shortlist · Recently Added · New in Feed · Continue Reading (>5% progreso) · Quick Reads (&lt;10 min) · Long Reads (>30 min) · Recently Highlighted</p>
+    <p><strong>Highlights:</strong> Selección → highlight automático | <code>H</code> = highlight párrafo | <code>T</code> = tag | <code>N</code> = nota | <code>Shift+N</code> = nota del documento</p>
+    <p><strong>Anti-pattern conocido:</strong> Sin colores de highlight — solo tags como sustituto. La queja #1 en su comunidad.</p>
+  </div>
+
+  <div class="tool-card">
+    <div class="tool-name">Ghost Editor (Oct 2024) <span class="tool-tag">Bookmark Card</span></div>
+    <p><strong>Inserción:</strong> Slash command <code>/</code> en línea nueva → menú de cards con búsqueda</p>
+    <p><strong>Bookmark Card:</strong> Pegar URL → Ghost fetchea OG metadata → renderiza: favicon, nombre, título, descripción, imagen hero, label del publisher</p>
+    <p><strong>Email-only card (único en el mercado):</strong> Contenido diferente para lectores web vs suscriptores de newsletter en un solo post.</p>
+    <p><strong>Limitación:</strong> El Bookmark Card solo consume URLs externas, no artículos propios de la DB interna. <strong>NewsLet puede hacer esto mejor.</strong></p>
+  </div>
+
+  <div class="tool-card">
+    <div class="tool-name">Beehiiv <span class="tool-tag">Gmail Clip Warning</span></div>
+    <p>El único editor que avisa cuando el email supera el umbral de 102KB de Gmail antes de truncar. Ningún competidor mayor ofrece esto. Una funcionalidad práctica que los creadores descubren que necesitaban solo cuando ya tuvieron un email truncado silenciosamente.</p>
+    <p><strong>UI:</strong> Interfaz tipo Notion (slash commands + bloques). Preview text editor integrado. Tokens de personalización por suscriptor.</p>
+  </div>
+
+  <div class="tool-card">
+    <div class="tool-name">Matter <span class="tool-tag">Pull-Down para Resumen</span></div>
+    <p><strong>Gesto único:</strong> Pull-down sobre un artículo en la cola → muestra el resumen de IA antes de decidir si leer el artículo completo. La decisión de leer se toma sin salir de la vista de cola.</p>
+    <p><strong>Ordenamiento "Lindy":</strong> Prioriza artículos con fecha de publicación más antigua — contrarresta el sesgo de recencia. Muestra lo que vale la pena leer más allá del ciclo de 24h.</p>
+    <p><strong>% match en contenido similar:</strong> Motor de serendipidad — no una lista de recomendaciones genérica sino una puntuación de similitud explícita.</p>
+  </div>
+
+  <div class="tool-card">
+    <div class="tool-name">Airtable Editorial Calendar <span class="tool-tag">DB Relacional</span></div>
+    <p><strong>Cuatro vistas simultáneas:</strong> Kanban (por Estado) · Calendario (por Fecha límite) · Galería (por tipo de contenido) · Formulario (pitch de artículos)</p>
+    <p><strong>Campos fórmula:</strong> <code>Días para deadline</code> → emoji semáforo 🟢/🟡/🟠/🔴 · On Time vs Late auto-flag</p>
+    <p><strong>Diferenciador real:</strong> El campo relacional Topics permite responder "¿cuántos artículos hemos publicado sobre IA?" — ningún kanban puro puede hacer esto.</p>
+  </div>
+
+  <!-- ══════════════════════════════════════════ -->
+  <h2>Lo que NewsLet ya hace mejor que los competidores</h2>
+  <ul>
+    <li><strong>Motor de reglas IF/THEN nativo</strong> — Feedly y NewsBlur no tienen esto. Inoreader es el único competidor real, y cuesta $10/mes.</li>
+    <li><strong>Score de relevancia por IA</strong> — Ningún lector RSS gratuito ofrece scoring automático por artículo.</li>
+    <li><strong>Resúmenes estructurados</strong> (punto clave / contexto / impacto) — Formato más rico que el resumen plano de Inoreader.</li>
+    <li><strong>Monitor de salud de fuentes</strong> con auto-deshabilitación — Ningún competidor analizado tiene esto.</li>
+    <li><strong>Clustering de artículos</strong> por tema — Diferenciador claro para cubrimiento multi-fuente del mismo evento.</li>
+  </ul>
+
+  <!-- ══════════════════════════════════════════ -->
+  <h2>Fuentes</h2>
+  <ul>
+    <li>Inoreader Blog: "Save Time with Automations" (Jan 2026)</li>
+    <li>Inoreader Blog: "New rule triggers and actions — translations, summaries and more" (Oct 2025)</li>
+    <li>Zapier: "Use conditional logic to filter and split your Zap workflows"</li>
+    <li>HubSpot Knowledge: "Use if/then branches in workflows"</li>
+    <li>n8n Community: "Advanced Conditional Logic Builder with drag-and-drop" feature request</li>
+    <li>Readwise Reader Docs: Highlights, Tags, and Notes</li>
+    <li>Readwise Reader Docs: Default Filtered Views and Filtering</li>
+    <li>MacStories: Matter review</li>
+    <li>MacStories: Reeder 2024 review</li>
+    <li>Readless: "Best Read-Later Apps 2026 Comparison"</li>
+    <li>Good e-Reader: "Kindle changes how highlighting, notes and definitions work" (2024)</li>
+    <li>Tom Critchlow: Hypothesis annotation UX analysis</li>
+    <li>Ghost Help: Cards reference</li>
+    <li>Beehiiv Blog: "Drag-and-drop email builder"</li>
+    <li>Mailchimp Help: "About Mailchimp's email builders"</li>
+    <li>XDA Developers: Airtable content calendar guide</li>
+    <li>Project Aeon: "7 Best Editorial Workflow Software Solutions for 2025"</li>
+    <li>Medium / Hagan Rivers: "UI Design for Rule Builders"</li>
+  </ul>
+
+</div>
+</body>
+</html>

@@ -59,6 +59,9 @@ class ArticleOut(BaseModel):
     published_at: Optional[datetime] = None
     fetched_at: datetime
     status: str
+    tags: Optional[str] = None
+    is_shortlisted: bool = False
+    cluster_id: Optional[int] = None
     summary: Optional[SummaryOut] = None
     source: Optional[SourceOut] = None
     model_config = {"from_attributes": True}
@@ -73,6 +76,10 @@ class ArticleStatusUpdate(BaseModel):
         if v not in ("pending", "approved", "rejected"):
             raise ValueError("status must be pending, approved, or rejected")
         return v
+
+
+class ArticleShortlistUpdate(BaseModel):
+    is_shortlisted: bool
 
 
 class ArticleListOut(BaseModel):
@@ -114,6 +121,11 @@ class DigestConfigUpdate(BaseModel):
     min_score: Optional[int] = None
     categories: Optional[str] = None
     is_active: Optional[bool] = None
+    recipients: Optional[str] = None
+    sort_by: Optional[str] = None
+    send_weekly: Optional[bool] = None
+    weekly_day: Optional[int] = None
+    weekly_hour: Optional[int] = None
 
 
 class DigestConfigOut(BaseModel):
@@ -124,6 +136,11 @@ class DigestConfigOut(BaseModel):
     categories: Optional[str] = None
     is_active: bool
     updated_at: datetime
+    recipients: Optional[str] = None
+    sort_by: str = "date"
+    send_weekly: bool = False
+    weekly_day: int = 0
+    weekly_hour: int = 9
     model_config = {"from_attributes": True}
 
 
@@ -229,5 +246,7 @@ class SourceStatsOut(BaseModel):
     name: str
     total_articles: int
     avg_score: Optional[float] = None
+    articles_week: int = 0
+    rejection_rate: int = 0
     categories: dict[str, int]
     sentiments: dict[str, int]

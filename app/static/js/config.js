@@ -176,32 +176,88 @@ async function clearNotifs() {
 }
 
 /* ══════════════════════════════════════════════════════
-   DIGEST CONFIG
+   DIGEST CONFIG (Tier 1.3)
 ══════════════════════════════════════════════════════ */
 async function loadDigestConfig() {
   try {
     const cfg = await api("/digest/config");
-    document.getElementById("cfg-hour").value    = cfg.hour;
-    document.getElementById("cfg-count").value   = cfg.count;
-    document.getElementById("cfg-score").value   = cfg.min_score;
-    document.getElementById("cfg-cats").value    = cfg.categories || "";
+    document.getElementById("cfg-hour").value     = cfg.hour;
+    document.getElementById("cfg-count").value    = cfg.count;
+    document.getElementById("cfg-score").value    = cfg.min_score;
+    document.getElementById("cfg-cats").value     = cfg.categories || "";
     document.getElementById("cfg-active").checked = cfg.is_active;
+    document.getElementById("cfg-recipients").value = cfg.recipients || "";
+    document.getElementById("cfg-sort").value     = cfg.sort_by || "date";
+    document.getElementById("cfg-weekly").checked = cfg.send_weekly;
+    document.getElementById("cfg-weekly-day").value = cfg.weekly_day ?? 0;
+    document.getElementById("cfg-weekly-hour").value = cfg.weekly_hour ?? 9;
+    _toggleWeeklyOptions(cfg.send_weekly);
   } catch {}
+}
+
+function _toggleWeeklyOptions(show) {
+  const row = document.getElementById("cfg-weekly-opts");
+  if (row) row.style.display = show ? "" : "none";
 }
 
 async function saveCfg() {
   const body = {
-    hour:       parseInt(document.getElementById("cfg-hour").value),
-    count:      parseInt(document.getElementById("cfg-count").value),
-    min_score:  parseInt(document.getElementById("cfg-score").value),
-    categories: document.getElementById("cfg-cats").value.trim() || null,
-    is_active:  document.getElementById("cfg-active").checked,
+    hour:        parseInt(document.getElementById("cfg-hour").value),
+    count:       parseInt(document.getElementById("cfg-count").value),
+    min_score:   parseInt(document.getElementById("cfg-score").value),
+    categories:  document.getElementById("cfg-cats").value.trim() || null,
+    is_active:   document.getElementById("cfg-active").checked,
+    recipients:  document.getElementById("cfg-recipients").value.trim() || null,
+    sort_by:     document.getElementById("cfg-sort").value,
+    send_weekly: document.getElementById("cfg-weekly").checked,
+    weekly_day:  parseInt(document.getElementById("cfg-weekly-day").value),
+    weekly_hour: parseInt(document.getElementById("cfg-weekly-hour").value),
   };
   try {
     await api("/digest/config", { method: "PATCH", body: JSON.stringify(body) });
     toast("✓ Configuración guardada", "ok");
   } catch { toast("Error al guardar", "err"); }
 }
+
+/* Digest preview (Tier 1.3) */
+async function showDigestPreview() {
+  const overlay = document.getElementById("overlay-digest-preview");
+  overlay.classList.add("on");
+  const body = document.getElementById("dp-body");
+  body.innerHTML = `<div class="preview-loading">Calculando vista previa...</div>`;
+
+  try {
+    const d = await api("/digest/preview");
+    const articles = d.articles || [];
+    const cfg = d.config || {};
+    if (!articles.length) {
+      body.innerHTML = `<div class="preview-err">No hay artículos que cumplan los criterios actuales.</div>`;
+      return;
+    }
+    const cats = Array.isArray(cfg.categories) ? cfg.categories.join(", ") : (cfg.categories || "");
+    const cfgLine = `score ≥ ${cfg.min_score ?? 0} · orden: ${cfg.sort_by || "date"}${cats ? ` · categorías: ${cats}` : ""}`;
+    body.innerHTML = `
+      <div class="dp-meta">Se enviarían <strong>${articles.length}</strong> artículos · ${cfgLine}</div>
+      <div class="dp-list">
+        ${articles.map((a, i) => `<div class="dp-item">
+          <span class="dp-pos">${i + 1}</span>
+          <div class="dp-info">
+            <div class="dp-title">${esc(a.title)}</div>
+            <div class="dp-sub">
+              ${a.source   ? `<span>${esc(a.source)}</span>` : ""}
+              ${a.category ? `<span class="a-cat">${esc(a.category)}</span>` : ""}
+              ${a.score != null ? `<span>⭐ ${a.score}</span>` : ""}
+              ${a.status   ? `<span class="badge-${a.status}">${a.status}</span>` : ""}
+            </div>
+          </div>
+        </div>`).join("")}
+      </div>`;
+  } catch(e) {
+    body.innerHTML = `<div class="preview-err">Error al obtener la vista previa</div>`;
+  }
+}
+
+function closeDigestPreview() { document.getElementById("overlay-digest-preview").classList.remove("on"); }
 
 /* ══════════════════════════════════════════════════════
    SYSTEM STATUS
@@ -225,9 +281,12 @@ async function loadSystemStatus() {
    MODAL CLICK-OUTSIDE & ESC
 ══════════════════════════════════════════════════════ */
 document.addEventListener("click", e => {
-  if (e.target.id === "overlay")    closeModal();
-  if (e.target.id === "overlay-wh") closeWebhookModal();
-  if (e.target.id === "overlay-reader") closeReader();
+  if (e.target.id === "overlay")                closeModal();
+  if (e.target.id === "overlay-wh")             closeWebhookModal();
+  if (e.target.id === "overlay-reader")         closeReader();
+  if (e.target.id === "overlay-catalogue")      closeCatalogue();
+  if (e.target.id === "overlay-digest-preview") closeDigestPreview();
+  if (e.target.id === "overlay-tags")           closeTagsModal();
 });
 
 /* ══════════════════════════════════════════════════════
@@ -246,6 +305,7 @@ document.addEventListener("click", e => {
   loadDash();
   loadSrcFilter();
   loadCatFilter();
+  loadTagFilter();
   renderSavedSearches();
   connectWS();
 

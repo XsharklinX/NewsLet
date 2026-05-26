@@ -9,6 +9,7 @@ from app.api.routers.analytics import router as analytics_router
 from app.api.routers.operations import router as operations_router
 from app.api.routers.config import router as config_router
 from app.api.routers.auth import public_router as auth_public_router
+from app.api.routers.rules import router as rules_router
 
 public_router = APIRouter(prefix="/api/v1")
 router = APIRouter(
@@ -32,6 +33,7 @@ protected_routers = [
     analytics_router,
     operations_router,
     config_router,
+    rules_router,
 ]
 
 public_routers = [

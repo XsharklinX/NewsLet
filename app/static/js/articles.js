@@ -3,6 +3,157 @@
 ══════════════════════════════════════════════════════ */
 const selectedIds = new Set();
 
+/* ── Search history (Tier 1.5) ─────────────────────────────────────────── */
+const _SEARCH_KEY = "nlSearchHistory";
+function _getHistory() { return JSON.parse(localStorage.getItem(_SEARCH_KEY) || "[]"); }
+function _addHistory(q) {
+  if (!q || q.length < 2) return;
+  let h = _getHistory().filter(x => x !== q);
+  h.unshift(q);
+  localStorage.setItem(_SEARCH_KEY, JSON.stringify(h.slice(0, 10)));
+}
+function onSearchFocus() {
+  const h = _getHistory();
+  const dd = document.getElementById("search-history-dd");
+  if (!dd || !h.length) return;
+  const q = document.getElementById("q").value.trim();
+  if (q) { dd.style.display = "none"; return; }
+  dd.innerHTML = h.map(s => `<div class="sh-item" onclick="setSearch('${s.replace(/'/g,"\\'")}')">🕐 ${esc(s)}</div>`).join("") +
+    `<div class="sh-clear" onclick="clearSearchHistory()">✕ Borrar historial</div>`;
+  dd.style.display = "block";
+}
+function setSearch(q) {
+  document.getElementById("q").value = q;
+  const dd = document.getElementById("search-history-dd");
+  if (dd) dd.style.display = "none";
+  onSearch();
+}
+function clearSearchHistory() {
+  localStorage.removeItem(_SEARCH_KEY);
+  const dd = document.getElementById("search-history-dd");
+  if (dd) dd.style.display = "none";
+}
+document.addEventListener("click", e => {
+  if (!e.target.closest(".search-wrap")) {
+    const dd = document.getElementById("search-history-dd");
+    if (dd) dd.style.display = "none";
+  }
+});
+
+/* ── Tag filter (Tier 1.4) ──────────────────────────────────────────────── */
+let activeTagFilter = "";
+async function loadTagFilter() {
+  try {
+    const d = await api("/tags");
+    const sel = document.getElementById("tag-filter");
+    if (!sel || !d.tags.length) return;
+    sel.innerHTML = '<option value="">Todas las etiquetas</option>' +
+      d.tags.map(t => `<option value="${esc(t)}">#${esc(t)}</option>`).join("");
+    sel.style.display = "";
+  } catch {}
+}
+function onTagFilter() {
+  activeTagFilter = document.getElementById("tag-filter")?.value || "";
+  loadArts();
+}
+function filterByTag(tag) {
+  activeTagFilter = tag;
+  const sel = document.getElementById("tag-filter");
+  if (sel) sel.value = tag;
+  go("arts");
+  loadArts();
+}
+
+/* ── Shortlist / "Leer más tarde" (Tier 2) ─────────────────────────────── */
+async function toggleShortlist(id, btn) {
+  const isActive = shortlistIds.has(id);
+  const newValue = !isActive;
+  try {
+    const d = await api(`/articles/${id}/shortlist`, {
+      method: "PATCH",
+      body: JSON.stringify({ is_shortlisted: newValue }),
+    });
+
+    if (d.is_shortlisted) {
+      shortlistIds.add(id);
+      if (btn) { btn.classList.add("shortlist-active"); btn.title = "Quitar de lista de lectura"; }
+      toast("🔖 Guardado para leer después", "ok");
+    } else {
+      shortlistIds.delete(id);
+      if (btn) { btn.classList.remove("shortlist-active"); btn.title = "Guardar para leer después"; }
+    }
+    localStorage.setItem("shortlistIds", JSON.stringify([...shortlistIds]));
+    _updateShortlistBadge();
+
+    // Update UI card if exists
+    const cardEl = document.querySelector(`.a-card[data-id="${id}"]`);
+    if (cardEl) {
+      cardEl.classList.toggle("is-shortlisted", d.is_shortlisted);
+      let dot = cardEl.querySelector(".a-shortlist-dot");
+      if (d.is_shortlisted) {
+        if (!dot) {
+          dot = document.createElement("span");
+          dot.className = "a-shortlist-dot";
+          dot.title = "Guardado para leer";
+          dot.textContent = "🔖";
+          cardEl.prepend(dot);
+        }
+      } else if (dot) {
+        dot.remove();
+      }
+    }
+  } catch (e) {
+    toast("Error al actualizar lista de lectura", "err");
+  }
+}
+
+function filShortlist(el) {
+  filterShortlist = !filterShortlist;
+  el.classList.toggle("on", filterShortlist);
+  loadArts(1);
+}
+
+function _updateShortlistBadge() {
+  const badge = document.getElementById("shortlist-count");
+  if (badge) badge.textContent = shortlistIds.size || "";
+}
+
+/* ── Cluster filter (Tier 2) ────────────────────────────────────────────── */
+let activeCluster = null;
+function filterByCluster(clusterId) {
+  activeCluster = activeCluster === clusterId ? null : clusterId;
+  if (activeCluster) {
+    toast(`🔗 Mostrando cluster #${clusterId}`, "info");
+  }
+  loadArts(1);
+}
+
+/* ── Personal reading stats (Tier 2) ───────────────────────────────────── */
+function loadPersonalStats() {
+  const el = document.getElementById("dash-personal-stats");
+  if (!el) return;
+
+  const totalRead = readIds.size;
+  const shortlisted = shortlistIds.size;
+  const avgReadTime = 4; // minutes average
+  const estimatedMinutes = totalRead * avgReadTime;
+  const hours = Math.floor(estimatedMinutes / 60);
+  const mins  = estimatedMinutes % 60;
+  const timeStr = hours > 0 ? `${hours}h ${mins}m` : `${mins}m`;
+
+  // Day of week activity from localStorage
+  const history = JSON.parse(localStorage.getItem("readHistory") || "{}");
+  const today = new Date().toISOString().slice(0, 10);
+
+  el.innerHTML = `
+    <div class="pstat-row">
+      <div class="pstat"><span class="pstat-val">${totalRead}</span><span class="pstat-lbl">Leídos en total</span></div>
+      <div class="pstat"><span class="pstat-val">${shortlisted}</span><span class="pstat-lbl">Para leer después</span></div>
+      <div class="pstat"><span class="pstat-val">${timeStr}</span><span class="pstat-lbl">Tiempo estimado</span></div>
+    </div>
+    ${shortlisted > 0 ? `<button class="btn btn-g btn-xs" style="margin-top:8px;width:100%" onclick="filShortlist(document.getElementById('pill-shortlist'))">🔖 Ver lista de lectura (${shortlisted})</button>` : ""}`;
+}
+
 /* ── Read tracking ─────────────────────────────────────────────────────── */
 let readIds = new Set(JSON.parse(localStorage.getItem("readIds") || "[]"));
 let filterUnread = false;
@@ -134,7 +285,7 @@ function card(a, compact = false) {
     : "";
 
   const clusterHtml = a.cluster_id
-    ? `<span title="Cluster #${a.cluster_id}" style="font-size:10px;color:var(--text-muted);background:var(--surface);padding:1px 6px;border-radius:4px;border:1px solid var(--border)">🔗 C${a.cluster_id}</span>`
+    ? `<button class="cluster-badge" onclick="filterByCluster(${a.cluster_id});event.stopPropagation()" title="Ver todas las noticias de este tema">🔗 ${a.cluster_count || ""}fuentes</button>`
     : "";
 
   const fb = a.feedback || 0;
@@ -147,9 +298,16 @@ function card(a, compact = false) {
     ? `<span title="Tema recurrente" style="font-size:10px;color:var(--warning)">🔁</span>`
     : "";
 
+  const tagsList = a.tags ? a.tags.split(",").map(t => t.trim()).filter(Boolean) : [];
+  const tagsHtml = (!compact && tagsList.length)
+    ? `<div class="a-tags">${tagsList.map(t => `<button class="a-tag" onclick="filterByTag('${t.replace(/'/g,"\\'")}');event.stopPropagation()">#${esc(t)}</button>`).join("")}</div>`
+    : "";
+
   const isRead = readIds.has(a.id);
-  return `<div class="a-card ${statusCls}${isRead ? " is-read" : ""}" data-id="${a.id}">
+  const isShortlisted = shortlistIds.has(a.id);
+  return `<div class="a-card ${statusCls}${isRead ? " is-read" : ""}${isShortlisted ? " is-shortlisted" : ""}" data-id="${a.id}">
     ${!isRead ? '<span class="a-unread-dot" title="No leído"></span>' : ""}
+    ${isShortlisted ? '<span class="a-shortlist-dot" title="Guardado para leer">🔖</span>' : ""}
     <label class="a-check" onclick="event.stopPropagation()" title="Seleccionar">
       <input type="checkbox" onchange="toggleSelect(${a.id},this)" ${selectedIds.has(a.id) ? "checked" : ""}>
     </label>
@@ -170,6 +328,7 @@ function card(a, compact = false) {
         <span title="${fmtDateFull(a.published_at || a.fetched_at)}" style="cursor:default">${fmtDate(a.published_at || a.fetched_at)}</span>
         ${model ? `<span class="a-dot">·</span><span style="font-style:italic;font-size:0.62rem;color:var(--text-muted)">${esc(model)}</span>` : ""}
       </div>` : ""}
+      ${tagsHtml}
       ${fbHtml}
     </div>
     <div class="a-right">
@@ -178,6 +337,7 @@ function card(a, compact = false) {
         <span class="${badgeCls(a.status)}">${a.status}</span>
       </div>
       <div class="a-actions">
+        <button class="btn btn-g btn-xs${isShortlisted ? " shortlist-active" : ""}" onclick="toggleShortlist(${a.id},this);event.stopPropagation()" title="${isShortlisted ? "Quitar de lista de lectura" : "Guardar para leer después"}">🔖</button>
         ${!a.summary ? `<button class="btn btn-g btn-xs" onclick="doSum1(${a.id})" title="Resumir IA">✦</button>` : ""}
         ${a.status !== "approved" ? `<button class="btn btn-s btn-xs" onclick="doStatus(${a.id},'approved')" title="Aprobar">✓</button>` : ""}
         ${a.status !== "rejected" ? `<button class="btn btn-d btn-xs" onclick="doStatus(${a.id},'rejected')" title="Rechazar">✕</button>` : ""}
@@ -268,6 +428,8 @@ async function loadDash() {
 
   // Load widgets in parallel
   loadDashWidgets();
+  loadPersonalStats();
+  _updateShortlistBadge();
 
   try {
     const d = await api("/articles?page=1&page_size=10");
@@ -383,12 +545,14 @@ async function loadArts(p) {
   if (filterSrc)       params.set("source_id", filterSrc);
   if (filterCat)       params.set("category",  filterCat);
   if (filterScore)     params.set("min_score", filterScore);
+  if (filterShortlist) params.set("shortlisted", true);
 
   // Show skeleton immediately
   const c = document.getElementById("art-list");
   if (c) { c.innerHTML = skeletonCards(8); setViewClass(c, artView); }
-  if (filterSentiment) params.set("sentiment", filterSentiment);
-  if (searchQ)         params.set("search",    searchQ);
+  if (filterSentiment)  params.set("sentiment",   filterSentiment);
+  if (activeTagFilter)  params.set("tag",         activeTagFilter);
+  if (searchQ)          params.set("search",      searchQ);
   if (filterRecent) {
     const map = { "1h": 1, "6h": 6, "24h": 24, "7d": 168 };
     const hours = map[filterRecent];
@@ -412,6 +576,15 @@ async function loadArts(p) {
     }
     c.innerHTML = d.articles.map(a => card(a, artView === "compact")).join("");
 
+    // Apply local filters (cluster) after render
+    if (activeCluster !== null) {
+      c.querySelectorAll(".a-card").forEach(card => {
+        const id = parseInt(card.dataset.id);
+        const art = d.articles.find(a => a.id === id);
+        card.style.display = (art && art.cluster_id === activeCluster) ? "" : "none";
+      });
+    }
+
     const tp = Math.ceil(d.total / d.page_size);
     let h = "";
     if (tp > 1) {
@@ -427,8 +600,20 @@ function onSearch() {
   clearTimeout(searchTmr);
   searchTmr = setTimeout(() => {
     searchQ = document.getElementById("q").value.trim();
+    const dd = document.getElementById("search-history-dd");
+    if (dd) dd.style.display = "none";
     loadArts(1);
   }, 350);
+}
+function onSearchKey(e) {
+  if (e.key === "Enter") {
+    const q = document.getElementById("q").value.trim();
+    if (q.length >= 2) _addHistory(q);
+  }
+  if (e.key === "Escape") {
+    const dd = document.getElementById("search-history-dd");
+    if (dd) dd.style.display = "none";
+  }
 }
 
 function filRecent(v, el) {
@@ -562,15 +747,18 @@ async function openReader(id) {
     const text = a.full_text || a.original_text || "Sin texto completo disponible.";
     document.getElementById("r-body").textContent = cleanTxt(text);
 
+    // Tags
+    _renderReaderTags(a.tags || "");
+
     // Send button
     const sendBtn = document.getElementById("r-send-btn");
     sendBtn.style.display = a.summary && a.status !== "sent" ? "inline-flex" : "none";
 
-    // Save/bookmark button
+    // Shortlist button state
     const saveBtn = document.getElementById("r-save-btn");
-    const isSaved = savedArticles.some(s => s.id === a.id);
-    saveBtn.textContent = isSaved ? "🔖✓" : "🔖";
-    saveBtn.title = isSaved ? "Guardado" : "Guardar artículo";
+    const isShortlisted = shortlistIds.has(id);
+    saveBtn.classList.toggle("shortlist-active", isShortlisted);
+    saveBtn.title = isShortlisted ? "Quitar de lista de lectura" : "Guardar para leer después";
 
     document.getElementById("overlay-reader").classList.add("on");
     loadRelated(id);
@@ -579,31 +767,95 @@ async function openReader(id) {
 
 function toggleSave() {
   if (!readerArticleId) return;
-  const idx = savedArticles.findIndex(s => s.id === readerArticleId);
-  if (idx >= 0) {
-    savedArticles.splice(idx, 1);
-    document.getElementById("r-save-btn").textContent = "🔖";
-    toast("Artículo removido de guardados", "info");
-  } else {
-    const title = document.getElementById("r-title").textContent;
-    savedArticles.push({ id: readerArticleId, title, saved_at: new Date().toISOString() });
-    document.getElementById("r-save-btn").textContent = "🔖✓";
-    toast("✓ Artículo guardado", "ok");
-  }
-  localStorage.setItem("savedArticles", JSON.stringify(savedArticles));
+  const btn = document.getElementById("r-save-btn");
+  toggleShortlist(readerArticleId, btn);
 }
 
 async function loadRelated(id) {
+  const container = document.getElementById("r-related");
+  const listEl = document.getElementById("rr-list");
+  if (!container || !listEl) return;
+  
+  container.style.display = "none";
+  listEl.innerHTML = "";
+
   try {
-    const list = await api(`/articles/${id}/related`);
-    // Could display in reader footer — simplified here
-  } catch {}
+    const data = await api(`/articles/${id}/related`);
+    if (data.articles && data.articles.length > 0) {
+      listEl.innerHTML = data.articles.map(a => `
+        <div class="rr-item" onclick="openReader(${a.id})">
+          <div class="rr-score">${a.relevance_score || '?'}</div>
+          <div class="rr-title">${esc(a.title)}</div>
+        </div>
+      `).join("");
+      container.style.display = "block";
+    }
+  } catch (e) {
+    console.warn("Could not load related articles", e);
+  }
 }
 
 function closeReader() {
+  const modal = document.querySelector(".modal-reader");
+  if (modal) modal.classList.remove("is-focus");
   document.getElementById("overlay-reader").classList.remove("on");
   readerArticleId = null;
 }
+
+function toggleFocusMode() {
+  const modal = document.querySelector(".modal-reader");
+  if (modal) modal.classList.toggle("is-focus");
+}
+
+/* ── Reader tags management (Tier 1.4) ─────────────────────────────────── */
+function _renderReaderTags(tagsStr) {
+  const el = document.getElementById("r-tags");
+  if (!el) return;
+  const tags = tagsStr ? tagsStr.split(",").map(t => t.trim()).filter(Boolean) : [];
+  el.innerHTML = `<div class="r-tags-list">${
+    tags.map(t => `<span class="r-tag">#${esc(t)}<button onclick="removeReaderTag('${esc(t)}')" title="Quitar">×</button></span>`).join("")
+  }<button class="r-tag-add" onclick="showAddTagInput()" title="Agregar etiqueta">+ etiqueta</button></div>
+  <div id="r-tag-input-row" style="display:none;margin-top:6px;display:none">
+    <input id="r-tag-input" type="text" placeholder="nueva etiqueta..." style="background:var(--surface);border:1px solid var(--border);border-radius:6px;color:var(--text);padding:4px 8px;font-size:12px;width:140px">
+    <button class="btn btn-s btn-xs" style="margin-left:4px" onclick="addReaderTag()">+ Añadir</button>
+  </div>`;
+}
+
+function showAddTagInput() {
+  const row = document.getElementById("r-tag-input-row");
+  if (row) { row.style.display = "flex"; row.style.alignItems = "center"; }
+  const inp = document.getElementById("r-tag-input");
+  if (inp) { inp.value = ""; inp.focus(); inp.onkeydown = e => { if (e.key === "Enter") addReaderTag(); if (e.key === "Escape") row.style.display = "none"; }; }
+}
+
+async function addReaderTag() {
+  if (!readerArticleId) return;
+  const inp = document.getElementById("r-tag-input");
+  const tag = inp?.value.trim().toLowerCase();
+  if (!tag) return;
+  try {
+    const a = await api(`/articles/${readerArticleId}`);
+    const existing = a.tags ? a.tags.split(",").map(t => t.trim()).filter(Boolean) : [];
+    if (!existing.includes(tag)) existing.push(tag);
+    const res = await api(`/articles/${readerArticleId}/tags`, { method: "PATCH", body: JSON.stringify({ tags: existing }) });
+    _renderReaderTags(res.tags.join(","));
+    loadArts();
+  } catch { toast("Error al agregar etiqueta", "err"); }
+}
+
+async function removeReaderTag(tag) {
+  if (!readerArticleId) return;
+  try {
+    const a = await api(`/articles/${readerArticleId}`);
+    const existing = a.tags ? a.tags.split(",").map(t => t.trim()).filter(Boolean) : [];
+    const updated = existing.filter(t => t !== tag);
+    const res = await api(`/articles/${readerArticleId}/tags`, { method: "PATCH", body: JSON.stringify({ tags: updated }) });
+    _renderReaderTags(res.tags.join(","));
+    loadArts();
+  } catch { toast("Error al quitar etiqueta", "err"); }
+}
+
+function closeTagsModal() {}  // placeholder for click-outside handler
 
 async function sendFromReader() {
   if (!readerArticleId) return;

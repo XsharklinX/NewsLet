@@ -101,6 +101,62 @@ def update_digest_config(body: DigestConfigUpdate, db: Session = Depends(get_db)
     return cfg
 
 
+@router.get("/digest/preview")
+def preview_digest(db: Session = Depends(get_db)):
+    """Return the articles that would be included in the next digest."""
+    from sqlalchemy.orm import joinedload
+    from app.models import Article, Summary
+    from app.models.article import Source
+
+    cfg = db.query(DigestConfig).first()
+    count     = cfg.count    if cfg else 10
+    min_score = cfg.min_score if cfg else 0
+    sort_by   = (cfg.sort_by or "date") if cfg else "date"
+    cats_filter = [c.strip() for c in (cfg.categories or "").split(",") if c.strip()] if cfg else []
+
+    q = (
+        db.query(Article)
+        .options(joinedload(Article.summary), joinedload(Article.source))
+        .filter(Article.status.in_(["approved", "pending"]))
+    )
+    if min_score:
+        q = q.filter(Article.relevance_score >= min_score)
+    if cats_filter:
+        q = q.filter(Article.category.in_(cats_filter))
+
+    if sort_by == "score":
+        q = q.order_by(Article.relevance_score.desc().nulls_last(), Article.fetched_at.desc())
+    elif sort_by == "category":
+        q = q.order_by(Article.category.asc().nulls_last(), Article.fetched_at.desc())
+    else:
+        q = q.order_by(Article.fetched_at.desc())
+
+    articles = q.limit(count).all()
+    return {
+        "count": len(articles),
+        "config": {
+            "sort_by": sort_by,
+            "min_score": min_score,
+            "categories": cats_filter,
+            "recipients": (cfg.recipients or "") if cfg else "",
+        },
+        "articles": [
+            {
+                "id": a.id,
+                "title": a.title,
+                "url": a.url,
+                "status": a.status,
+                "score": a.relevance_score,
+                "category": a.category,
+                "source": a.source.name if a.source else None,
+                "summary": a.summary.summary_text[:200] if a.summary else None,
+                "fetched_at": a.fetched_at.isoformat() if a.fetched_at else None,
+            }
+            for a in articles
+        ],
+    }
+
+
 # ═══════════════════════════════════════════════════════════════════════════
 # WEBHOOKS
 # ═══════════════════════════════════════════════════════════════════════════
